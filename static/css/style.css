@@ -1,0 +1,504 @@
+/* Custom CSS for Suzu Drive-Thru Kafé */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Root Variables */
+:root {
+    --coffee-primary: #8B4513;
+    --coffee-secondary: #D2691E;
+    --coffee-light: #F4A460;
+    --coffee-cream: #F5DEB3;
+    --gold-primary: #FFD700;
+    --gold-secondary: #FFA500;
+    --success-green: #10b981;
+    --error-red: #ef4444;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+    --glass-bg: rgba(255, 255, 255, 0.9);
+}
+
+/* Base Styles */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: var(--text-dark);
+}
+
+.arabic-font {
+    font-family: 'Cairo', sans-serif;
+    direction: rtl;
+}
+
+.english-font {
+    font-family: 'Inter', sans-serif;
+    direction: ltr;
+}
+
+/* Background Gradients */
+.gradient-bg {
+    background: linear-gradient(135deg, #8B4513 0%, #D2691E 25%, #F4A460 50%, #DEB887 75%, #F5DEB3 100%);
+    min-height: 100vh;
+}
+
+.coffee-gradient {
+    background: linear-gradient(135deg, #6F4E37 0%, #8B4513 50%, #A0522D 100%);
+}
+
+.admin-gradient {
+    background: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
+}
+
+.discount-badge {
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+    box-shadow: 0 8px 32px rgba(255, 165, 0, 0.3);
+}
+
+.success-gradient {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.danger-gradient {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+/* Glass Effect */
+.glass-effect {
+    backdrop-filter: blur(10px);
+    background: var(--glass-bg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Coffee Bean Decorations */
+.coffee-bean {
+    background: radial-gradient(ellipse at center, #8B4513 0%, #654321 100%);
+    border-radius: 50%;
+    position: relative;
+}
+
+.coffee-bean::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 2px;
+    background: #654321;
+    border-radius: 1px;
+}
+
+/* Animations */
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: scale(1); 
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.05); 
+        opacity: 0.9;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.bounce-in {
+    animation: bounceIn 0.6s ease-out;
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Button Styles */
+.btn-primary {
+    background: var(--coffee-primary);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+}
+
+.btn-primary:hover {
+    background: #654321;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
+}
+
+.btn-secondary {
+    background: var(--gold-primary);
+    color: var(--text-dark);
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.btn-secondary:hover {
+    background: var(--gold-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+}
+
+/* Form Styles */
+.form-input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--coffee-primary);
+    box-shadow: 0 0 0 4px rgba(139, 69, 19, 0.1);
+}
+
+.form-input.error {
+    border-color: var(--error-red);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+/* Card Styles */
+.card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-used {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-verified {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* QR Code Styles */
+.qr-container {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+}
+
+.qr-container canvas {
+    border-radius: 8px;
+}
+
+/* Loading Spinner */
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid var(--coffee-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Table Styles */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.data-table th {
+    background: var(--text-dark);
+    color: white;
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.data-table td {
+    padding: 16px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 14px;
+}
+
+.data-table tr:hover {
+    background: #f9fafb;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+    
+    .card {
+        padding: 16px;
+        margin: 8px 0;
+    }
+    
+    .data-table {
+        font-size: 12px;
+    }
+    
+    .data-table th,
+    .data-table td {
+        padding: 8px;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        padding: 14px 20px;
+        font-size: 16px;
+    }
+    
+    .form-input {
+        padding: 14px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .discount-badge {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .discount-badge .text-5xl {
+        font-size: 2.5rem;
+    }
+    
+    .qr-container {
+        padding: 12px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .gradient-bg {
+        background: white !important;
+    }
+    
+    .glass-effect {
+        background: white !important;
+        backdrop-filter: none !important;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        display: none;
+    }
+    
+    .qr-container {
+        box-shadow: none;
+        border: 2px solid #000;
+    }
+}
+
+/* Accessibility */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus styles for keyboard navigation */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid var(--coffee-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .glass-effect {
+        background: white;
+        border: 2px solid #000;
+    }
+    
+    .btn-primary {
+        border: 2px solid #000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .pulse-animation,
+    .fade-in,
+    .slide-in-right,
+    .bounce-in {
+        animation: none;
+    }
+    
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .card:hover {
+        transform: none;
+    }
+}
+
+/* Dark mode support (future enhancement) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-dark: #f9fafb;
+        --text-light: #d1d5db;
+        --glass-bg: rgba(31, 41, 55, 0.9);
+    }
+    
+    .glass-effect {
+        background: var(--glass-bg);
+        color: var(--text-dark);
+    }
+    
+    .card {
+        background: #374151;
+        color: var(--text-dark);
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--coffee-primary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #654321;
+}
+
+/* Selection styles */
+::selection {
+    background: var(--coffee-light);
+    color: white;
+}
+
+::-moz-selection {
+    background: var(--coffee-light);
+    color: white;
+}
