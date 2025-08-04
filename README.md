@@ -326,3 +326,25 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Made with ☕ for Suzu Drive-Thru Kafé**
 
 *For technical support or business inquiries, please contact the development team.*
+
+# Suzz - Premium Coffee Experience
+
+## Local Development
+
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+```
+
+## Environment Variables
+
+انسخ `.env.example` إلى `.env` وأضف القيم الخاصة بك.
+
+## Deploy to Railway
+
+1. اربط الريبو بـ Railway.
+2. Railway سيكتشف `Procfile` و`requirements.txt` تلقائيًا.
+3. أضف متغيرات البيئة من لوحة تحكم Railway.
