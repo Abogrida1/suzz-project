@@ -243,6 +243,65 @@
         </div>
     </footer>
 
+    <script>
+        // تفعيل فوري لمحسن الصور في صفحة الإدارة
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحسين فوري للصور
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                const originalSrc = img.src;
+                
+                // إنشاء صورة اختبار
+                const testImg = new Image();
+                testImg.onload = function() {
+                    console.log('Admin image loaded successfully:', originalSrc);
+                };
+                
+                testImg.onerror = function() {
+                    console.log('Admin image failed, applying fallback for:', originalSrc);
+                    
+                    // إنشاء SVG بديل فوري للإدارة
+                    const svgFallback = createAdminSVGFallback(img);
+                    img.parentNode.replaceChild(svgFallback, img);
+                };
+                
+                testImg.src = originalSrc;
+                
+                // timeout للتأكد من التبديل
+                setTimeout(() => {
+                    if (!testImg.complete || testImg.naturalWidth === 0) {
+                        console.log('Admin image timeout, applying fallback for:', originalSrc);
+                        const svgFallback = createAdminSVGFallback(img);
+                        if (img.parentNode) {
+                            img.parentNode.replaceChild(svgFallback, img);
+                        }
+                    }
+                }, 2000);
+            });
+        });
+        
+        function createAdminSVGFallback(originalImg) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.setAttribute('class', originalImg.className);
+            svg.style.width = originalImg.style.width || '48px';
+            svg.style.height = originalImg.style.height || '48px';
+            
+            // شعار إدارة Suzz
+            svg.innerHTML = `
+                <defs>
+                    <linearGradient id="adminGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#d97706;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#92400e;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="45" fill="url(#adminGrad)" stroke="#fff" stroke-width="2"/>
+                <text x="50" y="60" font-family="Arial, sans-serif" font-size="30" font-weight="bold" text-anchor="middle" fill="white">A</text>
+            `;
+            
+            return svg;
+        }
+    </script>
     <script src="/static/js/image-optimizer.js"></script>
     <script src="/static/js/advanced-camera.js"></script>
     <script src="/static/js/admin.js"></script>
