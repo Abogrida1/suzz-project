@@ -62,7 +62,7 @@ def check_environment():
     
     missing_vars = []
     for var in required_vars:
-        if not getattr(config, var, None):
+        if not getattr(config, var, None) or getattr(config, var, None) == f'your_{var.lower().replace("green_api_", "")}_here':
             missing_vars.append(var)
     
     if missing_vars:
@@ -70,7 +70,7 @@ def check_environment():
         for var in missing_vars:
             print(f"   - {var}")
         print("\n💡 Please check your .env file or environment variables")
-        print("   Copy .env.example to .env and fill in your values")
+        print("   Copy .env.example to .env and fill in your Green API values")
         return False
     
     return True
@@ -86,7 +86,7 @@ def print_startup_info():
     print(f"🌐 Host: {config.HOST}")
     print(f"🚪 Port: {config.PORT}")
     print(f"🗄️  Database: {config.DATABASE_PATH}")
-    print(f"📞 WhatsApp API: {'✅ Configured' if config.GREEN_API_INSTANCE_ID else '❌ Not configured'}")
+    print(f"📞 WhatsApp API: {'✅ Configured' if config.GREEN_API_INSTANCE_ID and config.GREEN_API_INSTANCE_ID != 'your_instance_id_here' else '❌ Not configured'}")
     print(f"🔐 Admin Password: {'✅ Set' if config.ADMIN_PASSWORD else '❌ Not set'}")
     print("=" * 60)
     print("🚀 Starting server...")

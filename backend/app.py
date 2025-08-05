@@ -209,6 +209,57 @@ def verify_otp():
     else:
         return jsonify({'error': 'User not found'}), 404
 
+@app.route('/api/resend-otp', methods=['POST'])
+def resend_otp():
+    """Resend OTP to user"""
+    data = request.get_json()
+    phone_number = security.sanitize_input(data.get('phone_number', '')).strip()
+    
+    if not phone_number:
+        return jsonify({'error': 'Phone number is required'}), 400
+    
+    # Validate phone number format (Egyptian format)
+    if not security.validate_egyptian_phone(phone_number):
+        return jsonify({'error': 'Invalid Egyptian phone number format'}), 400
+    
+    # Check if user exists
+    existing_user = user_model.get_user_by_phone(phone_number)
+    
+    if not existing_user:
+        return jsonify({'error': 'User not found. Please register first.'}), 404
+    
+    if existing_user['is_verified']:
+        return jsonify({'error': 'Phone number already verified'}), 400
+    
+    if existing_user['is_used']:
+        return jsonify({'error': 'This phone number has already used a discount code'}), 400
+    
+    # Generate new OTP
+    otp = f"{random.randint(100000, 999999)}"
+    
+    # Store new OTP
+    if not otp_model.create_otp(phone_number, otp, config.OTP_EXPIRY_MINUTES):
+        return jsonify({'error': 'Failed to generate OTP'}), 500
+    
+    # Log resend attempt
+    audit_log.log_action(
+        action="OTP_RESENT",
+        user_phone=phone_number,
+        details="OTP resent to user",
+        ip_address=request.remote_addr
+    )
+    
+    # Send OTP via WhatsApp
+    if send_whatsapp_otp(phone_number, otp):
+        return jsonify({
+            'message': 'OTP resent successfully',
+            'discount': existing_user['discount_percentage'],
+            'unique_code': existing_user['unique_code'],
+            'qr_code': existing_user['qr_code_data']
+        })
+    else:
+        return jsonify({'error': 'Failed to resend OTP'}), 500
+
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login():
     """Admin login"""
@@ -252,6 +303,37 @@ def get_all_users():
     except Exception as e:
         logger.error(f"Error getting users: {e}")
         return jsonify({'error': 'Failed to retrieve users'}), 500
+
+@app.route('/api/admin/search', methods=['GET'])
+def search_users():
+    """Search users by phone number for admin panel"""
+    try:
+        search_query = request.args.get('q', '').strip()
+        
+        if not search_query:
+            return jsonify({'error': 'Search query is required'}), 400
+        
+        # Get all users and filter by phone number
+        all_users = user_model.get_all_users()
+        filtered_users = [
+            user for user in all_users 
+            if search_query in user['phone_number']
+        ]
+        
+        audit_log.log_action(
+            action="ADMIN_SEARCH_USERS",
+            details=f"Admin searched for: {search_query}",
+            ip_address=request.remote_addr
+        )
+        
+        return jsonify({
+            'users': filtered_users,
+            'total_found': len(filtered_users),
+            'search_query': search_query
+        })
+    except Exception as e:
+        logger.error(f"Error searching users: {e}")
+        return jsonify({'error': 'Failed to search users'}), 500
 
 @app.route('/api/admin/redeem', methods=['POST'])
 def redeem_code():

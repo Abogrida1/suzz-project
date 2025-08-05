@@ -20,8 +20,8 @@ class Config:
     DATABASE_PATH = os.getenv('DATABASE_PATH', 'suzu_cafe.db')
     
     # GreenAPI Configuration
-    GREEN_API_INSTANCE_ID = os.getenv('GREEN_API_INSTANCE_ID', '7105288219')
-    GREEN_API_TOKEN = os.getenv('GREEN_API_TOKEN', '47b3ca2c761240ebb523b770ad34bebd8ecb317db4d643d390')
+    GREEN_API_INSTANCE_ID = os.getenv('GREEN_API_INSTANCE_ID', '7105295516')
+    GREEN_API_TOKEN = os.getenv('GREEN_API_TOKEN', 'ca6c383f4b8c4441992204cd3f903f882ccb29c65ae44106bf')
     GREEN_API_BASE_URL = 'https://api.green-api.com'
     
     # Admin Configuration

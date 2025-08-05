@@ -33,6 +33,10 @@ class SuzuAdmin {
             if (e.key === 'Enter') this.handleManualRedemption();
         });
 
+        // Search functionality
+        document.getElementById('search-input').addEventListener('input', (e) => this.handleSearch(e.target.value));
+        document.getElementById('clear-search-btn').addEventListener('click', () => this.clearSearch());
+
         // Refresh data
         document.getElementById('refresh-btn').addEventListener('click', () => this.loadUsers());
     }
@@ -165,12 +169,17 @@ class SuzuAdmin {
 
     async startQRScanner() {
         try {
+            // Request camera permissions first
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            stream.getTracks().forEach(track => track.stop()); // Stop the test stream
+            
             this.html5QrCode = new Html5Qrcode("qr-reader");
             
             const config = {
                 fps: 10,
                 qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
+                aspectRatio: 1.0,
+                rememberLastUsedCamera: true
             };
 
             await this.html5QrCode.start(
@@ -189,7 +198,24 @@ class SuzuAdmin {
 
         } catch (err) {
             console.error('Error starting QR scanner:', err);
-            this.showScanResult('error', 'Camera access denied or not available. Please check permissions.');
+            let errorMessage = 'Camera access denied or not available.';
+            
+            if (err.name === 'NotAllowedError') {
+                errorMessage = 'Camera permission denied. Please allow camera access and try again.';
+            } else if (err.name === 'NotFoundError') {
+                errorMessage = 'No camera found on this device.';
+            } else if (err.name === 'NotSupportedError') {
+                errorMessage = 'Camera not supported on this browser.';
+            }
+            
+            this.showScanResult('error', `
+                <div class="text-center">
+                    <div class="text-4xl mb-4">📷</div>
+                    <h4 class="text-xl font-bold text-red-800 mb-2">Camera Error</h4>
+                    <p class="text-red-700 mb-4">${errorMessage}</p>
+                    <p class="text-sm text-gray-600">Please check your browser settings and allow camera access.</p>
+                </div>
+            `);
         }
     }
 
@@ -405,6 +431,55 @@ class SuzuAdmin {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
+    }
+
+    // Search functionality
+    async handleSearch(query) {
+        const searchInput = document.getElementById('search-input');
+        const clearBtn = document.getElementById('clear-search-btn');
+        const searchInfo = document.getElementById('search-info');
+        const searchResultsText = document.getElementById('search-results-text');
+
+        if (!query.trim()) {
+            // If search is empty, show all users
+            this.updateUsersTable();
+            clearBtn.classList.add('hidden');
+            searchInfo.classList.add('hidden');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/api/admin/search?q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update users list with search results
+                this.users = data.users;
+                this.updateUsersTable();
+                
+                // Show search info
+                searchResultsText.textContent = `Found ${data.total_found} user(s) matching "${data.search_query}"`;
+                searchInfo.classList.remove('hidden');
+                clearBtn.classList.remove('hidden');
+            } else {
+                console.error('Search failed:', data.error);
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+        }
+    }
+
+    clearSearch() {
+        const searchInput = document.getElementById('search-input');
+        const clearBtn = document.getElementById('clear-search-btn');
+        const searchInfo = document.getElementById('search-info');
+
+        searchInput.value = '';
+        clearBtn.classList.add('hidden');
+        searchInfo.classList.add('hidden');
+        
+        // Reload all users
+        this.loadUsers();
     }
 
     // Get statistics summary

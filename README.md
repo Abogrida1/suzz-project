@@ -11,7 +11,7 @@ A complete, production-ready promotional web application for **Suzu Drive-Thru K
 
 ### 🎁 Customer Features
 - **Phone Registration**: Egyptian phone number format (01xxxxxxxxx)
-- **WhatsApp OTP**: Secure verification via GreenAPI
+- **WhatsApp OTP**: Secure verification via WhatsApp Business API
 - **Random Discounts**: 10% to 40% in 5% increments
 - **QR Code Generation**: Unique codes for in-store redemption
 - **One-time Use**: Each phone number can only claim once
@@ -29,7 +29,7 @@ A complete, production-ready promotional web application for **Suzu Drive-Thru K
 - **Flask Backend**: RESTful API with SQLite database
 - **Modern Frontend**: TailwindCSS with responsive design
 - **QR Code Integration**: Generation and scanning capabilities
-- **WhatsApp Integration**: GreenAPI for OTP delivery
+- **WhatsApp Integration**: WhatsApp Business API for OTP delivery
 - **Production Ready**: Hosting-ready configuration
 - **Security**: Password hashing, input validation, rate limiting
 
@@ -37,7 +37,7 @@ A complete, production-ready promotional web application for **Suzu Drive-Thru K
 
 ### Prerequisites
 - Python 3.8+
-- GreenAPI WhatsApp account
+- WhatsApp Business API account (Meta Business)
 - Modern web browser with camera access (for QR scanning)
 
 ### Installation
@@ -77,14 +77,15 @@ python app.py
 
 ## 🔑 Configuration
 
-### GreenAPI Setup
-1. Sign up at [GreenAPI](https://green-api.com)
-2. Create a WhatsApp instance
-3. Get your Instance ID and API Token
+### WhatsApp Business API Setup
+1. Sign up at [Meta for Developers](https://developers.facebook.com/)
+2. Create a WhatsApp Business API application
+3. Get your Access Token and Phone Number ID
 4. Update `.env` file:
 ```env
-GREEN_API_INSTANCE_ID=your_instance_id
-GREEN_API_TOKEN=your_api_token
+WHATSAPP_ACCESS_TOKEN=your_access_token
+WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id
+WHATSAPP_BUSINESS_ACCOUNT_ID=your_business_account_id
 ```
 
 ### Admin Access
@@ -272,9 +273,9 @@ message = f"🔐 رمز التحقق الخاص بك في سوزو كافيه: {
 
 ## 📞 Support
 
-### GreenAPI Support
-- Documentation: https://green-api.com/docs/
-- Support: support@green-api.com
+### WhatsApp Business API Support
+- Documentation: https://developers.facebook.com/docs/whatsapp/
+- Support: https://developers.facebook.com/support/
 
 ### Technical Support
 - Create GitHub issue for bugs
@@ -295,7 +296,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **GreenAPI** for WhatsApp integration
+- **WhatsApp Business API** for WhatsApp integration
 - **TailwindCSS** for beautiful styling
 - **QRCode.js** for QR code generation
 - **Html5-QRCode** for QR scanning

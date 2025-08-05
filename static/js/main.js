@@ -25,6 +25,9 @@ class SuzuApp {
             if (e.key === 'Enter') this.handleOTPVerification();
         });
 
+        // Resend OTP
+        document.getElementById('resend-otp-btn').addEventListener('click', () => this.handleResendOTP());
+
         // Phone input formatting
         document.getElementById('phone-input').addEventListener('input', (e) => {
             this.formatPhoneInput(e.target);
@@ -277,6 +280,68 @@ class SuzuApp {
         if (this.otpTimer) {
             clearInterval(this.otpTimer);
             this.otpTimer = null;
+        }
+    }
+
+    async handleResendOTP() {
+        if (!this.currentUser || !this.currentUser.phone) {
+            this.showError('otp-error', 'Please register first');
+            return;
+        }
+
+        const resendBtn = document.getElementById('resend-otp-btn');
+        const resendInfo = document.getElementById('resend-info');
+        
+        // Disable button temporarily
+        resendBtn.disabled = true;
+        resendBtn.textContent = 'Sending...';
+        
+        this.hideError('otp-error');
+        this.hideError('resend-info');
+
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/api/resend-otp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    phone_number: this.currentUser.phone
+                })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Show success message
+                resendInfo.textContent = 'New verification code sent to your WhatsApp!';
+                resendInfo.classList.remove('hidden');
+                
+                // Clear OTP input
+                document.getElementById('otp-input').value = '';
+                document.getElementById('otp-input').focus();
+                
+                // Restart timer
+                this.stopOTPTimer();
+                this.startOTPTimer();
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    resendInfo.classList.add('hidden');
+                }, 5000);
+                
+            } else {
+                this.showError('otp-error', data.error || 'Failed to resend OTP');
+            }
+        } catch (error) {
+            console.error('Resend OTP error:', error);
+            this.showError('otp-error', 'Network error. Please try again.');
+        } finally {
+            // Re-enable button after 30 seconds
+            setTimeout(() => {
+                resendBtn.disabled = false;
+                resendBtn.textContent = 'Resend Code';
+            }, 30000);
         }
     }
 
