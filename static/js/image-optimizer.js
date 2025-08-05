@@ -220,8 +220,8 @@ class ImageOptimizer {
      */
     preloadCriticalImages() {
         const criticalImages = [
-            'https://www.pythonanywhere.com/user/battbot/files/home/battbot/WhatsApp%20Image%202025-08-04%20at%2003.22.59_8508aa3a.jpg',
-            'https://www.pythonanywhere.com/user/battbot/files/home/battbot/WhatsApp%20Image%202025-08-04%20at%2003.23.05_d23941ee.jpg'
+            '/static/images/whatsapp_image_1.jpg',
+            '/static/images/whatsapp_image_2.jpg'
         ];
 
         criticalImages.forEach(src => {
