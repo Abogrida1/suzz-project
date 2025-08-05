@@ -169,8 +169,34 @@ class SuzuAdmin {
 
     async startQRScanner() {
         try {
+            // Clear any previous scan results
+            this.clearScanResult();
+            
+            // Show scanning status
+            this.showScanResult('info', `
+                <div class="text-center">
+                    <div class="text-4xl mb-4">📷</div>
+                    <h4 class="text-xl font-bold text-blue-800 mb-2">Starting Camera...</h4>
+                    <p class="text-blue-700">Please allow camera access when prompted</p>
+                    <div class="mt-4">
+                        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    </div>
+                </div>
+            `);
+
+            // Check if camera is available
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('Camera not supported on this browser');
+            }
+
             // Request camera permissions first
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: "environment",
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                } 
+            });
             stream.getTracks().forEach(track => track.stop()); // Stop the test stream
             
             this.html5QrCode = new Html5Qrcode("qr-reader");
@@ -179,33 +205,67 @@ class SuzuAdmin {
                 fps: 10,
                 qrbox: { width: 250, height: 250 },
                 aspectRatio: 1.0,
-                rememberLastUsedCamera: true
+                rememberLastUsedCamera: true,
+                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
             };
 
             await this.html5QrCode.start(
                 { facingMode: "environment" },
                 config,
                 (decodedText, decodedResult) => {
+                    console.log('QR Code scanned:', decodedText);
                     this.handleQRCodeScan(decodedText);
                 },
                 (errorMessage) => {
-                    // Ignore scan errors (they're frequent and normal)
+                    // Ignore frequent scan errors but log them for debugging
+                    console.debug('QR scan error (normal):', errorMessage);
                 }
             );
 
+            // Update UI to show scanner is active
             document.getElementById('start-scanner-btn').classList.add('hidden');
             document.getElementById('stop-scanner-btn').classList.remove('hidden');
+            
+            // Show scanning status
+            this.showScanResult('info', `
+                <div class="text-center">
+                    <div class="text-4xl mb-4">📱</div>
+                    <h4 class="text-xl font-bold text-green-800 mb-2">Camera Active</h4>
+                    <p class="text-green-700 mb-2">Point your camera at a QR code to scan</p>
+                    <div class="bg-white p-3 rounded-lg shadow-inner">
+                        <p class="text-sm text-gray-600">
+                            📋 Make sure the QR code is well-lit and centered in the camera view
+                        </p>
+                    </div>
+                </div>
+            `);
 
         } catch (err) {
             console.error('Error starting QR scanner:', err);
             let errorMessage = 'Camera access denied or not available.';
+            let troubleshooting = '';
             
             if (err.name === 'NotAllowedError') {
                 errorMessage = 'Camera permission denied. Please allow camera access and try again.';
+                troubleshooting = `
+                    <div class="mt-4 text-left">
+                        <p class="font-semibold mb-2">To fix this:</p>
+                        <ul class="text-sm space-y-1">
+                            <li>• Click the camera icon in your browser's address bar</li>
+                            <li>• Select "Allow" for camera access</li>
+                            <li>• Refresh the page and try again</li>
+                        </ul>
+                    </div>
+                `;
             } else if (err.name === 'NotFoundError') {
                 errorMessage = 'No camera found on this device.';
+                troubleshooting = '<p class="text-sm mt-2">Please use a device with a camera or try manual code entry.</p>';
             } else if (err.name === 'NotSupportedError') {
                 errorMessage = 'Camera not supported on this browser.';
+                troubleshooting = '<p class="text-sm mt-2">Try using Chrome, Firefox, or Safari for better camera support.</p>';
+            } else if (err.message && err.message.includes('not supported')) {
+                errorMessage = 'QR scanning not supported on this browser.';
+                troubleshooting = '<p class="text-sm mt-2">Please use manual code entry or try a different browser.</p>';
             }
             
             this.showScanResult('error', `
@@ -213,7 +273,12 @@ class SuzuAdmin {
                     <div class="text-4xl mb-4">📷</div>
                     <h4 class="text-xl font-bold text-red-800 mb-2">Camera Error</h4>
                     <p class="text-red-700 mb-4">${errorMessage}</p>
-                    <p class="text-sm text-gray-600">Please check your browser settings and allow camera access.</p>
+                    ${troubleshooting}
+                    <div class="mt-4 p-3 bg-gray-100 rounded-lg">
+                        <p class="text-sm text-gray-700">
+                            💡 You can still redeem codes manually using the text input above
+                        </p>
+                    </div>
                 </div>
             `);
         }
