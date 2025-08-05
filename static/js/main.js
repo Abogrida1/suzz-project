@@ -28,6 +28,9 @@ class SuzuApp {
         // Resend OTP
         document.getElementById('resend-otp-btn').addEventListener('click', () => this.handleResendOTP());
 
+        // Change phone number
+        document.getElementById('change-phone-btn').addEventListener('click', () => this.handleChangePhone());
+
         // Phone input formatting
         document.getElementById('phone-input').addEventListener('input', (e) => {
             this.formatPhoneInput(e.target);
@@ -186,6 +189,10 @@ class SuzuApp {
     showOTPSection() {
         this.hideAllSections();
         document.getElementById('otp-section').classList.remove('hidden');
+        
+        // Update current phone display
+        document.getElementById('current-phone').textContent = this.formatPhoneForDisplay(this.currentUser.phone);
+        
         document.getElementById('otp-input').focus();
     }
 
@@ -351,6 +358,32 @@ class SuzuApp {
             return `${phone.substring(0, 3)} ${phone.substring(3, 6)} ${phone.substring(6)}`;
         }
         return phone;
+    }
+
+    // Handle change phone number
+    handleChangePhone() {
+        // Stop current timer
+        this.stopOTPTimer();
+        
+        // Clear current user data
+        this.currentUser = null;
+        
+        // Clear phone input and show welcome section
+        document.getElementById('phone-input').value = '';
+        document.getElementById('otp-input').value = '';
+        
+        // Hide all errors
+        this.hideError('phone-error');
+        this.hideError('otp-error');
+        this.hideError('resend-info');
+        
+        // Show welcome section
+        this.showWelcomeSection();
+        
+        // Focus on phone input
+        setTimeout(() => {
+            document.getElementById('phone-input').focus();
+        }, 100);
     }
 
     // Utility method to get current timestamp

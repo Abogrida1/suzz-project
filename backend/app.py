@@ -37,16 +37,24 @@ def generate_random_discount():
     return random.choice(discounts)
 
 def send_whatsapp_otp(phone_number, otp):
-    """Send OTP via WhatsApp using GreenAPI"""
+    """Send OTP via WhatsApp using GreenAPI (Saudi number to Egyptian numbers)"""
     try:
-        # Format phone number for WhatsApp (add +20 for Egypt if needed)
+        # Smart formatting for Egyptian numbers to work with Saudi Green API
         if not phone_number.startswith('+'):
             if phone_number.startswith('01'):
+                # Egyptian mobile format: 01xxxxxxxxx -> +201xxxxxxxxx
                 formatted_phone = f"+2{phone_number}"
+            elif phone_number.startswith('1') and len(phone_number) == 10:
+                # Handle 1xxxxxxxxx format -> +201xxxxxxxxx
+                formatted_phone = f"+20{phone_number}"
             else:
+                # Default Egyptian country code
                 formatted_phone = f"+20{phone_number}"
         else:
             formatted_phone = phone_number
+        
+        # Remove any spaces or special characters
+        formatted_phone = formatted_phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')
         
         url = f"{config.GREEN_API_BASE_URL}/waInstance{config.GREEN_API_INSTANCE_ID}/sendMessage/{config.GREEN_API_TOKEN}"
         
@@ -61,16 +69,26 @@ def send_whatsapp_otp(phone_number, otp):
             "message": message
         }
         
-        response = requests.post(url, json=payload, timeout=10)
+        # Add headers for better compatibility
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        
+        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        
+        # Log detailed response for debugging
+        logger.info(f"WhatsApp API Response: Status {response.status_code}, Body: {response.text}")
         
         # Log the attempt
         audit_log.log_action(
             action="OTP_SENT",
             user_phone=phone_number,
-            details=f"WhatsApp OTP sent to {formatted_phone}",
+            details=f"WhatsApp OTP sent to {formatted_phone} via Saudi Green API",
             ip_address=request.remote_addr
         )
         
+        # Green API returns 200 for successful requests
         return response.status_code == 200
         
     except Exception as e:
@@ -78,7 +96,7 @@ def send_whatsapp_otp(phone_number, otp):
         audit_log.log_action(
             action="OTP_SEND_FAILED",
             user_phone=phone_number,
-            details=f"Failed to send OTP: {str(e)}",
+            details=f"Failed to send OTP via Saudi Green API: {str(e)}",
             ip_address=request.remote_addr
         )
         return False
