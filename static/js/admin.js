@@ -140,25 +140,25 @@ class SuzuAdmin {
             const verifiedText = user.is_verified ? 'Yes' : 'Pending';
 
             row.innerHTML = `
-                <td class="p-4 border-b border-gray-200">
-                    <span class="font-mono text-sm">${this.formatPhone(user.phone_number)}</span>
+                <td class="p-2 sm:p-4 border-b border-gray-200">
+                    <span class="font-mono text-xs sm:text-sm">${this.formatPhone(user.phone_number)}</span>
                 </td>
-                <td class="p-4 border-b border-gray-200">
-                    <span class="font-bold text-lg text-orange-600">${user.discount_percentage}%</span>
+                <td class="p-2 sm:p-4 border-b border-gray-200">
+                    <span class="font-bold text-sm sm:text-lg text-orange-600">${user.discount_percentage}%</span>
                 </td>
-                <td class="p-4 border-b border-gray-200">
+                <td class="p-2 sm:p-4 border-b border-gray-200 hidden sm:table-cell">
                     <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">${user.unique_code}</span>
                 </td>
-                <td class="p-4 border-b border-gray-200">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span>
+                <td class="p-2 sm:p-4 border-b border-gray-200">
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusClass}">${statusText}</span>
                 </td>
-                <td class="p-4 border-b border-gray-200">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${verifiedClass}">${verifiedText}</span>
+                <td class="p-2 sm:p-4 border-b border-gray-200 hidden md:table-cell">
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold ${verifiedClass}">${verifiedText}</span>
                 </td>
-                <td class="p-4 border-b border-gray-200 text-sm text-gray-600">
+                <td class="p-2 sm:p-4 border-b border-gray-200 text-xs sm:text-sm text-gray-600 hidden lg:table-cell">
                     ${this.formatDateTime(user.created_at)}
                 </td>
-                <td class="p-4 border-b border-gray-200 text-sm text-gray-600">
+                <td class="p-2 sm:p-4 border-b border-gray-200 text-xs sm:text-sm text-gray-600 hidden lg:table-cell">
                     ${user.used_at ? this.formatDateTime(user.used_at) : '-'}
                 </td>
             `;
@@ -205,8 +205,7 @@ class SuzuAdmin {
                 fps: 10,
                 qrbox: { width: 250, height: 250 },
                 aspectRatio: 1.0,
-                rememberLastUsedCamera: true,
-                supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                rememberLastUsedCamera: true
             };
 
             await this.html5QrCode.start(
