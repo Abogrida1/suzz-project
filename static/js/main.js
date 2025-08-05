@@ -10,6 +10,20 @@ class SuzuApp {
     init() {
         this.bindEvents();
         this.showWelcomeSection();
+        this.initializeImageOptimization();
+    }
+
+    /**
+     * Initialize image optimization for all images
+     */
+    initializeImageOptimization() {
+        // Wait for image optimizer to be ready
+        if (window.ImageOptimizer) {
+            window.ImageOptimizer.optimizeAllImages();
+        } else {
+            // Retry after a short delay
+            setTimeout(() => this.initializeImageOptimization(), 500);
+        }
     }
 
     bindEvents() {

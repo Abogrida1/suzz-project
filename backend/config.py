@@ -59,6 +59,12 @@ class Config:
         "🔐 رمز التحقق الخاص بك في سوزو كافيه: {otp}\n\nYour Suzu Kafé verification code: {otp}\n\nصالح لمدة {minutes} دقائق / Valid for {minutes} minutes"
     )
     
+    # SMS Fallback Configuration
+    SMS_FALLBACK_ENABLED = os.getenv('SMS_FALLBACK_ENABLED', 'False').lower() == 'true'
+    SMS_API_KEY = os.getenv('SMS_API_KEY', '')
+    SMS_API_BASE_URL = os.getenv('SMS_API_BASE_URL', 'https://api.sms-service.com')
+    SMS_SENDER_ID = os.getenv('SMS_SENDER_ID', 'SuzuCafe')
+    
     # File Upload Configuration
     MAX_CONTENT_LENGTH = int(os.getenv('MAX_CONTENT_LENGTH', 16777216))  # 16MB
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', 'uploads')

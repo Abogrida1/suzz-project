@@ -1,16 +1,343 @@
-// Admin JavaScript for Suzu Drive-Thru Kafé
+// Enhanced Admin JavaScript for Suzu Drive-Thru Kafé with Mobile Optimization
 class SuzuAdmin {
     constructor() {
         this.apiBaseUrl = window.location.origin;
         this.isLoggedIn = false;
         this.html5QrCode = null;
         this.users = [];
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        this.touchStartY = 0;
+        this.touchEndY = 0;
         this.init();
     }
 
     init() {
         this.bindEvents();
+        this.setupMobileOptimizations();
         this.showLoginSection();
+        this.initializeAdvancedFeatures();
+    }
+
+    /**
+     * Setup mobile-specific optimizations
+     */
+    setupMobileOptimizations() {
+        if (this.isMobile) {
+            // Add mobile-specific classes
+            document.body.classList.add('mobile-optimized');
+            
+            // Setup touch gestures
+            this.setupTouchGestures();
+            
+            // Setup viewport handling
+            this.setupViewportHandling();
+            
+            // Setup mobile-friendly interactions
+            this.setupMobileInteractions();
+        }
+    }
+
+    /**
+     * Setup touch gestures for mobile
+     */
+    setupTouchGestures() {
+        // Pull to refresh functionality
+        document.addEventListener('touchstart', (e) => {
+            this.touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            this.touchEndY = e.changedTouches[0].clientY;
+            this.handleGesture();
+        });
+
+        // Prevent zoom on double tap for form inputs
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+    }
+
+    /**
+     * Handle touch gestures
+     */
+    handleGesture() {
+        const swipeThreshold = 100;
+        const diff = this.touchStartY - this.touchEndY;
+
+        if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+                // Swipe up - scroll to top
+                this.handleSwipeUp();
+            } else {
+                // Swipe down - pull to refresh
+                this.handleSwipeDown();
+            }
+        }
+    }
+
+    /**
+     * Handle swipe up gesture
+     */
+    handleSwipeUp() {
+        if (window.scrollY > 200) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    /**
+     * Handle swipe down gesture
+     */
+    handleSwipeDown() {
+        if (window.scrollY === 0 && this.isLoggedIn) {
+            this.showRefreshIndicator();
+            setTimeout(() => {
+                this.loadUsers();
+                this.hideRefreshIndicator();
+            }, 1000);
+        }
+    }
+
+    /**
+     * Setup viewport handling for mobile
+     */
+    setupViewportHandling() {
+        // Handle orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                this.adjustLayoutForOrientation();
+            }, 500);
+        });
+
+        // Handle keyboard show/hide on mobile
+        if (this.isMobile) {
+            const viewport = document.querySelector('meta[name=viewport]');
+            
+            document.addEventListener('focusin', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                    viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+                }
+            });
+
+            document.addEventListener('focusout', (e) => {
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
+            });
+        }
+    }
+
+    /**
+     * Setup mobile-friendly interactions
+     */
+    setupMobileInteractions() {
+        // Larger touch targets for mobile
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+            if (this.isMobile) {
+                button.style.minHeight = '44px';
+                button.style.minWidth = '44px';
+            }
+        });
+
+        // Enhanced search for mobile
+        this.setupMobileSearch();
+        
+        // Mobile-friendly table interactions
+        this.setupMobileTable();
+    }
+
+    /**
+     * Initialize advanced features
+     */
+    initializeAdvancedFeatures() {
+        // Initialize advanced camera system
+        if (window.AdvancedCameraSystem) {
+            this.advancedCamera = window.AdvancedCameraSystem;
+            this.setupAdvancedCameraIntegration();
+        }
+
+        // Setup image optimization
+        if (window.ImageOptimizer) {
+            window.ImageOptimizer.optimizeAllImages();
+        }
+
+        // Make this instance globally available for camera integration
+        window.adminApp = this;
+    }
+
+    /**
+     * Setup advanced camera integration
+     */
+    setupAdvancedCameraIntegration() {
+        // Listen for QR code scan events
+        document.addEventListener('qrCodeScanned', (event) => {
+            const { text } = event.detail;
+            this.handleQRScan(text);
+        });
+    }
+
+    /**
+     * Handle QR code scan from advanced camera
+     */
+    handleQRScan(qrData) {
+        // Auto-fill manual input
+        const manualInput = document.getElementById('manual-code-input');
+        if (manualInput) {
+            manualInput.value = qrData;
+        }
+
+        // Auto-process if valid
+        if (this.isValidQRCode(qrData)) {
+            this.redeemCode(qrData);
+        }
+    }
+
+    /**
+     * Check if QR code is valid
+     */
+    isValidQRCode(text) {
+        return text && text.includes('|') && text.split('|').length >= 2;
+    }
+
+    /**
+     * Setup mobile search enhancements
+     */
+    setupMobileSearch() {
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && this.isMobile) {
+            // Add mobile-specific search enhancements
+            searchInput.setAttribute('autocomplete', 'off');
+            searchInput.setAttribute('autocorrect', 'off');
+            searchInput.setAttribute('autocapitalize', 'off');
+            searchInput.setAttribute('spellcheck', 'false');
+        }
+    }
+
+    /**
+     * Setup mobile table interactions
+     */
+    setupMobileTable() {
+        if (this.isMobile) {
+            // Add horizontal scroll indicator for mobile tables
+            const tableContainer = document.querySelector('.overflow-x-auto');
+            if (tableContainer) {
+                tableContainer.addEventListener('scroll', (e) => {
+                    const scrollLeft = e.target.scrollLeft;
+                    const scrollWidth = e.target.scrollWidth;
+                    const clientWidth = e.target.clientWidth;
+                    
+                    // Add visual indicators for scrollable content
+                    if (scrollLeft > 0) {
+                        tableContainer.classList.add('scrolled-left');
+                    } else {
+                        tableContainer.classList.remove('scrolled-left');
+                    }
+                    
+                    if (scrollLeft < scrollWidth - clientWidth - 10) {
+                        tableContainer.classList.add('scrolled-right');
+                    } else {
+                        tableContainer.classList.remove('scrolled-right');
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Adjust layout for orientation changes
+     */
+    adjustLayoutForOrientation() {
+        if (this.isMobile) {
+            // Force table reflow
+            const table = document.querySelector('table');
+            if (table) {
+                table.style.display = 'none';
+                table.offsetHeight; // Trigger reflow
+                table.style.display = '';
+            }
+            
+            // Adjust QR scanner if active
+            if (this.html5QrCode) {
+                this.stopQRScanner();
+                setTimeout(() => {
+                    this.startQRScanner();
+                }, 1000);
+            }
+        }
+    }
+
+    /**
+     * Show refresh indicator for pull-to-refresh
+     */
+    showRefreshIndicator() {
+        const indicator = document.createElement('div');
+        indicator.id = 'refresh-indicator';
+        indicator.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-full shadow-lg z-50';
+        indicator.innerHTML = '🔄 Refreshing...';
+        document.body.appendChild(indicator);
+    }
+
+    /**
+     * Hide refresh indicator
+     */
+    hideRefreshIndicator() {
+        const indicator = document.getElementById('refresh-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
+    /**
+     * Show success message with auto-hide
+     */
+    showSuccessMessage(message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+        toast.innerHTML = `✅ ${message}`;
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+        }, 100);
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 5000);
+    }
+
+    /**
+     * Show error message with auto-hide
+     */
+    showErrorMessage(message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+        toast.innerHTML = `❌ ${message}`;
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.classList.remove('translate-x-full');
+        }, 100);
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            toast.classList.add('translate-x-full');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 5000);
     }
 
     bindEvents() {
