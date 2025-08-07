@@ -96,7 +96,7 @@ class User:
     def __init__(self, db_manager: DatabaseManager):
         self.db = db_manager
     
-    def create_user(self, phone_number: str, discount: int, unique_code: str, qr_code_data: str) -> bool:
+    def create_user(self, phone_number: str, discount: int, unique_code: str, qr_code_data: str, is_verified: bool = False) -> bool:
         """Create a new user"""
         try:
             conn = self.db.get_connection()
@@ -105,7 +105,7 @@ class User:
             cursor.execute('''
                 INSERT INTO users (phone_number, discount_percentage, unique_code, qr_code_data, is_verified)
                 VALUES (?, ?, ?, ?, ?)
-            ''', (phone_number, discount, unique_code, qr_code_data, False))
+            ''', (phone_number, discount, unique_code, qr_code_data, is_verified))
             
             conn.commit()
             conn.close()
