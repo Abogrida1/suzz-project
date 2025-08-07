@@ -255,20 +255,19 @@ def admin():
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    """Register a new user and send OTP"""
+    """Register a new user and return discount + QR directly (no OTP)"""
     data = request.get_json()
     phone_number = security.sanitize_input(data.get('phone_number', '')).strip()
     
     if not phone_number:
         return jsonify({'error': 'Phone number is required'}), 400
-    
+
     # Validate phone number format (Egyptian format)
     if not security.validate_egyptian_phone(phone_number):
         return jsonify({'error': 'Invalid Egyptian phone number format'}), 400
-    
+
     # Check if user already exists
     existing_user = user_model.get_user_by_phone(phone_number)
-    
     if existing_user:
         if existing_user['is_used']:
             audit_log.log_action(
@@ -279,146 +278,40 @@ def register():
             )
             return jsonify({'error': 'This phone number has already used a discount code'}), 400
         else:
-            # User exists but hasn't used the code yet
+            # User exists, return their data directly
             return jsonify({
                 'message': 'User already registered',
                 'discount': existing_user['discount_percentage'],
                 'unique_code': existing_user['unique_code'],
                 'qr_code': existing_user['qr_code_data'],
-                'is_verified': existing_user['is_verified']
+                'is_verified': True
             })
-    
+
     # Generate new user data
     discount = generate_random_discount()
     unique_code = code_generator.generate_unique_code()
     qr_data = f"{unique_code}|{phone_number}|{discount}"
     qr_code_base64 = code_generator.generate_qr_code(qr_data)
-    
-    # Create new user
-    if not user_model.create_user(phone_number, discount, unique_code, qr_code_base64):
+
+    # Create new user (mark as verified directly)
+    if not user_model.create_user(phone_number, discount, unique_code, qr_code_base64, is_verified=True):
         return jsonify({'error': 'Failed to create user'}), 500
-    
-    # Generate and send OTP
-    otp = f"{random.randint(100000, 999999)}"
-    
-    # Store OTP
-    if not otp_model.create_otp(phone_number, otp, config.OTP_EXPIRY_MINUTES):
-        return jsonify({'error': 'Failed to generate OTP'}), 500
-    
-    # Log registration attempt
+
     audit_log.log_action(
         action="USER_REGISTERED",
         user_phone=phone_number,
-        details=f"New user registered with {discount}% discount",
+        details=f"New user registered with {discount}% discount (no OTP)",
         ip_address=request.remote_addr
     )
-    
-    # Send OTP via WhatsApp
-    if send_whatsapp_otp(phone_number, otp):
-        return jsonify({
-            'message': 'OTP sent successfully',
-            'discount': discount,
-            'unique_code': unique_code,
-            'qr_code': qr_code_base64
-        })
-    else:
-        return jsonify({'error': 'Failed to send OTP'}), 500
 
-@app.route('/api/verify-otp', methods=['POST'])
-def verify_otp():
-    """Verify OTP code"""
-    data = request.get_json()
-    phone_number = security.sanitize_input(data.get('phone_number', '')).strip()
-    otp_code = security.sanitize_input(data.get('otp_code', '')).strip()
-    
-    if not phone_number or not otp_code:
-        return jsonify({'error': 'Phone number and OTP are required'}), 400
-    
-    # Verify OTP using model
-    if not otp_model.verify_otp(phone_number, otp_code):
-        audit_log.log_action(
-            action="OTP_VERIFICATION_FAILED",
-            user_phone=phone_number,
-            details="Invalid or expired OTP",
-            ip_address=request.remote_addr
-        )
-        return jsonify({'error': 'Invalid or expired OTP'}), 400
-    
-    # Mark user as verified
-    if not user_model.verify_user(phone_number):
-        return jsonify({'error': 'Failed to verify user'}), 500
-    
-    # Get user data
-    user = user_model.get_user_by_phone(phone_number)
-    
-    if user:
-        audit_log.log_action(
-            action="OTP_VERIFIED",
-            user_phone=phone_number,
-            details="User successfully verified",
-            ip_address=request.remote_addr
-        )
-        
-        return jsonify({
-            'message': 'OTP verified successfully',
-            'discount': user['discount_percentage'],
-            'unique_code': user['unique_code'],
-            'qr_code': user['qr_code_data'],
-            'is_verified': True
-        })
-    else:
-        return jsonify({'error': 'User not found'}), 404
-
-@app.route('/api/resend-otp', methods=['POST'])
-def resend_otp():
-    """Resend OTP to user"""
-    data = request.get_json()
-    phone_number = security.sanitize_input(data.get('phone_number', '')).strip()
-    
-    if not phone_number:
-        return jsonify({'error': 'Phone number is required'}), 400
-    
-    # Validate phone number format (Egyptian format)
-    if not security.validate_egyptian_phone(phone_number):
-        return jsonify({'error': 'Invalid Egyptian phone number format'}), 400
-    
-    # Check if user exists
-    existing_user = user_model.get_user_by_phone(phone_number)
-    
-    if not existing_user:
-        return jsonify({'error': 'User not found. Please register first.'}), 404
-    
-    if existing_user['is_verified']:
-        return jsonify({'error': 'Phone number already verified'}), 400
-    
-    if existing_user['is_used']:
-        return jsonify({'error': 'This phone number has already used a discount code'}), 400
-    
-    # Generate new OTP
-    otp = f"{random.randint(100000, 999999)}"
-    
-    # Store new OTP
-    if not otp_model.create_otp(phone_number, otp, config.OTP_EXPIRY_MINUTES):
-        return jsonify({'error': 'Failed to generate OTP'}), 500
-    
-    # Log resend attempt
-    audit_log.log_action(
-        action="OTP_RESENT",
-        user_phone=phone_number,
-        details="OTP resent to user",
-        ip_address=request.remote_addr
-    )
-    
-    # Send OTP via WhatsApp
-    if send_whatsapp_otp(phone_number, otp):
-        return jsonify({
-            'message': 'OTP resent successfully',
-            'discount': existing_user['discount_percentage'],
-            'unique_code': existing_user['unique_code'],
-            'qr_code': existing_user['qr_code_data']
-        })
-    else:
-        return jsonify({'error': 'Failed to resend OTP'}), 500
+    # Return discount and QR directly
+    return jsonify({
+        'message': 'Registration successful',
+        'discount': discount,
+        'unique_code': unique_code,
+        'qr_code': qr_code_base64,
+        'is_verified': True
+    })
 
 @app.route('/api/admin/login', methods=['POST'])
 def admin_login():

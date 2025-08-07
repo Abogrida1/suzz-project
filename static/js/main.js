@@ -33,26 +33,12 @@ class SuzuApp {
             if (e.key === 'Enter') this.handleRegistration();
         });
 
-        // OTP verification
-        document.getElementById('verify-otp-btn').addEventListener('click', () => this.handleOTPVerification());
-        document.getElementById('otp-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleOTPVerification();
-        });
-
-        // Resend OTP
-        document.getElementById('resend-otp-btn').addEventListener('click', () => this.handleResendOTP());
-
         // Change phone number
         document.getElementById('change-phone-btn').addEventListener('click', () => this.handleChangePhone());
 
         // Phone input formatting
         document.getElementById('phone-input').addEventListener('input', (e) => {
             this.formatPhoneInput(e.target);
-        });
-
-        // OTP input formatting
-        document.getElementById('otp-input').addEventListener('input', (e) => {
-            this.formatOTPInput(e.target);
         });
     }
 
@@ -71,18 +57,6 @@ class SuzuApp {
         if (this.isValidEgyptianPhone(value)) {
             this.hideError('phone-error');
         }
-    }
-
-    formatOTPInput(input) {
-        // Remove non-digits
-        let value = input.value.replace(/\D/g, '');
-        
-        // Limit to 6 digits
-        if (value.length > 6) {
-            value = value.substring(0, 6);
-        }
-        
-        input.value = value;
     }
 
     isValidEgyptianPhone(phone) {
@@ -123,17 +97,11 @@ class SuzuApp {
                     phone: phone,
                     discount: data.discount,
                     uniqueCode: data.unique_code,
-                    qrCode: data.qr_code
+                    qrCode: data.qr_code,
+                    isVerified: true
                 };
-
-                if (data.is_verified) {
-                    // User already verified, show discount directly
-                    this.showDiscountSection();
-                } else {
-                    // Show OTP section
-                    this.showOTPSection();
-                    this.startOTPTimer();
-                }
+                // انتقل مباشرة لعرض الخصم والكود
+                this.showDiscountSection();
             } else {
                 this.showErrorSection(data.error || 'Registration failed');
             }
@@ -145,69 +113,9 @@ class SuzuApp {
         }
     }
 
-    async handleOTPVerification() {
-        const otpInput = document.getElementById('otp-input');
-        const otp = otpInput.value.trim();
-
-        if (otp.length !== 6) {
-            this.showError('otp-error', 'Please enter a 6-digit OTP code');
-            otpInput.focus();
-            return;
-        }
-
-        this.hideError('otp-error');
-        this.showLoading();
-
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/api/verify-otp`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    phone_number: this.currentUser.phone,
-                    otp_code: otp
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                this.currentUser = {
-                    ...this.currentUser,
-                    discount: data.discount,
-                    uniqueCode: data.unique_code,
-                    qrCode: data.qr_code,
-                    isVerified: true
-                };
-
-                this.stopOTPTimer();
-                this.showDiscountSection();
-            } else {
-                this.showError('otp-error', data.error || 'Invalid OTP code');
-                otpInput.focus();
-            }
-        } catch (error) {
-            console.error('OTP verification error:', error);
-            this.showError('otp-error', 'Network error. Please try again.');
-        } finally {
-            this.hideLoading();
-        }
-    }
-
     showWelcomeSection() {
         this.hideAllSections();
         document.getElementById('welcome-section').classList.remove('hidden');
-    }
-
-    showOTPSection() {
-        this.hideAllSections();
-        document.getElementById('otp-section').classList.remove('hidden');
-        
-        // Update current phone display
-        document.getElementById('current-phone').textContent = this.formatPhoneForDisplay(this.currentUser.phone);
-        
-        document.getElementById('otp-input').focus();
     }
 
     showDiscountSection() {
@@ -277,93 +185,6 @@ class SuzuApp {
                 qrContainer.appendChild(canvas);
             }
         });
-    }
-
-    startOTPTimer() {
-        let timeLeft = 300; // 5 minutes in seconds
-        const countdownElement = document.getElementById('countdown');
-        
-        this.otpTimer = setInterval(() => {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            countdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (timeLeft <= 0) {
-                this.stopOTPTimer();
-                this.showErrorSection('OTP expired. Please try again.');
-            }
-            
-            timeLeft--;
-        }, 1000);
-    }
-
-    stopOTPTimer() {
-        if (this.otpTimer) {
-            clearInterval(this.otpTimer);
-            this.otpTimer = null;
-        }
-    }
-
-    async handleResendOTP() {
-        if (!this.currentUser || !this.currentUser.phone) {
-            this.showError('otp-error', 'Please register first');
-            return;
-        }
-
-        const resendBtn = document.getElementById('resend-otp-btn');
-        const resendInfo = document.getElementById('resend-info');
-        
-        // Disable button temporarily
-        resendBtn.disabled = true;
-        resendBtn.textContent = 'Sending...';
-        
-        this.hideError('otp-error');
-        this.hideError('resend-info');
-
-        try {
-            const response = await fetch(`${this.apiBaseUrl}/api/resend-otp`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    phone_number: this.currentUser.phone
-                })
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // Show success message
-                resendInfo.textContent = 'New verification code sent to your WhatsApp!';
-                resendInfo.classList.remove('hidden');
-                
-                // Clear OTP input
-                document.getElementById('otp-input').value = '';
-                document.getElementById('otp-input').focus();
-                
-                // Restart timer
-                this.stopOTPTimer();
-                this.startOTPTimer();
-                
-                // Hide success message after 5 seconds
-                setTimeout(() => {
-                    resendInfo.classList.add('hidden');
-                }, 5000);
-                
-            } else {
-                this.showError('otp-error', data.error || 'Failed to resend OTP');
-            }
-        } catch (error) {
-            console.error('Resend OTP error:', error);
-            this.showError('otp-error', 'Network error. Please try again.');
-        } finally {
-            // Re-enable button after 30 seconds
-            setTimeout(() => {
-                resendBtn.disabled = false;
-                resendBtn.textContent = 'Resend Code';
-            }, 30000);
-        }
     }
 
     // Utility method to format phone number for display
