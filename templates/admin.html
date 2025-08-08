@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - Suzu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --admin-primary: #3b82f6;
+            --admin-secondary: #1d4ed8;
+            --success-green: #10b981;
+            --error-red: #ef4444;
+            --warning-yellow: #f59e0b;
+            --dark-bg: #1f2937;
+            --darker-bg: #111827;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, var(--darker-bg) 0%, var(--dark-bg) 50%, #374151 100%);
+            min-height: 100vh;
+        }
+
+        .admin-gradient {
+            background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-secondary) 100%);
+        }
+
+        .success-gradient {
+            background: linear-gradient(135deg, var(--success-green) 0%, #059669 100%);
+        }
+
+        .danger-gradient {
+            background: linear-gradient(135deg, var(--error-red) 0%, #dc2626 100%);
+        }
+
+        .warning-gradient {
+            background: linear-gradient(135deg, var(--warning-yellow) 0%, #d97706 100%);
+        }
+
+        .glass-admin {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(29, 78, 216, 0.1) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .qr-scanner-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .table-row {
+            transition: all 0.3s ease;
+        }
+
+        .table-row:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(59, 130, 246, 0.3);
+            border-top: 4px solid var(--admin-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--admin-primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .glass-admin {
+                margin: 8px;
+                padding: 16px;
+            }
+            
+            .stats-card {
+                margin-bottom: 16px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="glass-admin mx-4 mt-4 mb-8 rounded-3xl shadow-2xl">
+        <div class="container mx-auto px-6 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <img src="https://i.ibb.co/6JTrCJGK/IMG-5877.jpg" 
+                         alt="Suzu Logo" 
+                         class="w-16 h-16 rounded-2xl shadow-lg border-2 border-white object-cover" />
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">لوحة التحكم</h1>
+                        <p class="text-sm text-gray-300">إدارة Suzu</p>
+                    </div>
+                </div>
+                <div id="logout-container" class="hidden">
+                    <button id="logout-btn" 
+                            class="px-6 py-3 danger-gradient text-white rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+                        🚪 تسجيل الخروج
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pb-8">
+        <!-- Login Section -->
+        <section id="login-section" class="glass-admin rounded-3xl shadow-2xl p-8 max-w-md mx-auto fade-in">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 admin-gradient rounded-full flex items-center justify-center mx-auto mb-4 pulse-animation">
+                    <span class="text-3xl">🔐</span>
+                </div>
+                <h2 class="text-3xl font-bold text-white mb-2">تسجيل الدخول</h2>
+                <p class="text-gray-300">أدخل كلمة المرور للوصول إلى لوحة التحكم</p>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label for="admin-password" class="block text-sm font-semibold text-white mb-2">كلمة المرور</label>
+                    <input type="password" 
+                           id="admin-password" 
+                           placeholder="أدخل كلمة المرور" 
+                           class="w-full p-4 border-2 border-gray-600 rounded-xl bg-gray-800 text-white placeholder-gray-400 search-input transition-all duration-300" />
+                </div>
+                
+                <button id="login-btn" 
+                        class="w-full py-4 px-6 text-lg font-bold text-white admin-gradient rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+                    🔓 دخول
+                </button>
+                
+                <p id="login-error" class="text-red-400 text-center hidden">كلمة المرور غير صحيحة. حاول مرة أخرى.</p>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="hidden fade-in">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="glass-admin rounded-xl p-6 text-center stats-card">
+                    <div class="text-3xl mb-2">👥</div>
+                    <div class="text-2xl font-bold text-white" id="total-users">0</div>
+                    <div class="text-sm text-gray-300">إجمالي المستخدمين</div>
+                </div>
+                <div class="glass-admin rounded-xl p-6 text-center stats-card">
+                    <div class="text-3xl mb-2">🎁</div>
+                    <div class="text-2xl font-bold text-blue-400" id="active-codes">0</div>
+                    <div class="text-sm text-gray-300">أكواد نشطة</div>
+                </div>
+                <div class="glass-admin rounded-xl p-6 text-center stats-card">
+                    <div class="text-3xl mb-2">💰</div>
+                    <div class="text-2xl font-bold text-orange-400" id="redeemed-codes">0</div>
+                    <div class="text-sm text-gray-300">تم الاستخدام</div>
+                </div>
+            </div>
+
+            <!-- QR Scanner Section -->
+            <div class="glass-admin rounded-3xl shadow-2xl p-8 mb-8">
+                <h3 class="text-2xl font-bold text-white mb-6 text-center">📱 ماسح الكود</h3>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Scanner -->
+                    <div>
+                        <div class="qr-scanner-container mb-4">
+                            <div id="qr-reader" class="w-full"></div>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button id="start-scanner-btn" 
+                                    class="flex-1 py-3 px-4 success-gradient text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+                                📷 تشغيل الماسح
+                            </button>
+                            <button id="stop-scanner-btn" 
+                                    class="flex-1 py-3 px-4 danger-gradient text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 hidden">
+                                ⏹️ إيقاف
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Manual Code Entry -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-4">إدخال يدوي</h4>
+                        <div class="space-y-4">
+                            <input type="text" 
+                                   id="manual-code-input" 
+                                   placeholder="أدخل الكود أو بيانات QR" 
+                                   class="w-full p-4 border-2 border-gray-600 rounded-xl bg-gray-800 text-white placeholder-gray-400 search-input transition-all duration-300" />
+                            <button id="redeem-manual-btn" 
+                                    class="w-full py-3 px-4 admin-gradient text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+                                🎁 استخدام الكود
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scan Result -->
+                <div id="scan-result" class="mt-8 p-6 rounded-xl border-2 border-gray-700 bg-gray-800 hidden">
+                    <h4 class="text-lg font-semibold text-white mb-4">نتيجة المسح</h4>
+                    <div id="scan-result-content"></div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="glass-admin rounded-3xl shadow-2xl p-8">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6 space-y-4 lg:space-y-0">
+                    <h3 class="text-2xl font-bold text-white">📊 جميع المستخدمين</h3>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                        <div class="relative">
+                            <input type="text" 
+                                   id="search-input" 
+                                   placeholder="ابحث برقم الهاتف..." 
+                                   class="pl-10 pr-4 py-2 border-2 border-gray-600 rounded-lg bg-gray-800 text-white placeholder-gray-400 search-input transition-all duration-300" />
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-400">🔍</span>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="clear-search-btn" 
+                                    class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300 hidden">
+                                ❌ مسح
+                            </button>
+                            <button id="refresh-btn" 
+                                    class="px-4 py-2 admin-gradient text-white rounded-lg hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+                                🔄 تحديث
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Results Info -->
+                <div id="search-info" class="mb-4 p-3 bg-blue-900/20 border border-blue-700 rounded-lg hidden">
+                    <p class="text-blue-200 text-sm">
+                        <span id="search-results-text"></span>
+                    </p>
+                </div>
+
+                <div class="overflow-x-auto -mx-4 lg:mx-0">
+                    <table class="w-full border-collapse bg-gray-800 rounded-xl overflow-hidden shadow-lg">
+                        <thead>
+                            <tr class="bg-gray-700 text-white">
+                                <th class="p-4 text-right text-sm font-semibold">رقم الهاتف</th>
+                                <th class="p-4 text-right text-sm font-semibold">الخصم</th>
+                                <th class="p-4 text-right text-sm font-semibold hidden lg:table-cell">الكود</th>
+                                <th class="p-4 text-right text-sm font-semibold">الحالة</th>
+                                <th class="p-4 text-right text-sm font-semibold hidden xl:table-cell">الإنشاء</th>
+                                <th class="p-4 text-right text-sm font-semibold hidden xl:table-cell">الاستخدام</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Users will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Section -->
+        <section id="loading-section" class="glass-admin rounded-3xl shadow-2xl p-8 hidden fade-in">
+            <div class="text-center">
+                <div class="loading-spinner mx-auto mb-4"></div>
+                <p class="text-xl text-gray-300">جاري التحميل...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-admin mt-16 py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-gray-300">© 2024 لوحة تحكم Suzu</p>
+            <p class="text-sm text-gray-400 mt-1">نظام إدارة آمن</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/admin-fixed.js"></script>
+</body>
+</html>

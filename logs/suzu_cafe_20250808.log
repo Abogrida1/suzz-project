@@ -1,0 +1,4 @@
+2025-08-08 09:28:29,253 - backend.app - INFO - Registration request received: 02220987876
+2025-08-08 09:28:29,254 - backend.app - WARNING - Registration failed: Invalid phone format: 02220987876
+2025-08-08 09:28:42,209 - backend.app - INFO - Registration request received: 01324122332
+2025-08-08 09:28:42,392 - backend.app - INFO - Registration successful: 01324122332 with discount 25%
