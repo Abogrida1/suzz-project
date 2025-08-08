@@ -6,3 +6,5 @@
 2025-08-08 10:08:18,531 - backend.app - WARNING - Registration failed: Invalid phone format: 08975454333
 2025-08-08 10:08:31,591 - backend.app - INFO - Registration request received: 01583872485
 2025-08-08 10:08:31,658 - backend.app - INFO - Registration successful: 01583872485 with discount 10%
+2025-08-08 10:21:09,552 - backend.app - INFO - Registration request received: 01040552433
+2025-08-08 10:21:09,703 - backend.app - INFO - Registration successful: 01040552433 with discount 20%
