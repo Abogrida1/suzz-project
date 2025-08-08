@@ -1,4 +1,4 @@
-// Main JavaScript for Suzu Drive-Thru Kafé - OTP Removed Version
+// Main JavaScript for Suzu Drive-Thru Kafé - Enhanced Phone Number Login
 class SuzuApp {
     constructor() {
         this.apiBaseUrl = window.location.origin;
@@ -9,6 +9,7 @@ class SuzuApp {
         this.bindEvents();
         this.showWelcomeSection();
         this.initializeImageOptimization();
+        this.setupPhoneInput();
     }
 
     initializeImageOptimization() {
@@ -16,6 +17,21 @@ class SuzuApp {
             window.ImageOptimizer.optimizeAllImages();
         } else {
             setTimeout(() => this.initializeImageOptimization(), 500);
+        }
+    }
+
+    setupPhoneInput() {
+        const phoneInput = document.getElementById('phone-input');
+        if (phoneInput) {
+            phoneInput.addEventListener('focus', () => {
+                phoneInput.classList.add('ring-4', 'ring-gray-200');
+                phoneInput.classList.remove('border-red-500', 'border-green-500');
+            });
+
+            phoneInput.addEventListener('blur', () => {
+                phoneInput.classList.remove('ring-4', 'ring-gray-200');
+                this.validatePhoneInput(phoneInput);
+            });
         }
     }
 
@@ -34,25 +50,56 @@ class SuzuApp {
         if (value.length > 11) {
             value = value.substring(0, 11);
         }
+        
+        if (value.length > 3 && value.length <= 7) {
+            value = value.substring(0, 3) + ' ' + value.substring(3);
+        } else if (value.length > 7) {
+            value = value.substring(0, 3) + ' ' + value.substring(3, 7) + ' ' + value.substring(7);
+        }
+        
         input.value = value;
+        
+        this.validatePhoneInput(input);
+    }
 
-        if (this.isValidEgyptianPhone(value)) {
+    validatePhoneInput(input) {
+        const phone = input.value.replace(/\s/g, '');
+        const isValid = this.isValidEgyptianPhone(phone);
+        
+        if (phone.length > 0) {
+            if (isValid) {
+                input.classList.remove('border-red-500', 'border-gray-300');
+                input.classList.add('border-green-500');
+                this.hideError('phone-error');
+            } else {
+                input.classList.remove('border-green-500', 'border-gray-300');
+                input.classList.add('border-red-500');
+                
+                if (phone.length === 11) {
+                    this.showError('phone-error', 'Please enter a valid Egyptian phone number (11 digits starting with 01)');
+                }
+            }
+        } else {
+            input.classList.remove('border-red-500', 'border-green-500');
+            input.classList.add('border-gray-300');
             this.hideError('phone-error');
         }
     }
 
     isValidEgyptianPhone(phone) {
+        const cleanPhone = phone.replace(/\D/g, '');
         const phoneRegex = /^01[0-9]{9}$/;
-        return phoneRegex.test(phone);
+        return phoneRegex.test(cleanPhone);
     }
 
     async handleRegistration() {
         const phoneInput = document.getElementById('phone-input');
-        const phone = phoneInput.value.trim();
+        const phone = phoneInput.value.replace(/\s/g, '').trim();
 
         if (!this.isValidEgyptianPhone(phone)) {
             this.showError('phone-error', 'Please enter a valid Egyptian phone number (11 digits starting with 01)');
             phoneInput.focus();
+            phoneInput.classList.add('border-red-500');
             return;
         }
 
