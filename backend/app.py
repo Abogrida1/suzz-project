@@ -58,10 +58,11 @@ def register():
         app.logger.warning("Registration failed: Phone number is required")
         return jsonify({'error': 'Phone number is required'}), 400
 
-    # Validate phone number format (Egyptian format)
-    if not security.validate_egyptian_phone(phone_number):
+    # Normalize and validate phone number
+    normalized_phone = security.normalize_egyptian_phone(phone_number)
+    if not normalized_phone:
         app.logger.warning(f"Registration failed: Invalid phone number format: {phone_number}")
-        return jsonify({'error': 'Invalid Egyptian phone number format'}), 400
+        return jsonify({'error': 'يرجى إدخال رقم هاتف مصري صحيح (11 رقم يبدأ بـ 01)'}), 400
 
     # Check if user already exists
     existing_user = user_model.get_user_by_phone(phone_number)
@@ -69,15 +70,15 @@ def register():
         if existing_user['is_used']:
             audit_log.log_action(
                 action="REGISTRATION_BLOCKED",
-                user_phone=phone_number,
+                user_phone=normalized_phone,
                 details="Phone number already used discount code",
                 ip_address=request.remote_addr
             )
-            app.logger.warning(f"Registration blocked: Phone number already used discount code: {phone_number}")
+            app.logger.warning(f"Registration blocked: Phone number already used discount code: {normalized_phone}")
             return jsonify({'error': 'This phone number has already used a discount code'}), 400
         else:
             # User exists, return their data directly
-            app.logger.info(f"User already registered: {phone_number}")
+            app.logger.info(f"User already registered: {normalized_phone}")
             return jsonify({
                 'message': 'User already registered',
                 'discount': existing_user['discount_percentage'],
@@ -89,22 +90,22 @@ def register():
     # Generate new user data
     discount = generate_random_discount()
     unique_code = code_generator.generate_unique_code()
-    qr_data = f"{unique_code}|{phone_number}|{discount}"
+    qr_data = f"{unique_code}|{normalized_phone}|{discount}"
     qr_code_base64 = code_generator.generate_qr_code(qr_data)
 
     # Create new user (mark as verified directly)
-    if not user_model.create_user(phone_number, discount, unique_code, qr_code_base64, is_verified=True):
-        app.logger.error(f"Failed to create user: {phone_number}")
+    if not user_model.create_user(normalized_phone, discount, unique_code, qr_code_base64, is_verified=True):
+        app.logger.error(f"Failed to create user: {normalized_phone}")
         return jsonify({'error': 'Failed to create user'}), 500
 
     audit_log.log_action(
         action="USER_REGISTERED",
-        user_phone=phone_number,
+        user_phone=normalized_phone,
         details=f"New user registered with {discount}% discount (no OTP)",
         ip_address=request.remote_addr
     )
 
-    app.logger.info(f"Registration successful: {phone_number} with discount {discount}%")
+    app.logger.info(f"Registration successful: {normalized_phone} with discount {discount}%")
 
     # Return discount and QR directly
     return jsonify({

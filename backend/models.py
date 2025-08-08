@@ -377,6 +377,23 @@ class SecurityManager:
         # Egyptian phone numbers: 11 digits starting with 01
         pattern = r'^01[0-9]{9}$'
         return bool(re.match(pattern, phone.replace(' ', '').replace('-', '')))
+
+    @staticmethod
+    def normalize_egyptian_phone(phone: str) -> str:
+        """Normalize Egyptian phone number by removing spaces, dashes, and handling +20 prefix"""
+        import re
+        if not phone:
+            return None
+        phone = phone.strip()
+        # Remove spaces and dashes
+        phone = re.sub(r'[\s\-]', '', phone)
+        # Remove +20 country code if present
+        if phone.startswith('+20'):
+            phone = phone[3:]
+        # Validate normalized phone
+        if re.match(r'^01[0-9]{9}$', phone):
+            return phone
+        return None
     
     @staticmethod
     def sanitize_input(text: str) -> str:
