@@ -180,28 +180,25 @@
         <!-- Dashboard Section -->
         <section id="dashboard-section" class="hidden fade-in">
             <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="glass-admin rounded-xl p-6 text-center stats-card">
                     <div class="text-3xl mb-2">👥</div>
-                    <div class="number-display text-white" id="total-users">0</div>
+                    <div class="text-2xl font-bold text-white" id="total-users">0</div>
                     <div class="text-sm text-gray-300">إجمالي المستخدمين</div>
                 </div>
                 <div class="glass-admin rounded-xl p-6 text-center stats-card">
-<<<<<<< HEAD
-=======
                     <div class="text-3xl mb-2">✅</div>
-                    <div class="number-display text-green-400" id="verified-users">0</div>
+                    <div class="text-2xl font-bold text-green-400" id="verified-users">0</div>
                     <div class="text-sm text-gray-300">تم التحقق</div>
                 </div>
                 <div class="glass-admin rounded-xl p-6 text-center stats-card">
->>>>>>> a5c70da (Updated admin panel for clarity and removed creation date column)
                     <div class="text-3xl mb-2">🎁</div>
-                    <div class="number-display text-blue-400" id="active-codes">0</div>
+                    <div class="text-2xl font-bold text-blue-400" id="active-codes">0</div>
                     <div class="text-sm text-gray-300">أكواد نشطة</div>
                 </div>
                 <div class="glass-admin rounded-xl p-6 text-center stats-card">
                     <div class="text-3xl mb-2">💰</div>
-                    <div class="number-display text-orange-400" id="redeemed-codes">0</div>
+                    <div class="text-2xl font-bold text-orange-400" id="redeemed-codes">0</div>
                     <div class="text-sm text-gray-300">تم الاستخدام</div>
                 </div>
             </div>
@@ -288,15 +285,14 @@
                 <div class="overflow-x-auto -mx-4 lg:mx-0">
                     <table class="w-full border-collapse bg-gray-800 rounded-xl overflow-hidden shadow-lg">
                         <thead>
-                        <tr class="bg-gray-700 text-white">
-                            <th class="p-4 text-right text-sm font-semibold">رقم الهاتف</th>
-                            <th class="p-4 text-right text-sm font-semibold">الخصم</th>
-                            <th class="p-4 text-right text-sm font-semibold hidden lg:table-cell">الكود</th>
-                            <th class="p-4 text-right text-sm font-semibold">الحالة</th>
-                            <th class="p-4 text-right text-sm font-semibold hidden xl:table-cell">التحقق</th>
-
-                            <th class="p-4 text-right text-sm font-semibold hidden xl:table-cell">الاستخدام</th>
-                        </tr>
+                            <tr class="bg-gray-700 text-white">
+                                <th class="p-4 text-right text-sm font-semibold">رقم الهاتف</th>
+                                <th class="p-4 text-right text-sm font-semibold">الخصم</th>
+                                <th class="p-4 text-right text-sm font-semibold hidden lg:table-cell">الكود</th>
+                                <th class="p-4 text-right text-sm font-semibold">الحالة</th>
+                                <th class="p-4 text-right text-sm font-semibold hidden xl:table-cell">الإنشاء</th>
+                                <th class="p-4 text-right text-sm font-semibold hidden xl:table-cell">الاستخدام</th>
+                            </tr>
                         </thead>
                         <tbody id="users-table-body">
                             <!-- Users will be loaded here -->

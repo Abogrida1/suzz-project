@@ -183,13 +183,18 @@ class AdminDashboard {
     }
 
     updateStats(stats) {
-        const totalUsers = document.getElementById('total-users');
-        const activeCodes = document.getElementById('active-codes');
-        const redeemedCodes = document.getElementById('redeemed-codes');
+        const elements = {
+            'total-users': stats.total_users || 0,
+            'active-codes': stats.active_codes || 0,
+            'redeemed-codes': stats.redeemed_codes || 0
+        };
 
-        if (totalUsers) totalUsers.textContent = stats.total_users || 0;
-        if (activeCodes) activeCodes.textContent = stats.active_codes || 0;
-        if (redeemedCodes) redeemedCodes.textContent = stats.redeemed_codes || 0;
+        Object.entries(elements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value.toLocaleString('en-US'); // Change to English numerals
+            }
+        });
     }
 
     renderUsersTable(users) {
@@ -217,8 +222,8 @@ class AdminDashboard {
                 '<span class="text-red-400">تم الاستخدام</span>' : 
                 '<span class="text-green-400">نشط</span>';
 
-            const createdAt = new Date(user.created_at).toLocaleDateString('ar-EG');
-            const usedAt = user.used_at ? new Date(user.used_at).toLocaleDateString('ar-EG') : '-';
+            const createdAt = new Date(user.created_at).toLocaleDateString('en-US');
+            const usedAt = user.used_at ? new Date(user.used_at).toLocaleDateString('en-US') : '-';
 
             row.innerHTML = `
                 <td class="p-4 text-sm">${user.phone_number}</td>
@@ -431,7 +436,6 @@ class AdminDashboard {
 
         resultContent.innerHTML = message;
         resultDiv.className = `mt-8 p-6 rounded-xl border-2 ${type === 'success' ? 'border-green-700 bg-green-900/20' : 'border-red-700 bg-red-900/20'} ${type === 'info' ? 'border-blue-700 bg-blue-900/20' : ''}`;
-        resultDiv.classList.remove('hidden');
 
         // Auto-hide after 5 seconds
         setTimeout(() => {

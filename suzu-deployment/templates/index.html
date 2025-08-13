@@ -19,7 +19,6 @@
     
     <!-- QR Code Library -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-    <script src="/static/js/qr-compatibility.js"></script>
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -246,7 +245,7 @@
                 <!-- Discount Badge -->
                 <div class="discount-reveal rounded-full w-40 h-40 mx-auto flex items-center justify-center mb-8">
                     <div class="text-center">
-                <div id="discount-value" class="discount-percentage">25%</div>
+                        <div id="discount-value" class="text-5xl font-bold text-gray-900">25%</div>
                         <div class="text-xl font-semibold text-gray-800">خصم</div>
                     </div>
                 </div>
@@ -260,7 +259,7 @@
                     <h4 class="text-lg font-semibold mb-4 text-gray-800">أظهر هذا الكود عند زيارتنا</h4>
                     <div id="qr-code-container" class="flex justify-center mb-4"></div>
                     <div class="text-sm text-gray-600">
-                        <p class="mb-2">الكود: <span id="unique-code" class="code-display"></span></p>
+                        <p class="mb-2">الكود: <span id="unique-code" class="font-mono font-bold text-black"></span></p>
                         <p class="text-xs text-gray-500">صالح للاستخدام مرة واحدة فقط</p>
                     </div>
                 </div>
