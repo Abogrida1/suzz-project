@@ -1,0 +1,62 @@
+# Production Requirements for SUZZ Cafe
+# =====================================
+
+# Core Flask
+Flask==2.3.3
+Flask-CORS==4.0.0
+
+# Database
+sqlite3  # Built-in with Python
+
+# HTTP Requests
+requests==2.31.0
+
+# Security & Authentication
+pyotp==2.9.0
+
+# QR Code Generation
+qrcode==7.4.2
+Pillow==10.0.1
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Production Server (choose one)
+# gunicorn==21.2.0  # For Linux/Unix
+# waitress==2.1.2   # For Windows
+
+# Logging
+# logging  # Built-in with Python
+
+# Date/Time
+# datetime  # Built-in with Python
+
+# Path handling
+# pathlib  # Built-in with Python
+
+# JSON handling
+# json  # Built-in with Python
+
+# Random number generation
+# random  # Built-in with Python
+
+# Hash functions
+# hashlib  # Built-in with Python
+
+# Secrets management
+# secrets  # Built-in with Python
+
+# IO operations
+# io  # Built-in with Python
+
+# Base64 encoding
+# base64  # Built-in with Python
+
+# Type hints
+# typing  # Built-in with Python
+
+# OS operations
+# os  # Built-in with Python
+
+# System operations
+# sys  # Built-in with Python
