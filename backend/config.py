@@ -16,8 +16,8 @@ class Config:
     HOST = os.getenv('HOST', '0.0.0.0')
     PORT = int(os.getenv('PORT', 5000))
     
-    # Database Configuration
-    DATABASE_PATH = os.getenv('DATABASE_PATH', 'suzu_cafe.db')
+    # Database Configuration - default to data/ for container writeability
+    DATABASE_PATH = os.getenv('DATABASE_PATH', 'data/suzu_cafe.db')
     
     # Ultra Messages Configuration
     ULTRA_MSG_INSTANCE_ID = os.getenv('ULTRA_MSG_INSTANCE_ID', 'instance139238')

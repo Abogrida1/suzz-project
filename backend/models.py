@@ -21,9 +21,30 @@ class DatabaseManager:
                 parent_dir = os.path.dirname(self.db_path)
                 if parent_dir:
                     os.makedirs(parent_dir, exist_ok=True)
+                else:
+                    # If no parent specified (e.g., "suzu_cafe.db"), default to data/ for better portability
+                    default_data_dir = os.path.join('data')
+                    os.makedirs(default_data_dir, exist_ok=True)
+                    self.db_path = os.path.join(default_data_dir, 'suzu_cafe.db')
+                    print(f"No parent dir specified; using default database path: {self.db_path}")
         except Exception as e:
             print(f"Warning: failed to ensure database directory exists for {self.db_path}: {e}")
-        self.init_database()
+
+        # Initialize database; if filesystem denies write, fallback to /tmp
+        try:
+            self.init_database()
+        except Exception as init_error:
+            print(f"Database init failed at {self.db_path}: {init_error}")
+            # Try a writable fallback commonly available in containers
+            try:
+                fallback_dir = '/tmp'
+                Path(fallback_dir).mkdir(exist_ok=True)
+                self.db_path = os.path.join(fallback_dir, 'suzu_cafe.db')
+                print(f"Retrying database init with fallback path: {self.db_path}")
+                self.init_database()
+            except Exception as fallback_error:
+                print(f"Fallback database init failed at {self.db_path}: {fallback_error}")
+                raise fallback_error
     
     def get_connection(self):
         """Get database connection"""
