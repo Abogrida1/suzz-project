@@ -37,7 +37,7 @@ class DatabaseManager:
             cursor = conn.cursor()
             
             print("Creating users table...")
-            # Create users table
+            # Create users table (base schema)
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,6 +53,19 @@ class DatabaseManager:
                 )
             ''')
             print("Users table created/verified")
+
+            # Lightweight migrations to add missing columns used by the app
+            print("Checking users table for required columns...")
+            cursor.execute("PRAGMA table_info(users)")
+            existing_columns = {row[1] for row in cursor.fetchall()}
+
+            if 'is_admin_discount' not in existing_columns:
+                print("Adding missing column: is_admin_discount")
+                cursor.execute("ALTER TABLE users ADD COLUMN is_admin_discount BOOLEAN DEFAULT FALSE")
+
+            if 'admin_description' not in existing_columns:
+                print("Adding missing column: admin_description")
+                cursor.execute("ALTER TABLE users ADD COLUMN admin_description TEXT DEFAULT ''")
             
             print("Creating OTPs table...")
             # Create OTP table
