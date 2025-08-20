@@ -19,10 +19,10 @@ class Config:
     # Database Configuration
     DATABASE_PATH = os.getenv('DATABASE_PATH', 'suzu_cafe.db')
     
-    # GreenAPI Configuration
-    GREEN_API_INSTANCE_ID = os.getenv('GREEN_API_INSTANCE_ID', '7105295516')
-    GREEN_API_TOKEN = os.getenv('GREEN_API_TOKEN', 'ca6c383f4b8c4441992204cd3f903f882ccb29c65ae44106bf')
-    GREEN_API_BASE_URL = 'https://api.green-api.com'
+    # Ultra Messages Configuration
+    ULTRA_MSG_INSTANCE_ID = os.getenv('ULTRA_MSG_INSTANCE_ID', 'instance139238')
+    ULTRA_MSG_TOKEN = os.getenv('ULTRA_MSG_TOKEN', 'r2730b4840azy8k8')
+    ULTRA_MSG_BASE_URL = 'https://api.ultramsg.com'
     
     # Admin Configuration
     ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'Suzz2212')
@@ -30,6 +30,7 @@ class Config:
     # OTP Configuration
     OTP_EXPIRY_MINUTES = int(os.getenv('OTP_EXPIRY_MINUTES', 5))
     OTP_LENGTH = int(os.getenv('OTP_LENGTH', 6))
+    OTP_ENABLED = os.getenv('OTP_ENABLED', 'True').lower() == 'true'
     
     # Discount Configuration
     MIN_DISCOUNT = int(os.getenv('MIN_DISCOUNT', 10))
@@ -56,7 +57,7 @@ class Config:
     # WhatsApp Message Templates
     OTP_MESSAGE_TEMPLATE = os.getenv(
         'OTP_MESSAGE_TEMPLATE',
-        "🔐 رمز التحقق الخاص بك في سوزو كافيه: {otp}\n\nYour Suzu Kafé verification code: {otp}\n\nصالح لمدة {minutes} دقائق / Valid for {minutes} minutes"
+        "🔐 رمز التحقق الخاص بك في SUZZ كافيه: {otp}\n\nYour SUZZ Kafé verification code: {otp}\n\nصالح لمدة {minutes} دقائق / Valid for {minutes} minutes\n\n🏆 أول Drive-Thru في السويس"
     )
     
     # SMS Fallback Configuration

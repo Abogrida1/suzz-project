@@ -1,129 +1,85 @@
 #!/usr/bin/env python3
 """
-Suzu Drive-Thru Kafé - Main Application Runner
-Production-ready promotional web app with WhatsApp OTP verification
+Suzu Cafe - Main Application Runner
+Enhanced with OTP system and improved UI
 """
 
 import os
 import sys
 import logging
-from datetime import datetime
+from pathlib import Path
 
 # Add backend directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'backend'))
+backend_dir = Path(__file__).parent / 'backend'
+sys.path.insert(0, str(backend_dir))
 
-from backend.app import app
-from backend.config import get_config
+# Import Flask app
+from app import app, config
 
 def setup_logging():
-    """Setup application logging"""
-    config = get_config()
-    
-    # Create logs directory if it doesn't exist
-    log_dir = 'logs'
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
+    """Setup comprehensive logging"""
+    log_dir = Path('logs')
+    log_dir.mkdir(exist_ok=True)
     
     # Configure logging
-    log_level = getattr(logging, config.LOG_LEVEL.upper(), logging.INFO)
-    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    
-    # File handler
-    file_handler = logging.FileHandler(
-        os.path.join(log_dir, f'suzu_cafe_{datetime.now().strftime("%Y%m%d")}.log')
-    )
-    file_handler.setLevel(log_level)
-    file_handler.setFormatter(logging.Formatter(log_format))
-    
-    # Console handler
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(log_level)
-    console_handler.setFormatter(logging.Formatter(log_format))
-    
-    # Configure root logger
     logging.basicConfig(
-        level=log_level,
-        handlers=[file_handler, console_handler]
+        level=getattr(logging, config.LOG_LEVEL),
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_dir / 'suzu_cafe.log', encoding='utf-8'),
+            logging.StreamHandler(sys.stdout)
+        ]
     )
-    
-    # Configure Flask app logger
-    app.logger.setLevel(log_level)
-    app.logger.addHandler(file_handler)
-    app.logger.addHandler(console_handler)
 
 def check_environment():
-    """Check if all required environment variables are set"""
-    config = get_config()
+    """Check environment configuration"""
+    logger = logging.getLogger(__name__)
     
-    required_vars = [
-        'GREEN_API_INSTANCE_ID',
-        'GREEN_API_TOKEN'
-    ]
+    # Check Ultra Messages configuration
+    if config.OTP_ENABLED:
+        if not config.ULTRA_MSG_INSTANCE_ID or not config.ULTRA_MSG_TOKEN:
+            logger.error("Ultra Messages not configured. OTP will not work.")
+        else:
+            logger.info("Ultra Messages configured successfully.")
     
-    missing_vars = []
-    for var in required_vars:
-        if not getattr(config, var, None) or getattr(config, var, None) == f'your_{var.lower().replace("green_api_", "")}_here':
-            missing_vars.append(var)
+    # Check database
+    if not os.path.exists(config.DATABASE_PATH):
+        logger.info(f"Database not found. Will be created at: {config.DATABASE_PATH}")
     
-    if missing_vars:
-        print("❌ Missing required environment variables:")
-        for var in missing_vars:
-            print(f"   - {var}")
-        print("\n💡 Please check your .env file or environment variables")
-        print("   Copy .env.example to .env and fill in your Green API values")
-        return False
+    # Check static and template directories
+    static_dir = Path('static')
+    templates_dir = Path('templates')
     
-    return True
-
-def print_startup_info():
-    """Print startup information"""
-    config = get_config()
+    if not static_dir.exists():
+        logger.warning("Static directory not found. Some features may not work.")
     
-    print("=" * 60)
-    print("🔥 SUZU DRIVE-THRU KAFÉ - PROMOTIONAL WEB APP")
-    print("=" * 60)
-    print(f"📱 Environment: {config.FLASK_ENV}")
-    print(f"🌐 Host: {config.HOST}")
-    print(f"🚪 Port: {config.PORT}")
-    print(f"🗄️  Database: {config.DATABASE_PATH}")
-    print(f"📞 WhatsApp API: {'✅ Configured' if config.GREEN_API_INSTANCE_ID and config.GREEN_API_INSTANCE_ID != 'your_instance_id_here' else '❌ Not configured'}")
-    print(f"🔐 Admin Password: {'✅ Set' if config.ADMIN_PASSWORD else '❌ Not set'}")
-    print("=" * 60)
-    print("🚀 Starting server...")
-    print(f"📍 Customer Interface: http://{config.HOST}:{config.PORT}")
-    print(f"👨‍💼 Admin Panel: http://{config.HOST}:{config.PORT}/admin")
-    print("=" * 60)
+    if not templates_dir.exists():
+        logger.warning("Templates directory not found. Some features may not work.")
 
 def main():
     """Main application entry point"""
+    setup_logging()
+    logger = logging.getLogger(__name__)
+    
+    logger.info("Starting Suzu Cafe Application...")
+    logger.info(f"Environment: {config.FLASK_ENV}")
+    logger.info(f"Debug Mode: {config.DEBUG}")
+    logger.info(f"OTP Enabled: {config.OTP_ENABLED}")
+    
+    check_environment()
+    
     try:
-        # Setup logging
-        setup_logging()
-        
-        # Check environment
-        if not check_environment():
-            sys.exit(1)
-        
-        # Print startup info
-        print_startup_info()
-        
-        # Get configuration
-        config = get_config()
-        
         # Run the application
         app.run(
+            debug=config.DEBUG,
             host=config.HOST,
             port=config.PORT,
-            debug=config.DEBUG,
             threaded=True
         )
-        
     except KeyboardInterrupt:
-        print("\n🛑 Server stopped by user")
-        sys.exit(0)
+        logger.info("Application stopped by user.")
     except Exception as e:
-        print(f"❌ Failed to start server: {e}")
-        logging.error(f"Server startup failed: {e}")
+        logger.error(f"Application error: {e}")
         sys.exit(1)
 
 if __name__ == '__main__':

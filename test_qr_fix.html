@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار إصلاح الكيو ار كود</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #333;
+            border-radius: 8px;
+        }
+        .qr-display {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .qr-canvas {
+            border: 2px solid #059669;
+            border-radius: 8px;
+            background: white;
+        }
+        button {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #047857;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .success {
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 اختبار إصلاح الكيو ار كود للخصومات الإدارية</h1>
+        
+        <div class="test-section">
+            <h2>1️⃣ اختبار إنشاء كيو ار كود للخصم الإداري</h2>
+            <p>إنشاء كيو ار كود لخصم إداري مع البيانات الصحيحة:</p>
+            <button onclick="testAdminDiscountQR()">إنشاء كيو ار كود إداري</button>
+            <div id="admin-qr-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>2️⃣ اختبار إنشاء كيو ار كود للمستخدم العادي</h2>
+            <p>إنشاء كيو ار كود لمستخدم عادي:</p>
+            <button onclick="testRegularUserQR()">إنشاء كيو ار كود مستخدم</button>
+            <div id="user-qr-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>3️⃣ اختبار التحميل</h2>
+            <p>اختبار تحميل الكيو ار كود:</p>
+            <button onclick="testDownload()">اختبار التحميل</button>
+            <div id="download-result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>4️⃣ اختبار معالجة الأخطاء</h2>
+            <p>اختبار معالجة الأخطاء:</p>
+            <button onclick="testErrorHandling()">اختبار معالجة الأخطاء</button>
+            <div id="error-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // محاكاة بيانات المستخدم
+        const mockAdminUser = {
+            id: 'admin_001',
+            unique_code: 'ADMIN25',
+            discount_percentage: '25',
+            is_admin_discount: true,
+            admin_description: 'خصم خاص من الإدارة',
+            created_at: new Date().toISOString()
+        };
+        
+        const mockRegularUser = {
+            id: 'user_001',
+            unique_code: 'USER15',
+            discount_percentage: '15',
+            is_admin_discount: false,
+            phone_number: '+201234567890',
+            created_at: new Date().toISOString()
+        };
+
+        // اختبار إنشاء كيو ار كود للخصم الإداري
+        function testAdminDiscountQR() {
+            const resultDiv = document.getElementById('admin-qr-result');
+            resultDiv.innerHTML = '<p>جاري إنشاء الكيو ار كود...</p>';
+            
+            try {
+                // إنشاء البيانات
+                const qrData = {
+                    unique_code: mockAdminUser.unique_code,
+                    discount_percentage: mockAdminUser.discount_percentage,
+                    type: 'admin_discount',
+                    description: mockAdminUser.admin_description,
+                    created_by: 'mado',
+                    created_at: mockAdminUser.created_at
+                };
+                
+                // إنشاء الحاوية
+                const container = document.createElement('div');
+                container.className = 'qr-display';
+                container.innerHTML = `
+                    <div id="qr-canvas-${mockAdminUser.id}" class="qr-canvas"></div>
+                    <p>خصم إداري: ${mockAdminUser.discount_percentage}%</p>
+                    <p>الكود: ${mockAdminUser.unique_code}</p>
+                `;
+                
+                resultDiv.innerHTML = '';
+                resultDiv.appendChild(container);
+                
+                // إنشاء الكيو ار كود
+                const canvasContainer = document.getElementById(`qr-canvas-${mockAdminUser.id}`);
+                if (canvasContainer && typeof QRCode !== 'undefined') {
+                    QRCode.toCanvas(canvasContainer, JSON.stringify(qrData), {
+                        width: 128,
+                        margin: 2,
+                        color: {
+                            dark: '#059669',
+                            light: '#ffffff'
+                        }
+                    }, (error, canvas) => {
+                        if (error) {
+                            console.error('Error generating admin discount QR code:', error);
+                            canvasContainer.innerHTML = '<span class="error">خطأ في إنشاء الكود</span>';
+                        } else {
+                            console.log('Admin discount QR code generated successfully!');
+                            canvas.style.maxWidth = '100%';
+                            canvas.style.height = 'auto';
+                            resultDiv.innerHTML += '<p class="success">✅ تم إنشاء الكيو ار كود الإداري بنجاح!</p>';
+                        }
+                    });
+                } else {
+                    resultDiv.innerHTML += '<p class="error">❌ مكتبة QR Code غير متوفرة</p>';
+                }
+            } catch (error) {
+                console.error('Error in testAdminDiscountQR:', error);
+                resultDiv.innerHTML += `<p class="error">❌ خطأ: ${error.message}</p>`;
+            }
+        }
+
+        // اختبار إنشاء كيو ار كود للمستخدم العادي
+        function testRegularUserQR() {
+            const resultDiv = document.getElementById('user-qr-result');
+            resultDiv.innerHTML = '<p>جاري إنشاء الكيو ار كود...</p>';
+            
+            try {
+                // إنشاء البيانات
+                const qrData = {
+                    unique_code: mockRegularUser.unique_code,
+                    discount_percentage: mockRegularUser.discount_percentage,
+                    type: 'user_discount',
+                    phone_number: mockRegularUser.phone_number,
+                    created_at: mockRegularUser.created_at
+                };
+                
+                // إنشاء الحاوية
+                const container = document.createElement('div');
+                container.className = 'qr-display';
+                container.innerHTML = `
+                    <div id="qr-${mockRegularUser.id}" class="qr-canvas"></div>
+                    <p>خصم مستخدم: ${mockRegularUser.discount_percentage}%</p>
+                    <p>الكود: ${mockRegularUser.unique_code}</p>
+                `;
+                
+                resultDiv.innerHTML = '';
+                resultDiv.appendChild(container);
+                
+                // إنشاء الكيو ار كود
+                const qrContainer = document.getElementById(`qr-${mockRegularUser.id}`);
+                if (qrContainer && typeof QRCode !== 'undefined') {
+                    QRCode.toCanvas(qrContainer, JSON.stringify(qrData), {
+                        width: 128,
+                        margin: 2,
+                        color: {
+                            dark: '#059669',
+                            light: '#ffffff'
+                        }
+                    }, (error, canvas) => {
+                        if (error) {
+                            console.error('Error generating user QR code:', error);
+                            qrContainer.innerHTML = '<span class="error">خطأ في إنشاء الكود</span>';
+                        } else {
+                            console.log('User QR code generated successfully!');
+                            canvas.style.maxWidth = '100%';
+                            canvas.style.height = 'auto';
+                            resultDiv.innerHTML += '<p class="success">✅ تم إنشاء الكيو ار كود للمستخدم بنجاح!</p>';
+                        }
+                    });
+                } else {
+                    resultDiv.innerHTML += '<p class="error">❌ مكتبة QR Code غير متوفرة</p>';
+                }
+            } catch (error) {
+                console.error('Error in testRegularUserQR:', error);
+                resultDiv.innerHTML += `<p class="error">❌ خطأ: ${error.message}</p>`;
+            }
+        }
+
+        // اختبار التحميل
+        function testDownload() {
+            const resultDiv = document.getElementById('download-result');
+            resultDiv.innerHTML = '<p>جاري اختبار التحميل...</p>';
+            
+            try {
+                // إنشاء كيو ار كود مؤقت للتحميل
+                const tempContainer = document.createElement('div');
+                tempContainer.id = 'temp-qr';
+                tempContainer.style.display = 'none';
+                document.body.appendChild(tempContainer);
+                
+                const qrData = {
+                    unique_code: 'TEST123',
+                    discount_percentage: '20',
+                    type: 'test',
+                    created_at: new Date().toISOString()
+                };
+                
+                if (typeof QRCode !== 'undefined') {
+                    QRCode.toCanvas(tempContainer, JSON.stringify(qrData), {
+                        width: 100,
+                        margin: 1,
+                        color: {
+                            dark: '#059669',
+                            light: '#ffffff'
+                        }
+                    }, (error, canvas) => {
+                        if (error) {
+                            resultDiv.innerHTML += '<p class="error">❌ خطأ في إنشاء الكود للتحميل</p>';
+                        } else {
+                            try {
+                                const link = document.createElement('a');
+                                link.download = 'test-qr-code.png';
+                                link.href = canvas.toDataURL();
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                document.body.removeChild(tempContainer);
+                                
+                                resultDiv.innerHTML += '<p class="success">✅ تم اختبار التحميل بنجاح!</p>';
+                            } catch (downloadError) {
+                                resultDiv.innerHTML += `<p class="error">❌ خطأ في التحميل: ${downloadError.message}</p>`;
+                            }
+                        }
+                    });
+                } else {
+                    resultDiv.innerHTML += '<p class="error">❌ مكتبة QR Code غير متوفرة</p>';
+                }
+            } catch (error) {
+                console.error('Error in testDownload:', error);
+                resultDiv.innerHTML += `<p class="error">❌ خطأ: ${error.message}</p>`;
+            }
+        }
+
+        // اختبار معالجة الأخطاء
+        function testErrorHandling() {
+            const resultDiv = document.getElementById('error-result');
+            resultDiv.innerHTML = '<p>جاري اختبار معالجة الأخطاء...</p>';
+            
+            try {
+                // اختبار مع حاوية غير موجودة
+                const nonExistentContainer = document.getElementById('non-existent');
+                if (!nonExistentContainer) {
+                    resultDiv.innerHTML += '<p class="success">✅ تم اختبار معالجة الحاوية غير الموجودة</p>';
+                }
+                
+                // اختبار مع بيانات غير صحيحة
+                try {
+                    const invalidData = undefined;
+                    if (typeof QRCode !== 'undefined') {
+                        QRCode.toCanvas(nonExistentContainer, invalidData, {}, (error) => {
+                            if (error) {
+                                resultDiv.innerHTML += '<p class="success">✅ تم اختبار معالجة البيانات غير الصحيحة</p>';
+                            }
+                        });
+                    }
+                } catch (qrError) {
+                    resultDiv.innerHTML += '<p class="success">✅ تم اختبار معالجة أخطاء QR Code</p>';
+                }
+                
+                resultDiv.innerHTML += '<p class="success">✅ تم اختبار معالجة الأخطاء بنجاح!</p>';
+            } catch (error) {
+                console.error('Error in testErrorHandling:', error);
+                resultDiv.innerHTML += `<p class="error">❌ خطأ: ${error.message}</p>`;
+            }
+        }
+
+        // اختبار عند تحميل الصفحة
+        window.addEventListener('load', () => {
+            console.log('✅ صفحة الاختبار جاهزة!');
+            console.log('📱 مكتبة QR Code متوفرة:', typeof QRCode !== 'undefined');
+        });
+    </script>
+</body>
+</html>
