@@ -84,3 +84,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+else:
+    # Expose WSGI app for Gunicorn: run:app
+    # Gunicorn command (Procfile): gunicorn -w 1 -b 0.0.0.0:$PORT run:app
+    pass
