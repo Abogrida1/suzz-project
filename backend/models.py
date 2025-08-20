@@ -1,4 +1,6 @@
 import sqlite3
+import os
+from pathlib import Path
 import hashlib
 import secrets
 import qrcode
@@ -13,6 +15,14 @@ class DatabaseManager:
     
     def __init__(self, db_path: str = 'suzu_cafe.db'):
         self.db_path = db_path
+        # Ensure parent directory exists when using a file-based SQLite path
+        try:
+            if self.db_path and self.db_path != ':memory:':
+                parent_dir = os.path.dirname(self.db_path)
+                if parent_dir:
+                    os.makedirs(parent_dir, exist_ok=True)
+        except Exception as e:
+            print(f"Warning: failed to ensure database directory exists for {self.db_path}: {e}")
         self.init_database()
     
     def get_connection(self):
