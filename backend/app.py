@@ -781,16 +781,24 @@ def admin_change_main_image():
         if not new_image_url.startswith(('http://', 'https://')):
             return jsonify({'error': 'رابط الصورة يجب أن يكون صحيحاً'}), 400
         
-        # Store the new image URL in database
+        # Store the new image URL in database safely
         try:
             conn = user_model.db.get_connection()
             cursor = conn.cursor()
             
-            # Update or insert the main image setting
-            cursor.execute('''
-                INSERT OR REPLACE INTO website_settings (setting_key, setting_value, description, updated_by)
-                VALUES (?, ?, ?, ?)
-            ''', ('main_image_url', new_image_url, 'الصورة الرئيسية للموقع', admin_user))
+            # Check if website_settings table exists
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='website_settings'")
+            table_exists = cursor.fetchone()
+            
+            if table_exists:
+                # Update or insert the main image setting
+                cursor.execute('''
+                    INSERT OR REPLACE INTO website_settings (setting_key, setting_value, description, updated_by)
+                    VALUES (?, ?, ?, ?)
+                ''', ('main_image_url', new_image_url, 'الصورة الرئيسية للموقع', admin_user))
+                app.logger.info(f"Main image URL updated: {new_image_url}")
+            else:
+                app.logger.warning("website_settings table does not exist, skipping database update")
             
             conn.commit()
             conn.close()
@@ -826,9 +834,23 @@ def get_website_settings():
         conn = user_model.db.get_connection()
         cursor = conn.cursor()
         
-        # Get all website settings
-        cursor.execute('SELECT setting_key, setting_value FROM website_settings')
-        settings = dict(cursor.fetchall())
+        # Check if website_settings table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='website_settings'")
+        table_exists = cursor.fetchone()
+        
+        if table_exists:
+            # Get all website settings
+            cursor.execute('SELECT setting_key, setting_value FROM website_settings')
+            settings = dict(cursor.fetchall())
+        else:
+            # Return default settings if table doesn't exist
+            settings = {
+                'main_image_url': 'https://i.ibb.co/MDHwvrfG/IMG-5849.jpg',
+                'site_name': 'SUZZ',
+                'site_description': 'أول Drive-Thru في السويس',
+                'default_discount': '15'
+            }
+            app.logger.warning("website_settings table does not exist, returning defaults")
         
         conn.close()
         
@@ -908,28 +930,33 @@ def clear_all_data():
         if confirmation != 'DELETE':
             return jsonify({'error': 'تأكيد غير صحيح'}), 400
         
-        # Clear all data
+        # Clear all data safely
         conn = user_model.db.get_connection()
         cursor = conn.cursor()
         
-        # Clear all tables
-        cursor.execute('DELETE FROM users')
-        cursor.execute('DELETE FROM otps')
-        cursor.execute('DELETE FROM admin_sessions')
-        cursor.execute('DELETE FROM user_sessions')
-        cursor.execute('DELETE FROM audit_log')
-        cursor.execute('DELETE FROM user_activity')
+        # Get list of existing tables to avoid errors
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        existing_tables = {row[0] for row in cursor.fetchall()}
+        
+        # Clear tables that exist
+        safe_tables = ['users', 'otps', 'admin_sessions', 'user_sessions', 'audit_log']
+        for table in safe_tables:
+            if table in existing_tables:
+                cursor.execute(f'DELETE FROM {table}')
+                app.logger.info(f"Cleared table: {table}")
         
         # Reset website settings to defaults
-        cursor.execute('DELETE FROM website_settings')
-        cursor.execute('''
-            INSERT INTO website_settings (setting_key, setting_value, description, updated_by)
-            VALUES 
-            ('main_image_url', 'https://i.ibb.co/MDHwvrfG/IMG-5849.jpg', 'الصورة الرئيسية للموقع', 'system'),
-            ('site_name', 'SUZZ', 'اسم الموقع', 'system'),
-            ('site_description', 'أول Drive-Thru في السويس', 'وصف الموقع', 'system'),
-            ('default_discount', '15', 'نسبة الخصم الافتراضية', 'system')
-        ''')
+        if 'website_settings' in existing_tables:
+            cursor.execute('DELETE FROM website_settings')
+            cursor.execute('''
+                INSERT INTO website_settings (setting_key, setting_value, description, updated_by)
+                VALUES 
+                ('main_image_url', 'https://i.ibb.co/MDHwvrfG/IMG-5849.jpg', 'الصورة الرئيسية للموقع', 'system'),
+                ('site_name', 'SUZZ', 'اسم الموقع', 'system'),
+                ('site_description', 'أول Drive-Thru في السويس', 'وصف الموقع', 'system'),
+                ('default_discount', '15', 'نسبة الخصم الافتراضية', 'system')
+            ''')
+            app.logger.info("Website settings reset to defaults")
         
         conn.commit()
         conn.close()
@@ -960,36 +987,42 @@ def reset_database():
         if confirmation != 'RESET':
             return jsonify({'error': 'تأكيد غير صحيح'}), 400
         
-        # This will require restarting the application
-        # For now, we'll clear all data and recreate initial data
+        # Clear all data and recreate initial data safely
         conn = user_model.db.get_connection()
         cursor = conn.cursor()
         
-        # Clear all tables
-        cursor.execute('DELETE FROM users')
-        cursor.execute('DELETE FROM otps')
-        cursor.execute('DELETE FROM admin_sessions')
-        cursor.execute('DELETE FROM user_sessions')
-        cursor.execute('DELETE FROM audit_log')
-        cursor.execute('DELETE FROM user_activity')
+        # Get list of existing tables to avoid errors
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        existing_tables = {row[0] for row in cursor.fetchall()}
+        
+        # Clear tables that exist
+        safe_tables = ['users', 'otps', 'admin_sessions', 'user_sessions', 'audit_log']
+        for table in safe_tables:
+            if table in existing_tables:
+                cursor.execute(f'DELETE FROM {table}')
+                app.logger.info(f"Reset: Cleared table {table}")
         
         # Reset website settings
-        cursor.execute('DELETE FROM website_settings')
-        cursor.execute('''
-            INSERT INTO website_settings (setting_key, setting_value, description, updated_by)
-            VALUES 
-            ('main_image_url', 'https://i.ibb.co/MDHwvrfG/IMG-5849.jpg', 'الصورة الرئيسية للموقع', 'system'),
-            ('site_name', 'SUZZ', 'اسم الموقع', 'system'),
-            ('site_description', 'أول Drive-Thru في السويس', 'وصف الموقع', 'system'),
-            ('default_discount', '15', 'نسبة الخصم الافتراضية', 'system')
-        ''')
+        if 'website_settings' in existing_tables:
+            cursor.execute('DELETE FROM website_settings')
+            cursor.execute('''
+                INSERT INTO website_settings (setting_key, setting_value, description, updated_by)
+                VALUES 
+                ('main_image_url', 'https://i.ibb.co/MDHwvrfG/IMG-5849.jpg', 'الصورة الرئيسية للموقع', 'system'),
+                ('site_name', 'SUZZ', 'اسم الموقع', 'system'),
+                ('site_description', 'أول Drive-Thru في السويس', 'وصف الموقع', 'system'),
+                ('default_discount', '15', 'نسبة الخصم الافتراضية', 'system')
+            ''')
+            app.logger.info("Reset: Website settings restored")
         
         # Recreate initial data
-        cursor.execute('''
-            INSERT INTO users (phone_number, discount_percentage, unique_code, qr_code_data, is_verified, is_admin_discount, admin_description)
-            VALUES 
-            ('', 25, 'ADMIN-TEST-001', '{"unique_code": "ADMIN-TEST-001", "discount_percentage": 25}', TRUE, TRUE, 'خصم إداري تجريبي')
-        ''')
+        if 'users' in existing_tables:
+            cursor.execute('''
+                INSERT INTO users (phone_number, discount_percentage, unique_code, qr_code_data, is_verified, is_admin_discount, admin_description)
+                VALUES 
+                ('', 25, 'ADMIN-TEST-001', '{"unique_code": "ADMIN-TEST-001", "discount_percentage": 25}', TRUE, TRUE, 'خصم إداري تجريبي')
+            ''')
+            app.logger.info("Reset: Initial test data created")
         
         conn.commit()
         conn.close()

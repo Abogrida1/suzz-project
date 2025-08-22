@@ -156,6 +156,21 @@ class DatabaseManager:
             ''')
             print("Audit log table created/verified")
             
+            print("Creating website_settings table...")
+            # Create website_settings table for configuration
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS website_settings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    setting_key TEXT UNIQUE NOT NULL,
+                    setting_value TEXT NOT NULL,
+                    description TEXT DEFAULT '',
+                    updated_by TEXT DEFAULT 'system',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            print("Website settings table created/verified")
+            
             print("Creating indexes...")
             # Create indexes for better performance
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone_number)')
@@ -163,6 +178,7 @@ class DatabaseManager:
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_otps_phone ON otps(phone_number)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_otps_expires ON otps(expires_at)')
             cursor.execute('CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_log(created_at)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_settings_key ON website_settings(setting_key)')
             print("Indexes created/verified")
             
             conn.commit()
