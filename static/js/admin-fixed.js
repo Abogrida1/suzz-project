@@ -1,7 +1,7 @@
 // Admin Dashboard JavaScript for SUZZ
 class AdminDashboard {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:5000';
+        this.apiBaseUrl = window.location.origin;
         this.isLoggedIn = false;
         this.currentUsers = [];
         this.currentUserType = null;
