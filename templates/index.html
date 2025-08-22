@@ -24,6 +24,9 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Font Awesome for Social Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <!-- Custom Styles -->
     <style>
         :root {
@@ -190,6 +193,139 @@
             0% { transform: scale(0.9); opacity: 0; }
             50% { transform: scale(1.02); }
             100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Social Media Icons Styles */
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .social-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .social-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .social-icon:hover::before {
+            left: 100%;
+        }
+
+        .social-icon:hover {
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Facebook */
+        .social-facebook {
+            background: linear-gradient(135deg, #1877f2 0%, #42a5f5 100%);
+        }
+
+        .social-facebook:hover {
+            background: linear-gradient(135deg, #166fe5 0%, #1877f2 100%);
+            box-shadow: 0 15px 35px rgba(24, 119, 242, 0.4);
+        }
+
+        /* Instagram */
+        .social-instagram {
+            background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);
+        }
+
+        .social-instagram:hover {
+            background: linear-gradient(135deg, #7c349a 0%, #e91e63 50%, #f57c00 100%);
+            box-shadow: 0 15px 35px rgba(225, 48, 108, 0.4);
+        }
+
+        /* TikTok */
+        .social-tiktok {
+            background: linear-gradient(135deg, #000000 0%, #ff0050 50%, #00f2ea 100%);
+        }
+
+        .social-tiktok:hover {
+            background: linear-gradient(135deg, #1a1a1a 0%, #e6004a 50%, #00d9d1 100%);
+            box-shadow: 0 15px 35px rgba(255, 0, 80, 0.4);
+        }
+
+        /* YouTube */
+        .social-youtube {
+            background: linear-gradient(135deg, #ff0000 0%, #ff4444 100%);
+        }
+
+        .social-youtube:hover {
+            background: linear-gradient(135deg, #e60000 0%, #ff0000 100%);
+            box-shadow: 0 15px 35px rgba(255, 0, 0, 0.4);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .social-icons {
+                gap: 1rem;
+                margin: 1.5rem 0;
+            }
+            
+            .social-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.25rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .social-icons {
+                gap: 0.75rem;
+                margin: 1rem 0;
+            }
+            
+            .social-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Social Icons Animation */
+        .social-icons-container {
+            animation: fadeIn 1s ease-out 0.8s both;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .social-icon:hover {
+            animation: bounce 0.6s ease-in-out;
         }
 
         .cafe-image {
@@ -469,6 +605,58 @@
 
         <!-- Success Section (will be dynamically created) -->
         <div id="success-section" class="hidden"></div>
+        
+        <!-- Social Media Icons Section -->
+        <div class="social-icons-container mt-16 mb-8">
+            <div class="text-center mb-6">
+                <h3 class="text-xl md:text-2xl font-bold text-white mb-3">تابعنا على وسائل التواصل الاجتماعي</h3>
+                <p class="text-gray-300 text-sm md:text-base">ابقى على تواصل معنا واحصل على آخر العروض والأخبار</p>
+            </div>
+            
+            <div class="social-icons">
+                <!-- Facebook -->
+                <a href="https://www.facebook.com/suzz.egy" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="social-icon social-facebook"
+                   title="تابعنا على فيسبوك">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                
+                <!-- Instagram -->
+                <a href="https://www.instagram.com/suzz.egy/" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="social-icon social-instagram"
+                   title="تابعنا على انستجرام">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                
+                <!-- TikTok -->
+                <a href="https://www.tiktok.com/@suzz.drive.thru" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="social-icon social-tiktok"
+                   title="تابعنا على تيك توك">
+                    <i class="fab fa-tiktok"></i>
+                </a>
+                
+                <!-- YouTube -->
+                <a href="https://www.youtube.com/@Suzzcafe" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="social-icon social-youtube"
+                   title="تابعنا على يوتيوب">
+                    <i class="fab fa-youtube"></i>
+                </a>
+            </div>
+            
+            <div class="text-center mt-6">
+                <p class="text-gray-400 text-xs md:text-sm">
+                    شاركنا تجربتك مع #SUZZ_Egypt
+                </p>
+            </div>
+        </div>
     </main>
 
     <!-- Footer -->
