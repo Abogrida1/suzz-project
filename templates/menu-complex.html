@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>المنيو - SUZZ Drive-Thru</title>
+    <meta name="description" content="اكتشف منيو SUZZ Drive-Thru - مجموعة واسعة من القهوة والمشروبات الشهية">
+    <link rel="icon" href="/static/images/logo.jpg">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Modern Framework -->
+    <link rel="stylesheet" href="/static/css/modern-framework.css">
+    
+    <style>
+        /* Menu Page Specific Styles */
+        .menu-hero {
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.1) 0%, 
+                rgba(16, 185, 129, 0.05) 50%, 
+                rgba(59, 130, 246, 0.1) 100%);
+            padding: var(--space-20) 0 var(--space-12);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%233b82f6" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+            animation: float 15s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(1deg); }
+        }
+
+        .menu-hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: var(--font-weight-extrabold);
+            margin-bottom: var(--space-4);
+        }
+
+        .hero-subtitle {
+            font-size: var(--font-size-lg);
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto var(--space-8);
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 60px;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .tabs-container {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tabs-list {
+            display: flex;
+            gap: var(--space-2);
+            padding: var(--space-4);
+            min-width: fit-content;
+        }
+
+        .category-tab {
+            background: transparent;
+            border: 2px solid var(--border-light);
+            color: var(--text-secondary);
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-full);
+            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+            transition: left var(--transition-base);
+        }
+
+        .category-tab:hover::before {
+            left: 100%;
+        }
+
+        .category-tab.active {
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+            color: white;
+            border-color: var(--primary-600);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        .category-tab:hover:not(.active) {
+            background: var(--primary-50);
+            color: var(--primary-600);
+            border-color: var(--primary-200);
+            transform: translateY(-2px);
+        }
+
+        /* Menu Grid */
+        .menu-section {
+            padding: var(--space-12) 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--space-12);
+        }
+
+        .section-title {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--text-primary);
+            margin-bottom: var(--space-4);
+        }
+
+        .section-description {
+            font-size: var(--font-size-lg);
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--space-8);
+            margin-top: var(--space-8);
+        }
+
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+                gap: var(--space-6);
+            }
+        }
+
+        .menu-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-2xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            transition: all var(--transition-base);
+            position: relative;
+        }
+
+        .menu-card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-8px);
+            border-color: var(--primary-200);
+        }
+
+        .menu-card-image {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            background: var(--bg-tertiary);
+            transition: transform var(--transition-base);
+        }
+
+        .menu-card:hover .menu-card-image {
+            transform: scale(1.1);
+        }
+
+        .menu-card-content {
+            padding: var(--space-8);
+        }
+
+        .menu-card-name {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            color: var(--text-primary);
+            margin-bottom: var(--space-3);
+            line-height: var(--line-height-tight);
+        }
+
+        .menu-card-description {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--space-6);
+            line-height: var(--line-height-relaxed);
+        }
+
+        .menu-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+        }
+
+        .menu-card-price {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--accent-600);
+        }
+
+        .order-btn {
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+            color: white;
+            border: none;
+            padding: var(--space-3) var(--space-6);
+            border-radius: var(--radius-full);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .order-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+        }
+
+        /* Featured Badge */
+        .featured-badge {
+            position: absolute;
+            top: var(--space-4);
+            right: var(--space-4);
+            background: linear-gradient(135deg, var(--accent-500), var(--accent-600));
+            color: white;
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Category Icons */
+        .category-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            margin-left: var(--space-2);
+        }
+
+        /* Price Range Filter */
+        .price-filter {
+            background: var(--bg-secondary);
+            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-8);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+
+        .price-range {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .price-badge {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            border: 2px solid transparent;
+        }
+
+        .price-badge.active {
+            background: var(--primary-500);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        .price-badge:hover:not(.active) {
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            position: fixed;
+            bottom: var(--space-6);
+            right: var(--space-6);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+            z-index: 1000;
+        }
+
+        .quick-action {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--radius-full);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-lg);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quick-action.order {
+            background: linear-gradient(135deg, var(--accent-500), var(--accent-600));
+            color: white;
+        }
+
+        .quick-action.scroll-top {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        .quick-action:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .menu-hero {
+                padding: var(--space-12) 0 var(--space-8);
+            }
+
+            .category-tabs {
+                top: 50px;
+            }
+
+            .menu-card-content {
+                padding: var(--space-6);
+            }
+
+            .menu-card-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: var(--space-3);
+            }
+
+            .order-btn {
+                justify-content: center;
+                padding: var(--space-4);
+            }
+
+            .quick-actions {
+                bottom: var(--space-4);
+                right: var(--space-4);
+            }
+
+            .quick-action {
+                width: 48px;
+                height: 48px;
+            }
+        }
+
+        /* Dark mode adjustments */
+        [data-theme="dark"] .category-tab:hover:not(.active) {
+            background: var(--primary-900);
+            color: var(--primary-300);
+            border-color: var(--primary-700);
+        }
+
+        [data-theme="dark"] .price-badge:hover:not(.active) {
+            background: var(--primary-900);
+            color: var(--primary-300);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="flex items-center justify-between py-4">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <img src="/static/images/logo.jpg" alt="SUZZ Logo" width="48" height="48" class="rounded-xl">
+                    <div>
+                        <h1 class="text-xl font-bold text-primary">SUZZ</h1>
+                        <p class="text-xs text-muted">Drive-Thru</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <ul class="nav-links hidden md:flex items-center gap-2">
+                    <li><a href="/home" class="nav-link">الرئيسية</a></li>
+                    <li><a href="/menu" class="nav-link active">المنيو</a></li>
+                    <li><a href="/location" class="nav-link">الموقع</a></li>
+                    <li><a href="/order" class="nav-link">اطلب الآن</a></li>
+                    <li><a href="/contact" class="nav-link">تواصل معنا</a></li>
+                    <li><a href="/" class="nav-link">كود الخصم</a></li>
+                </ul>
+
+                <!-- Controls -->
+                <div class="flex items-center gap-2">
+                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="تغيير المظهر">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                    <button class="theme-toggle md:hidden" onclick="alert('قائمة الموبايل')">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="menu-hero">
+        <div class="container">
+            <div class="menu-hero-content">
+                <h1 class="hero-title">منيو SUZZ</h1>
+                <p class="hero-subtitle">
+                    اكتشف مجموعة واسعة من أفضل المشروبات والقهوة المحضرة بعناية فائقة
+                </p>
+                <div class="flex justify-center gap-4">
+                    <a href="/order" class="btn btn-primary btn-lg">
+                        <i class="fas fa-shopping-cart"></i>
+                        اطلب الآن
+                    </a>
+                    <button class="btn btn-outline btn-lg" onclick="scrollToMenu()">
+                        <i class="fas fa-eye"></i>
+                        تصفح المنيو
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Tabs -->
+    <section class="category-tabs">
+        <div class="container">
+            <div class="tabs-container">
+                <div class="tabs-list" id="category-tabs">
+                    <button class="category-tab active" data-category="all">
+                        <span class="category-icon"><i class="fas fa-list"></i></span>
+                        جميع المنتجات
+                    </button>
+                    <button class="category-tab" data-category="frappe">
+                        <span class="category-icon"><i class="fas fa-snowflake"></i></span>
+                        فرابيه
+                    </button>
+                    <button class="category-tab" data-category="cold-coffee">
+                        <span class="category-icon"><i class="fas fa-coffee"></i></span>
+                        قهوة باردة
+                    </button>
+                    <button class="category-tab" data-category="cold-beverages">
+                        <span class="category-icon"><i class="fas fa-glass-whiskey"></i></span>
+                        مشروبات باردة
+                    </button>
+                    <button class="category-tab" data-category="hot-coffee">
+                        <span class="category-icon"><i class="fas fa-mug-hot"></i></span>
+                        قهوة ساخنة
+                    </button>
+                    <button class="category-tab" data-category="tea">
+                        <span class="category-icon"><i class="fas fa-leaf"></i></span>
+                        شاي وأعشاب
+                    </button>
+                    <button class="category-tab" data-category="hot-beverages">
+                        <span class="category-icon"><i class="fas fa-fire"></i></span>
+                        مشروبات ساخنة
+                    </button>
+                    <button class="category-tab" data-category="additions">
+                        <span class="category-icon"><i class="fas fa-plus"></i></span>
+                        إضافات
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Price Filter -->
+    <section class="container">
+        <div class="price-filter">
+            <h3 class="text-center text-lg font-semibold mb-4">فلترة حسب السعر</h3>
+            <div class="price-range" id="price-filter">
+                <span class="price-badge active" data-range="all">جميع الأسعار</span>
+                <span class="price-badge" data-range="low">أقل من 50 EGP</span>
+                <span class="price-badge" data-range="medium">50-100 EGP</span>
+                <span class="price-badge" data-range="high">أكثر من 100 EGP</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Content -->
+    <main class="container" id="menu-content">
+        <!-- Menu sections will be generated here -->
+    </main>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="/order" class="quick-action order" title="اطلب الآن">
+            <i class="fas fa-shopping-cart"></i>
+        </a>
+        <button class="quick-action scroll-top" onclick="scrollToTop()" title="أعلى الصفحة" style="display: none;" id="scroll-top-btn">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-secondary py-12 border-t border-gray-200 mt-16">
+        <div class="container">
+            <div class="text-center">
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <img src="/static/images/logo.jpg" alt="SUZZ Logo" width="40" height="40" class="rounded-lg">
+                    <div>
+                        <h3 class="text-lg font-bold text-primary">SUZZ</h3>
+                        <p class="text-xs text-muted">Drive-Thru</p>
+                    </div>
+                </div>
+                <p class="text-base text-secondary mb-2">© 2025 SUZZ Drive-Thru. جميع الحقوق محفوظة.</p>
+                <p class="text-sm text-muted">🏆 أول وأسرع Drive-Thru في السويس</p>
+                
+                <div class="flex justify-center gap-4 mt-6">
+                    <a href="https://wa.me/201050689899" target="_blank" class="btn btn-secondary">
+                        <i class="fab fa-whatsapp"></i>
+                        واتس آب
+                    </a>
+                    <a href="/location" class="btn btn-outline">
+                        <i class="fas fa-map-marker-alt"></i>
+                        موقعنا
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Menu Data
+        const menuData = [
+            // FRAPPE
+            { id: 1, name: "Latte Frappe", price: 95, category: "frappe", description: "قهوة لاتيه باردة مع حليب مخفوق", image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop&auto=format&q=80", featured: true },
+            { id: 2, name: "Latte Caramel Frappe", price: 110, category: "frappe", description: "فرابيه لاتيه بطعم الكراميل الشهي", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 3, name: "DBL Espresso Frappe", price: 100, category: "frappe", description: "فرابيه إسبريسو مضاعف للمحبين", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 4, name: "Mocha Frappe", price: 110, category: "frappe", description: "مزيج مثالي من القهوة والشوكولاتة", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=80", featured: true },
+            { id: 5, name: "White Mocha Frappe", price: 110, category: "frappe", description: "موكا أبيض منعش ولذيذ", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=80" },
+            
+            // COLD COFFEE
+            { id: 12, name: "Iced Mocha", price: 110, category: "cold-coffee", description: "موكا بارد بطعم الشوكولاتة الغني", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 13, name: "Iced White Mocha", price: 110, category: "cold-coffee", description: "موكا أبيض بارد مع كريمة مخفوقة", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 14, name: "Iced Caramel Macchiato", price: 110, category: "cold-coffee", description: "ماكياتو كراميل بارد بطبقات جميلة", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=80", featured: true },
+            { id: 15, name: "Iced Caffè Americano", price: 90, category: "cold-coffee", description: "أمريكانو بارد كلاسيكي ومنعش", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=80" },
+            
+            // COLD BEVERAGES
+            { id: 18, name: "Smoothies", price: 90, category: "cold-beverages", description: "سموذي فواكه طازجة ومنعشة", image: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 19, name: "Yogurt", price: 100, category: "cold-beverages", description: "يوجرت طبيعي بطعم الفواكه", image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 20, name: "Cherry Cola", price: 75, category: "cold-beverages", description: "كولا بطعم الكرز المميز", image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop&auto=format&q=80" },
+            
+            // HOT COFFEE
+            { id: 31, name: "Mocha", price: 105, category: "hot-coffee", description: "موكا ساخن بالشوكولاتة الداكنة", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 32, name: "White Mocha", price: 105, category: "hot-coffee", description: "موكا أبيض ساخن ومريح", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 33, name: "Cappuccino", price: 93, category: "hot-coffee", description: "كابتشينو إيطالي أصيل", image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop&auto=format&q=80", featured: true },
+            { id: 34, name: "Latte", price: 93, category: "hot-coffee", description: "لاتيه ناعم بحليب مبخر", image: "https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=400&h=300&fit=crop&auto=format&q=80" },
+            
+            // TEA
+            { id: 48, name: "Breakfast Tea", price: 40, category: "tea", description: "شاي الإفطار الإنجليزي الكلاسيكي", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 49, name: "Flavored Tea", price: 45, category: "tea", description: "شاي بنكهات طبيعية متنوعة", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 50, name: "Milk Tea", price: 50, category: "tea", description: "شاي بالحليب دافئ ومريح", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=80" },
+            
+            // HOT BEVERAGES
+            { id: 54, name: "Hot Chocolate", price: 82, category: "hot-beverages", description: "شوكولاتة ساخنة غنية ولذيذة", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 55, name: "White Hot Chocolate", price: 82, category: "hot-beverages", description: "شوكولاتة بيضاء ساخنة كريمية", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=80" },
+            
+            // ADDITIONS
+            { id: 60, name: "Extra Espresso Shot", price: 35, category: "additions", description: "جرعة إسبريسو إضافية للطاقة", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 61, name: "Milk", price: 27, category: "additions", description: "حليب طازج عالي الجودة", image: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=300&fit=crop&auto=format&q=80" },
+            { id: 62, name: "Flavour Syrup", price: 35, category: "additions", description: "شراب منكه بطعوم مختلفة", image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop&auto=format&q=80" }
+        ];
+
+        // Category mapping
+        const categoryTitles = {
+            'all': 'جميع المنتجات',
+            'frappe': '🧊 فرابيه',
+            'cold-coffee': '❄️ قهوة باردة',
+            'cold-beverages': '🥤 مشروبات باردة',
+            'hot-coffee': '☕ قهوة ساخنة',
+            'tea': '🍵 شاي وأعشاب',
+            'hot-beverages': '🍫 مشروبات ساخنة',
+            'additions': '➕ إضافات'
+        };
+
+        const categoryDescriptions = {
+            'all': 'اكتشف جميع منتجاتنا المتنوعة والشهية',
+            'frappe': 'مشروبات باردة منعشة مع قهوة مخفوقة',
+            'cold-coffee': 'قهوة باردة لذيذة ومنعشة لكل الأوقات',
+            'cold-beverages': 'مشروبات باردة متنوعة وطازجة',
+            'hot-coffee': 'قهوة ساخنة عطرة لبداية يوم مثالية',
+            'tea': 'مجموعة متنوعة من الشاي والأعشاب الطبيعية',
+            'hot-beverages': 'مشروبات ساخنة دافئة ومريحة',
+            'additions': 'إضافات لتخصيص مشروبك المفضل'
+        };
+
+        // App State
+        let currentCategory = 'all';
+        let currentPriceRange = 'all';
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            setupCategoryTabs();
+            setupPriceFilter();
+            renderMenu();
+            setupScrollToTop();
+        });
+
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('suzz-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('suzz-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Category Tabs
+        function setupCategoryTabs() {
+            const tabs = document.querySelectorAll('.category-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = tab.getAttribute('data-category');
+                    renderMenu();
+                });
+            });
+        }
+
+        // Price Filter
+        function setupPriceFilter() {
+            const filters = document.querySelectorAll('.price-badge');
+            filters.forEach(filter => {
+                filter.addEventListener('click', () => {
+                    filters.forEach(f => f.classList.remove('active'));
+                    filter.classList.add('active');
+                    currentPriceRange = filter.getAttribute('data-range');
+                    renderMenu();
+                });
+            });
+        }
+
+        // Menu Rendering
+        function renderMenu() {
+            const menuContent = document.getElementById('menu-content');
+            let filteredData = filterByCategory(menuData);
+            filteredData = filterByPrice(filteredData);
+
+            if (currentCategory === 'all') {
+                // Show all categories
+                const categories = [...new Set(filteredData.map(item => item.category))];
+                let html = '';
+
+                categories.forEach(category => {
+                    const categoryItems = filteredData.filter(item => item.category === category);
+                    if (categoryItems.length === 0) return;
+
+                    html += renderCategorySection(category, categoryItems);
+                });
+
+                menuContent.innerHTML = html;
+            } else {
+                // Show single category
+                menuContent.innerHTML = renderCategorySection(currentCategory, filteredData);
+            }
+        }
+
+        function filterByCategory(data) {
+            if (currentCategory === 'all') return data;
+            return data.filter(item => item.category === currentCategory);
+        }
+
+        function filterByPrice(data) {
+            if (currentPriceRange === 'all') return data;
+            
+            switch (currentPriceRange) {
+                case 'low':
+                    return data.filter(item => item.price < 50);
+                case 'medium':
+                    return data.filter(item => item.price >= 50 && item.price <= 100);
+                case 'high':
+                    return data.filter(item => item.price > 100);
+                default:
+                    return data;
+            }
+        }
+
+        function renderCategorySection(category, items) {
+            return `
+                <section class="menu-section" id="section-${category}">
+                    <div class="section-header">
+                        <h2 class="section-title">${categoryTitles[category] || category}</h2>
+                        <p class="section-description">${categoryDescriptions[category] || ''}</p>
+                    </div>
+                    <div class="menu-grid">
+                        ${items.map(item => renderMenuItem(item)).join('')}
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderMenuItem(item) {
+            const featuredBadge = item.featured ? '<div class="featured-badge">مميز</div>' : '';
+            
+            return `
+                <div class="menu-card">
+                    ${featuredBadge}
+                    <img src="${item.image}" alt="${item.name}" class="menu-card-image"
+                         onerror="this.src='https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop&auto=format&q=80'">
+                    <div class="menu-card-content">
+                        <h3 class="menu-card-name">${item.name}</h3>
+                        <p class="menu-card-description">${item.description || 'مشروب لذيذ ومميز'}</p>
+                        <div class="menu-card-footer">
+                            <span class="menu-card-price">${item.price} EGP</span>
+                            <a href="/order" class="order-btn">
+                                <i class="fas fa-shopping-cart"></i>
+                                اطلب الآن
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Scroll Functions
+        function scrollToMenu() {
+            const menuSection = document.querySelector('.menu-section');
+            if (menuSection) {
+                menuSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function setupScrollToTop() {
+            const scrollBtn = document.getElementById('scroll-top-btn');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    scrollBtn.style.display = 'flex';
+                } else {
+                    scrollBtn.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

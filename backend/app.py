@@ -207,13 +207,43 @@ def send_otp():
 
 @app.route('/')
 def index():
-    """Serve the main page"""
+    """Serve the QR Code page"""
     return render_template('index.html')
+
+@app.route('/home')
+def home():
+    """Home page route"""
+    return render_template('home.html')
+
+@app.route('/menu')
+def menu():
+    """Menu page route"""
+    return render_template('menu.html')
+
+@app.route('/location')
+def location():
+    """Location page route"""
+    return render_template('location.html')
+
+@app.route('/order')
+def order():
+    """Order page route"""
+    return render_template('order.html')
+
+@app.route('/contact')
+def contact():
+    """Contact page route"""
+    return render_template('contact.html')
 
 @app.route('/admin')
 def admin():
     """Serve the admin page"""
     return render_template('admin.html')
+
+@app.route('/assets/<path:filename>')
+def serve_assets(filename):
+    """Serve files from assets directory"""
+    return send_from_directory('../assets', filename)
 
 @app.route('/api/verify-otp', methods=['POST'])
 def verify_otp():

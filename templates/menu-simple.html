@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>المنيو - SUZZ Drive-Thru</title>
+    <meta name="description" content="اكتشف منيو SUZZ Drive-Thru - مجموعة واسعة من القهوة والمشروبات الشهية">
+    <link rel="icon" href="/static/images/logo.jpg">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Modern Framework -->
+    <link rel="stylesheet" href="/static/css/modern-framework.css">
+    
+    <!-- Modern Design System -->
+    <link rel="stylesheet" href="/static/css/modern-design.css">
+    
+    <!-- Menu Mobile Enhancements -->
+    <link rel="stylesheet" href="/static/css/menu-mobile.css">
+    
+    <!-- General Mobile Menu Improvements -->
+    <link rel="stylesheet" href="/static/css/mobile-menu-general.css">
+    
+    <!-- Navigation System -->
+    <link rel="stylesheet" href="/static/css/navigation.css">
+    
+    <style>
+        /* Menu Page Specific Styles */
+        .menu-hero {
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.1) 0%, 
+                rgba(16, 185, 129, 0.05) 50%, 
+                rgba(59, 130, 246, 0.1) 100%);
+            padding: var(--space-20) 0 var(--space-12);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%233b82f6" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+            animation: float 15s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(1deg); }
+        }
+
+        .menu-hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: var(--font-weight-extrabold);
+            margin-bottom: var(--space-4);
+        }
+
+        .hero-subtitle {
+            font-size: var(--font-size-lg);
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto var(--space-8);
+        }
+
+        /* Menu Images Section */
+        .menu-images {
+            padding: var(--space-16) 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--space-8);
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .menu-images {
+                padding: 0;
+                min-height: 100vh;
+                background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            }
+            
+            .menu-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+                width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .menu-grid {
+                gap: 1.5rem;
+                width: 92%;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .menu-grid {
+                gap: 1.25rem;
+                width: 95%;
+            }
+        }
+
+        .menu-image-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-2xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            transition: all var(--transition-base);
+            position: relative;
+            height: 500px;
+        }
+
+        .menu-image-card:hover {
+            box-shadow: var(--shadow-2xl);
+            transform: translateY(-8px);
+            border-color: var(--primary-200);
+        }
+
+        .menu-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-base);
+        }
+
+        @media (max-width: 768px) {
+            .menu-image-card {
+                height: 320px;
+                border-radius: 25px;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+                border: 3px solid rgba(5, 150, 105, 0.3);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .menu-image-card {
+                height: 280px;
+                border-radius: 22px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .menu-image-card {
+                height: 250px;
+                border-radius: 20px;
+            }
+        }
+
+        .menu-image-card:hover .menu-image {
+            transform: scale(1.05);
+        }
+
+        .menu-image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: var(--space-8);
+            transform: translateY(100%);
+            transition: transform var(--transition-base);
+        }
+
+        .menu-image-card:hover .menu-image-overlay {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .menu-image-overlay {
+                transform: translateY(0);
+                padding: 4rem 2rem 2.5rem;
+                background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+            }
+        }
+
+        .overlay-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--space-2);
+        }
+
+        @media (max-width: 768px) {
+            .overlay-title {
+                font-size: 1.3rem;
+                font-weight: 800;
+                text-shadow: 0 3px 6px rgba(0, 0, 0, 0.9);
+                letter-spacing: 0.5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .overlay-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        .overlay-description {
+            font-size: var(--font-size-sm);
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .overlay-description {
+                font-size: 0.875rem;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        /* Order CTA Section */
+        .order-cta {
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+            color: white;
+            padding: var(--space-16) 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .order-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0,50 Q25,30 50,50 T100,50 L100,100 L0,100 Z" fill="%23ffffff" opacity="0.1"/></svg>');
+            animation: wave 10s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-title {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--space-4);
+        }
+
+        .cta-subtitle {
+            font-size: var(--font-size-lg);
+            opacity: 0.9;
+            margin-bottom: var(--space-8);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: var(--space-4);
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--primary-600);
+            border: none;
+            padding: var(--space-4) var(--space-8);
+            border-radius: var(--radius-xl);
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+            background: var(--primary-50);
+        }
+
+        .btn-outline-white {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: var(--space-4) var(--space-8);
+            border-radius: var(--radius-xl);
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-lg);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .btn-outline-white:hover {
+            background: white;
+            color: var(--primary-600);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .menu-hero {
+                padding: var(--space-12) 0 var(--space-8);
+            }
+
+            .menu-images {
+                padding: var(--space-12) 0;
+            }
+
+            .order-cta {
+                padding: var(--space-12) 0;
+            }
+
+            .cta-title {
+                font-size: var(--font-size-2xl);
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-white,
+            .btn-outline-white {
+                justify-content: center;
+                padding: var(--space-4);
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+                padding: 0 var(--space-4);
+            }
+        }
+
+        /* Dark mode adjustments */
+        [data-theme="dark"] .menu-hero {
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.2) 0%, 
+                rgba(16, 185, 129, 0.1) 50%, 
+                rgba(59, 130, 246, 0.2) 100%);
+        }
+
+        [data-theme="dark"] .order-cta {
+            background: linear-gradient(135deg, var(--primary-800), var(--accent-800));
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav" id="top-nav">
+        <div class="container">
+            <div class="top-nav-content">
+                <!-- Logo -->
+                <div class="logo-section">
+                    <img src="/static/images/logo.jpg" alt="SUZZ Logo" class="logo-image">
+                    <div class="logo-text">
+                        <h1>SUZZ</h1>
+                        <p>Drive-Thru</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="desktop-nav">
+                    <a href="/home" class="desktop-nav-link">الرئيسية</a>
+                    <a href="/menu" class="desktop-nav-link active">المنيو</a>
+                    <a href="/location" class="desktop-nav-link">الموقع</a>
+                    <a href="/order" class="desktop-nav-link">اطلب الآن</a>
+                    <a href="/contact" class="desktop-nav-link">تواصل معنا</a>
+                    <a href="/" class="desktop-nav-link">كود الخصم</a>
+                </div>
+
+                <!-- Controls -->
+                <div class="top-nav-controls">
+                    <button class="control-btn" onclick="toggleTheme()" aria-label="تغيير المظهر">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bottom Navigation (Mobile) -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <a href="/home" class="bottom-nav-item">
+            <i class="nav-icon fas fa-home"></i>
+            <span class="nav-label">الرئيسية</span>
+        </a>
+        <a href="/menu" class="bottom-nav-item active">
+            <i class="nav-icon fas fa-book-open"></i>
+            <span class="nav-label">المنيو</span>
+        </a>
+        <a href="/order" class="bottom-nav-item">
+            <i class="nav-icon fas fa-shopping-cart"></i>
+            <span class="nav-label">اطلب</span>
+        </a>
+        <a href="/location" class="bottom-nav-item">
+            <i class="nav-icon fas fa-map-marker-alt"></i>
+            <span class="nav-label">الموقع</span>
+        </a>
+        <a href="/" class="bottom-nav-item">
+            <i class="nav-icon fas fa-qrcode"></i>
+            <span class="nav-label">خصم</span>
+        </a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="menu-hero">
+        <div class="container">
+            <div class="menu-hero-content">
+                <h1 class="hero-title">منيو SUZZ</h1>
+                <p class="hero-subtitle">
+                    اكتشف مجموعة واسعة من أفضل المشروبات والقهوة المحضرة بعناية فائقة
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Images Section -->
+    <section class="menu-images">
+        <div class="container">
+            <div class="menu-grid">
+                <div class="menu-image-card">
+                    <img src="/static/images/menu/menu photo 1.jpg" alt="منيو SUZZ - الجزء الأول" class="menu-image">
+                    <div class="menu-image-overlay">
+                        <h3 class="overlay-title">المشروبات الساخنة والباردة</h3>
+                        <p class="overlay-description">قهوة فريش وفرابيه ومشروبات ساخنة لذيذة</p>
+                    </div>
+                </div>
+                
+                <div class="menu-image-card">
+                    <img src="/static/images/menu/menu photo 2.jpg" alt="منيو SUZZ - الجزء الثاني" class="menu-image">
+                    <div class="menu-image-overlay">
+                        <h3 class="overlay-title">مجموعة متنوعة من النكهات</h3>
+                        <p class="overlay-description">شاي وأعشاب وإضافات مميزة لتخصيص طلبك</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Order CTA Section -->
+    <section class="order-cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2 class="cta-title">جاهز للطلب؟</h2>
+                <p class="cta-subtitle">اطلب الآن واستلم طلبك في أقل من 3 دقائق</p>
+                
+                <div class="cta-buttons">
+                    <a href="/order" class="btn-white">
+                        <i class="fas fa-shopping-cart"></i>
+                        اطلب الآن
+                    </a>
+                    <a href="https://wa.me/201050689899?text=مرحباً، أريد معرفة المزيد عن منيو SUZZ" 
+                       target="_blank" class="btn-outline-white">
+                        <i class="fab fa-whatsapp"></i>
+                        تواصل معنا
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-secondary py-12 border-t border-gray-200">
+        <div class="container">
+            <div class="text-center">
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <img src="/static/images/logo.jpg" alt="SUZZ Logo" width="40" height="40" class="rounded-lg">
+                    <div>
+                        <h3 class="text-lg font-bold text-primary">SUZZ</h3>
+                        <p class="text-xs text-muted">Drive-Thru</p>
+                    </div>
+                </div>
+                <p class="text-base text-secondary mb-2">© 2025 SUZZ Drive-Thru. جميع الحقوق محفوظة.</p>
+                <p class="text-sm text-muted">🏆 أول وأسرع Drive-Thru في السويس</p>
+                
+                <div class="flex justify-center gap-4 mt-6">
+                    <a href="https://wa.me/201050689899" target="_blank" class="btn btn-secondary">
+                        <i class="fab fa-whatsapp"></i>
+                        واتس آب
+                    </a>
+                    <a href="/location" class="btn btn-outline">
+                        <i class="fas fa-map-marker-alt"></i>
+                        موقعنا
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('suzz-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('suzz-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            
+            // Handle navbar scroll effect
+            let lastScrollY = window.scrollY;
+            window.addEventListener('scroll', () => {
+                const navbar = document.querySelector('.top-nav');
+                if (window.scrollY > lastScrollY && window.scrollY > 100) {
+                    navbar.style.transform = 'translateY(-100%)';
+                } else {
+                    navbar.style.transform = 'translateY(0)';
+                }
+                
+                // Add scrolled class for styling
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                
+                lastScrollY = window.scrollY;
+            });
+        });
+    </script>
+</body>
+</html>

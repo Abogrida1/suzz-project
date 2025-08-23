@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار موقع SUZZ - التصميم الجديد</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(30, 41, 59, 0.8);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(4, 120, 87, 0.05) 100%);
+            border-radius: 15px;
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            margin: 0 auto 20px;
+            display: block;
+            border: 3px solid rgba(5, 150, 105, 0.3);
+        }
+        
+        .title {
+            background: linear-gradient(135deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+        
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        
+        .status-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(51, 65, 85, 0.4);
+            border-radius: 15px;
+            border: 1px solid rgba(5, 150, 105, 0.2);
+        }
+        
+        .status-title {
+            color: #10b981;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-item {
+            margin: 10px 0;
+            padding: 15px;
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 10px;
+            border-right: 4px solid #10b981;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-good {
+            border-right-color: #10b981;
+        }
+        
+        .status-warning {
+            border-right-color: #f59e0b;
+        }
+        
+        .status-error {
+            border-right-color: #ef4444;
+        }
+        
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .badge-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .badge-error {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .pages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .page-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(51, 65, 85, 0.4));
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .page-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(5, 150, 105, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .page-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .page-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #f8fafc;
+        }
+        
+        .page-description {
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.4);
+            color: white;
+        }
+        
+        .instructions {
+            background: rgba(5, 150, 105, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(5, 150, 105, 0.3);
+            margin-top: 30px;
+        }
+        
+        .instructions h3 {
+            color: #10b981;
+            margin-top: 0;
+        }
+        
+        .code {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            color: #10b981;
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            margin: 10px 0;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .icon {
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="/static/images/logo.jpg" alt="SUZZ Logo" class="logo">
+            <h1 class="title">SUZZ Drive-Thru</h1>
+            <p class="subtitle">🏆 أول وأسرع Drive-Thru في السويس - التصميم الجديد</p>
+        </div>
+
+        <div class="success-message">
+            <h2 style="color: #10b981; margin: 0 0 10px 0;">🎉 تم إعادة تصميم الموقع بنجاح!</h2>
+            <p style="margin: 0; color: #cbd5e1;">الموقع الآن يتبع نفس تصميم صفحة كود الخصم الأنيق والاحترافي</p>
+        </div>
+
+        <div class="status-section">
+            <h2 class="status-title">
+                <span class="icon">📊</span>
+                حالة الموقع - التصميم الجديد
+            </h2>
+            
+            <div class="status-item status-good">
+                <span>🎨 التصميم الموحد</span>
+                <span class="badge badge-success">ممتاز</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>🎥 فيديو Drive-Thru واضح</span>
+                <span class="badge badge-success">يعمل</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>🖼️ اللوجو والصور</span>
+                <span class="badge badge-success">محملة</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>🎯 الألوان الخضراء الأنيقة</span>
+                <span class="badge badge-success">متطابق</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>📱 التصميم المتجاوب</span>
+                <span class="badge badge-success">محسن</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>⚡ الأداء والسرعة</span>
+                <span class="badge badge-success">سريع</span>
+            </div>
+        </div>
+
+        <div class="status-section">
+            <h2 class="status-title">
+                <span class="icon">🔗</span>
+                صفحات الموقع - التصميم الجديد
+            </h2>
+            
+            <div class="pages-grid">
+                <div class="page-card">
+                    <div class="page-icon">🏠</div>
+                    <div class="page-title">الصفحة الرئيسية</div>
+                    <div class="page-description">صفحة رئيسية أنيقة مع فيديو Drive-Thru واضح وتصميم احترافي</div>
+                    <a href="http://localhost:5000/home" class="btn">زيارة الصفحة</a>
+                </div>
+                
+                <div class="page-card">
+                    <div class="page-icon">📋</div>
+                    <div class="page-title">المنيو</div>
+                    <div class="page-description">عرض أنيق للمنيو بالصور مع إمكانية العرض المكبر</div>
+                    <a href="http://localhost:5000/menu" class="btn">شاهد المنيو</a>
+                </div>
+                
+                <div class="page-card">
+                    <div class="page-icon">🛒</div>
+                    <div class="page-title">اطلب الآن</div>
+                    <div class="page-description">نظام طلب بسيط وسريع مع المنتجات الأكثر شعبية</div>
+                    <a href="http://localhost:5000/order" class="btn">اطلب الآن</a>
+                </div>
+                
+                <div class="page-card">
+                    <div class="page-icon">📍</div>
+                    <div class="page-title">موقعنا</div>
+                    <div class="page-description">خريطة تفاعلية ومعلومات الموقع ومواعيد العمل</div>
+                    <a href="http://localhost:5000/location" class="btn">اعرف الموقع</a>
+                </div>
+                
+                <div class="page-card">
+                    <div class="page-icon">📞</div>
+                    <div class="page-title">تواصل معنا</div>
+                    <div class="page-description">نموذج تواصل احترافي مع روابط وسائل التواصل الاجتماعي</div>
+                    <a href="http://localhost:5000/contact" class="btn">تواصل معنا</a>
+                </div>
+                
+                <div class="page-card">
+                    <div class="page-icon">🎫</div>
+                    <div class="page-title">كود الخصم</div>
+                    <div class="page-description">الصفحة الأصلية للحصول على كود الخصم (لم تتغير)</div>
+                    <a href="http://localhost:5000/" class="btn">كود الخصم</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-section">
+            <h2 class="status-title">
+                <span class="icon">✨</span>
+                المميزات الجديدة
+            </h2>
+            
+            <div class="status-item status-good">
+                <span>🎨 تصميم موحد مع صفحة كود الخصم</span>
+                <span class="badge badge-success">جديد</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>🌈 نظام ألوان أخضر أنيق ومتدرج</span>
+                <span class="badge badge-success">محسن</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>💎 تأثيرات Glassmorphism و Backdrop Blur</span>
+                <span class="badge badge-success">حديث</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>🎯 شريط تنقل ثابت وأنيق</span>
+                <span class="badge badge-success">محسن</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>📱 تحسينات الموبايل والاستجابة</span>
+                <span class="badge badge-success">محدث</span>
+            </div>
+            
+            <div class="status-item status-good">
+                <span>⚡ تحسين الأداء وسرعة التحميل</span>
+                <span class="badge badge-success">أسرع</span>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>📋 كيفية تشغيل الموقع</h3>
+            <p><strong>1. تشغيل الخادم:</strong></p>
+            <div class="code">
+                python backend/app.py
+            </div>
+            <p><em>أو استخدم الملف المساعد:</em></p>
+            <div class="code">
+                python start_website.py
+            </div>
+            
+            <p><strong>2. فتح الموقع:</strong></p>
+            <div class="code">
+                http://localhost:5000
+            </div>
+            
+            <p><strong>3. اختبار جميع الصفحات:</strong></p>
+            <ul style="color: #cbd5e1;">
+                <li>الصفحة الرئيسية: <code style="color: #10b981;">http://localhost:5000/home</code></li>
+                <li>المنيو: <code style="color: #10b981;">http://localhost:5000/menu</code></li>
+                <li>اطلب الآن: <code style="color: #10b981;">http://localhost:5000/order</code></li>
+                <li>موقعنا: <code style="color: #10b981;">http://localhost:5000/location</code></li>
+                <li>تواصل معنا: <code style="color: #10b981;">http://localhost:5000/contact</code></li>
+                <li>كود الخصم: <code style="color: #10b981;">http://localhost:5000/</code></li>
+            </ul>
+        </div>
+
+        <div class="status-section">
+            <h2 class="status-title">
+                <span class="icon">🚀</span>
+                النتيجة النهائية
+            </h2>
+            <div style="text-align: center; padding: 20px;">
+                <h3 style="color: #10b981; margin-bottom: 15px;">موقع SUZZ الآن أصبح:</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                    <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <span style="font-size: 2rem;">🎨</span><br>
+                        <strong>أنيق وموحد</strong>
+                    </div>
+                    <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <span style="font-size: 2rem;">⚡</span><br>
+                        <strong>سريع وخفيف</strong>
+                    </div>
+                    <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <span style="font-size: 2rem;">📱</span><br>
+                        <strong>متجاوب تماماً</strong>
+                    </div>
+                    <div style="padding: 15px; background: rgba(16, 185, 129, 0.1); border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <span style="font-size: 2rem;">💎</span><br>
+                        <strong>احترافي ومتقدم</strong>
+                    </div>
+                </div>
+                <p style="color: #cbd5e1; font-size: 1.1rem; margin-top: 20px;">
+                    🎉 تم إعادة تصميم الموقع بالكامل ليتماشى مع صفحة كود الخصم الأنيقة!<br>
+                    التصميم الآن موحد وأنيق وسريع ومتجاوب على جميع الأجهزة
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

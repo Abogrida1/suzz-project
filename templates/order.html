@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUZZ - اطلب الآن</title>
+    <meta name="description" content="SUZZ - أول Drive-Thru في السويس">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/6JTrCJGK/IMG-5877.jpg">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Modern Design System -->
+    <link rel="stylesheet" href="/static/css/modern-design.css">
+    
+    <!-- Mobile Enhancements -->
+    <link rel="stylesheet" href="/static/css/mobile-enhancements.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo Section -->
+                <div class="logo-section">
+                    <img src="https://i.ibb.co/6JTrCJGK/IMG-5877.jpg" alt="SUZZ Logo" class="logo-image">
+                    <div class="logo-text">
+                        <h1>SUZZ</h1>
+                        <p>🏆 أول Drive-Thru في السويس</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="/home" class="desktop-nav-link">الرئيسية</a>
+                    <a href="/menu" class="desktop-nav-link">المنيو</a>
+                    <a href="/location" class="desktop-nav-link">الموقع</a>
+                    <a href="/order" class="desktop-nav-link active">اطلب الآن</a>
+                    <a href="/contact" class="desktop-nav-link">تواصل معنا</a>
+                    <a href="/" class="desktop-nav-link">كود الخصم</a>
+                </nav>
+
+                <!-- Header Controls -->
+                <div class="header-controls">
+                    <button class="control-btn theme-toggle" onclick="toggleTheme()" aria-label="تغيير المظهر">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bottom Navigation (Mobile) - المنيو بار الرسمي -->
+    <nav class="bottom-nav md:hidden" id="bottom-nav">
+        <a href="/home" class="bottom-nav-item">
+            <i class="nav-icon fas fa-home"></i>
+            <span class="nav-label">الرئيسية</span>
+        </a>
+        <a href="/menu" class="bottom-nav-item">
+            <i class="nav-icon fas fa-book-open"></i>
+            <span class="nav-label">المنيو</span>
+        </a>
+        <a href="/order" class="bottom-nav-item active">
+            <i class="nav-icon fas fa-shopping-cart"></i>
+            <span class="nav-label">اطلب</span>
+        </a>
+        <a href="/location" class="bottom-nav-item">
+            <i class="nav-icon fas fa-map-marker-alt"></i>
+            <span class="nav-label">الموقع</span>
+        </a>
+        <a href="/" class="bottom-nav-item">
+            <i class="nav-icon fas fa-qrcode"></i>
+            <span class="nav-label">خصم</span>
+        </a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" style="min-height: 50vh;">
+        <!-- Video Overlay -->
+        <div class="hero-overlay"></div>
+        
+        <!-- Hero Content -->
+        <div class="hero-content">
+            <h1 class="hero-title">اطلب الآن</h1>
+            <p class="hero-subtitle">اختر من تشكيلتنا المميزة واستلم طلبك في أقل من 3 دقائق</p>
+        </div>
+    </section>
+
+    <!-- Main Order Section -->
+    <section class="section">
+        <div class="container">
+            <div class="order-layout">
+                <!-- Menu Categories -->
+                <div class="menu-section">
+                    <div class="section-header">
+                        <h2 class="gradient-text">منيو SUZZ</h2>
+                        <p class="text-muted">اختر من تشكيلتنا المميزة</p>
+                    </div>
+                    
+                    <!-- Category Tabs -->
+                    <div class="category-tabs">
+                        <button class="category-tab active" data-category="drinks">
+                            <i class="fas fa-coffee"></i>
+                            المشروبات
+                        </button>
+                        <button class="category-tab" data-category="food">
+                            <i class="fas fa-utensils"></i>
+                            الوجبات
+                        </button>
+                        <button class="category-tab" data-category="desserts">
+                            <i class="fas fa-ice-cream"></i>
+                            الحلويات
+                        </button>
+                    </div>
+                    
+                    <!-- Products Grid -->
+                    <div class="products-container">
+                        <!-- Drinks Category -->
+                        <div class="product-category active" id="drinks">
+                            <div class="product-grid">
+                                <div class="product-card" data-product="espresso">
+                                    <div class="product-image">
+                                        <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300&h=200&fit=crop" alt="إسبريسو">
+                                        <div class="product-badge">الأكثر طلباً</div>
+                                    </div>
+                                    <div class="product-info">
+                                        <h3 class="product-title">إسبريسو</h3>
+                                        <p class="product-description">قهوة إيطالية مركزة ومكثفة</p>
+                                        <div class="product-price">15 ج.م</div>
+                                        <button class="btn btn-primary btn-sm add-to-cart" onclick="addToCart('espresso', 'إسبريسو', 15)">
+                                            <i class="fas fa-plus"></i>
+                                            أضف للسلة
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="product-card" data-product="cappuccino">
+                                    <div class="product-image">
+                                        <img src="https://images.unsplash.com/photo-1572442388796-11668a64e141?w=300&h=200&fit=crop" alt="كابتشينو">
+                                    </div>
+                                    <div class="product-info">
+                                        <h3 class="product-title">كابتشينو</h3>
+                                        <p class="product-description">قهوة مع رغوة حليب ناعمة</p>
+                                        <div class="product-price">20 ج.م</div>
+                                        <button class="btn btn-primary btn-sm add-to-cart" onclick="addToCart('cappuccino', 'كابتشينو', 20)">
+                                            <i class="fas fa-plus"></i>
+                                            أضف للسلة
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="product-card" data-product="latte">
+                                    <div class="product-image">
+                                        <img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?w=300&h=200&fit=crop" alt="لاتيه">
+                                    </div>
+                                    <div class="product-info">
+                                        <h3 class="product-title">لاتيه</h3>
+                                        <p class="product-description">قهوة مع حليب دافئ</p>
+                                        <div class="product-price">22 ج.م</div>
+                                        <button class="btn btn-primary btn-sm add-to-cart" onclick="addToCart('latte', 'لاتيه', 22)">
+                                            <i class="fas fa-plus"></i>
+                                            أضف للسلة
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Food Category -->
+                        <div class="product-category" id="food">
+                            <div class="product-grid">
+                                <div class="product-card" data-product="burger">
+                                    <div class="product-image">
+                                        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=200&fit=crop" alt="برجر">
+                                        <div class="product-badge">جديد</div>
+                                    </div>
+                                    <div class="product-info">
+                                        <h3 class="product-title">برجر SUZZ</h3>
+                                        <p class="product-description">برجر لحم طازج مع خضروات</p>
+                                        <div class="product-price">45 ج.م</div>
+                                        <button class="btn btn-primary btn-sm add-to-cart" onclick="addToCart('burger', 'برجر SUZZ', 45)">
+                                            <i class="fas fa-plus"></i>
+                                            أضف للسلة
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="product-card" data-product="sandwich">
+                                    <div class="product-image">
+                                        <img src="https://images.unsplash.com/photo-1528735602786-469f3817353d?w=300&h=200&fit=crop" alt="ساندويتش">
+                                    </div>
+                                    <div class="product-info">
+                                        <h3 class="product-title">ساندويتش دجاج</h3>
+                                        <p class="product-description">دجاج مشوي مع خضروات طازجة</p>
+                                        <div class="product-price">35 ج.م</div>
+                                        <button class="btn btn-primary btn-sm add-to-cart" onclick="addToCart('sandwich', 'ساندويتش دجاج', 35)">
+                                            <i class="fas fa-plus"></i>
+                                            أضف للسلة
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Desserts Category -->
+                        <div class="product-category" id="desserts">
+                            <div class="product-grid">
+                                <div class="product-card" data-product="cheesecake">
+                                    <div class="product-image">
+                                        <img src="https://images.unsplash.com/photo-1533134242443-d4fd215305ad?w=300&h=200&fit=crop" alt="تشيز كيك">
+                                    </div>
+                                    <div class="product-info">
+                                        <h3 class="product-title">تشيز كيك</h3>
+                                        <p class="product-description">تشيز كيك كريمي مع توت طازج</p>
+                                        <div class="product-price">30 ج.م</div>
+                                        <button class="btn btn-primary btn-sm add-to-cart" onclick="addToCart('cheesecake', 'تشيز كيك', 30)">
+                                            <i class="fas fa-plus"></i>
+                                            أضف للسلة
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cart Sidebar -->
+                <div class="cart-sidebar">
+                    <div class="cart-header">
+                        <h3 class="gradient-text">سلة الطلب</h3>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </div>
+                    
+                    <div class="cart-items" id="cartItems">
+                        <div class="empty-cart">
+                            <i class="fas fa-shopping-cart text-muted text-4xl mb-4"></i>
+                            <p class="text-muted">السلة فارغة</p>
+                            <p class="text-muted text-sm">اختر منتجات من القائمة</p>
+                        </div>
+                    </div>
+                    
+                    <div class="cart-summary">
+                        <div class="cart-total">
+                            <span>المجموع:</span>
+                            <span class="total-amount" id="totalAmount">0 ج.م</span>
+                        </div>
+                        
+                        <div class="cart-actions">
+                            <button class="btn btn-outline w-full mb-3" onclick="clearCart()">
+                                <i class="fas fa-trash"></i>
+                                إفراغ السلة
+                            </button>
+                            <button class="btn btn-primary w-full" onclick="proceedToCheckout()" id="checkoutBtn" disabled>
+                                <i class="fas fa-credit-card"></i>
+                                إتمام الطلب
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="https://i.ibb.co/6JTrCJGK/IMG-5877.jpg" alt="SUZZ Logo">
+                    <h3>SUZZ</h3>
+                </div>
+                <p class="footer-text">© 2025 SUZZ. جميع الحقوق محفوظة.</p>
+                <p class="footer-text">🏆 أول Drive-Thru في السويس</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Cart Management
+        let cart = [];
+        let cartTotal = 0;
+
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('suzz-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('suzz-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Header Scroll Effect
+        function handleHeaderScroll() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+
+        // Category Tabs
+        function initializeCategoryTabs() {
+            const tabs = document.querySelectorAll('.category-tab');
+            const categories = document.querySelectorAll('.product-category');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetCategory = tab.dataset.category;
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show target category
+                    categories.forEach(cat => {
+                        cat.classList.remove('active');
+                        if (cat.id === targetCategory) {
+                            cat.classList.add('active');
+                        }
+                    });
+                });
+            });
+        }
+
+        // Cart Functions
+        function addToCart(productId, productName, price) {
+            const existingItem = cart.find(item => item.id === productId);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: productName,
+                    price: price,
+                    quantity: 1
+                });
+            }
+            
+            updateCart();
+            showNotification(`${productName} تم إضافته للسلة`);
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(item => item.id !== productId);
+            updateCart();
+        }
+
+        function updateQuantity(productId, newQuantity) {
+            const item = cart.find(item => item.id === productId);
+            if (item) {
+                if (newQuantity <= 0) {
+                    removeFromCart(productId);
+                } else {
+                    item.quantity = newQuantity;
+                    updateCart();
+                }
+            }
+        }
+
+        function updateCart() {
+            const cartItems = document.getElementById('cartItems');
+            const cartCount = document.getElementById('cartCount');
+            const totalAmount = document.getElementById('totalAmount');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            
+            // Update cart count
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            
+            // Update cart total
+            cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            totalAmount.textContent = `${cartTotal} ج.م`;
+            
+            // Enable/disable checkout button
+            checkoutBtn.disabled = cart.length === 0;
+            
+            // Update cart items display
+            if (cart.length === 0) {
+                cartItems.innerHTML = `
+                    <div class="empty-cart">
+                        <i class="fas fa-shopping-cart text-muted text-4xl mb-4"></i>
+                        <p class="text-muted">السلة فارغة</p>
+                        <p class="text-muted text-sm">اختر منتجات من القائمة</p>
+                    </div>
+                `;
+            } else {
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-details">
+                            <h4 class="cart-item-title">${item.name}</h4>
+                            <div class="cart-item-price">${item.price} ج.م</div>
+                        </div>
+                        <div class="cart-item-quantity">
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity - 1})">-</button>
+                            <span class="quantity-input">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity + 1})">+</button>
+                        </div>
+                        <button class="remove-item" onclick="removeFromCart('${item.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCart();
+            showNotification('تم إفراغ السلة');
+        }
+
+        function proceedToCheckout() {
+            if (cart.length === 0) return;
+            alert('سيتم إضافة نظام إتمام الطلب قريباً!');
+        }
+
+        // Notifications
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            initializeCategoryTabs();
+            window.addEventListener('scroll', handleHeaderScroll);
+        });
+    </script>
+
+    <style>
+        .order-layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: var(--spacing-xl);
+            align-items: start;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .category-tabs {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xl);
+            overflow-x: auto;
+            padding-bottom: var(--spacing-sm);
+        }
+        
+        .category-tab {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: 2px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+        }
+        
+        .category-tab:hover,
+        .category-tab.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+        
+        .product-category {
+            display: none;
+        }
+        
+        .product-category.active {
+            display: block;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-lg);
+        }
+        
+        .product-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            transition: all var(--transition-normal);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--border-accent);
+        }
+        
+        .product-image {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+        }
+        
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-slow);
+        }
+        
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+        
+        .product-badge {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            background: var(--accent);
+            color: white;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .product-info {
+            padding: var(--spacing-lg);
+        }
+        
+        .product-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .product-description {
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-md);
+            font-size: 0.875rem;
+        }
+        
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: var(--spacing-md);
+            }
+            
+            .cart-sidebar {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-lg);
+            position: sticky;
+            top: 100px;
+        }
+        
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-primary);
+        }
+        
+        .cart-count {
+            background: var(--accent);
+            color: white;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .cart-items {
+            min-height: 200px;
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: var(--spacing-xl) 0;
+            color: var(--text-muted);
+        }
+        
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-md);
+            background: var(--bg-primary);
+        }
+        
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-item-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-xs);
+            font-size: 0.875rem;
+        }
+        
+        .cart-item-price {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .quantity-btn {
+            width: 2rem;
+            height: 2rem;
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quantity-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        .quantity-input {
+            width: 2rem;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .remove-item {
+            background: none;
+            border: none;
+            color: var(--error);
+            cursor: pointer;
+            padding: var(--spacing-xs);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+        
+        .remove-item:hover {
+            background: var(--error);
+            color: white;
+        }
+        
+        .cart-summary {
+            border-top: 1px solid var(--border-primary);
+            padding-top: var(--spacing-lg);
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .total-amount {
+            color: var(--accent);
+            font-size: 1.25rem;
+        }
+        
+        .cart-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+        
+        @media (max-width: 1024px) {
+            .order-layout {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+            
+            .cart-sidebar {
+                position: static;
+                order: -1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: var(--spacing-md);
+            }
+            
+            .category-tabs {
+                gap: var(--spacing-xs);
+            }
+            
+            .category-tab {
+                padding: var(--spacing-sm) var(--spacing-md);
+                font-size: 0.875rem;
+            }
+            
+            .product-image {
+                height: 180px;
+            }
+            
+            .product-info {
+                padding: var(--spacing-md);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-image {
+                height: 200px;
+            }
+            
+            .cart-sidebar {
+                padding: var(--spacing-md);
+            }
+        }
+    </style>
+</body>
+</html>

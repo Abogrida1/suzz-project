@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SUZZ Drive-Thru - أسرع كافيه في مصر</title>
+    <meta name="description" content="SUZZ Drive-Thru - أول وأسرع Drive-Thru في السويس - قهوة طازجة في أقل من 3 دقائق">
+    <meta name="keywords" content="SUZZ, Drive-Thru, السويس, قهوة, مشروبات, سريع">
+    <link rel="icon" href="/static/images/logo.jpg">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Modern Framework -->
+    <link rel="stylesheet" href="/static/css/modern-framework.css">
+    
+    <style>
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.1) 0%, 
+                rgba(16, 185, 129, 0.05) 50%, 
+                rgba(59, 130, 246, 0.1) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="20" cy="20" r="1" fill="%233b82f6" opacity="0.1"/><circle cx="50" cy="50" r="0.5" fill="%2310b981" opacity="0.1"/><circle cx="80" cy="80" r="1.5" fill="%233b82f6" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: var(--font-weight-extrabold);
+            line-height: 1.1;
+            margin-bottom: var(--space-6);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+            color: var(--text-secondary);
+            margin-bottom: var(--space-8);
+            max-width: 600px;
+        }
+
+        .hero-cta {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+            align-items: flex-start;
+        }
+
+        @media (min-width: 640px) {
+            .hero-cta {
+                flex-direction: row;
+                align-items: center;
+            }
+        }
+
+        /* Feature Cards */
+        .feature-card {
+            position: relative;
+            padding: var(--space-8);
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary-50), var(--accent-50));
+            border-radius: var(--radius-2xl);
+            opacity: 0;
+            transition: opacity var(--transition-base);
+            z-index: -1;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-6);
+            box-shadow: var(--shadow-lg);
+            transition: all var(--transition-base);
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .feature-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
+            color: white;
+            padding: var(--space-20) 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0,50 Q25,30 50,50 T100,50 L100,100 L0,100 Z" fill="%23ffffff" opacity="0.1"/></svg>');
+            animation: wave 10s ease-in-out infinite;
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(-10px); }
+        }
+
+        .stat-card {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stat-number {
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-weight-extrabold);
+            margin-bottom: var(--space-2);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: var(--font-size-lg);
+            opacity: 0.9;
+        }
+
+        /* Menu Preview */
+        .menu-preview-card {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            border-radius: var(--radius-2xl);
+            background: var(--bg-tertiary);
+        }
+
+        .menu-preview-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform var(--transition-slow);
+        }
+
+        .menu-preview-card:hover .menu-preview-image {
+            transform: scale(1.1);
+        }
+
+        .menu-preview-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: var(--space-6);
+            transform: translateY(100%);
+            transition: transform var(--transition-base);
+        }
+
+        .menu-preview-card:hover .menu-preview-overlay {
+            transform: translateY(0);
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-3xl);
+            padding: var(--space-12);
+            margin: var(--space-16) 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, var(--primary-100) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .contact-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.1;
+        }
+
+        .floating-coffee {
+            top: 20%;
+            right: 10%;
+            font-size: 3rem;
+            color: var(--accent-500);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-car {
+            bottom: 20%;
+            left: 15%;
+            font-size: 2.5rem;
+            color: var(--primary-500);
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        /* Mobile Navigation */
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 320px;
+            height: 100vh;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-2xl);
+            transition: right var(--transition-base);
+            z-index: 2000;
+            padding: var(--space-6);
+        }
+
+        .mobile-nav.open {
+            right: 0;
+        }
+
+        .mobile-nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-base);
+            z-index: 1500;
+        }
+
+        .mobile-nav-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-nav-links {
+            list-style: none;
+            padding: var(--space-8) 0;
+        }
+
+        .mobile-nav-links li {
+            margin-bottom: var(--space-4);
+        }
+
+        .mobile-nav-links a {
+            display: block;
+            padding: var(--space-4);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: var(--font-weight-medium);
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-base);
+        }
+
+        .mobile-nav-links a:hover,
+        .mobile-nav-links a.active {
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        /* Section spacing */
+        .section {
+            padding: var(--space-20) 0;
+        }
+
+        .section-sm {
+            padding: var(--space-16) 0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 80vh;
+                padding: var(--space-8) 0;
+            }
+
+            .hero-content {
+                text-align: center;
+            }
+
+            .feature-card {
+                padding: var(--space-6);
+            }
+
+            .stats-section {
+                padding: var(--space-12) 0;
+            }
+
+            .contact-section {
+                padding: var(--space-8);
+                margin: var(--space-8) 0;
+            }
+
+            .section {
+                padding: var(--space-12) 0;
+            }
+        }
+
+        /* Dark mode adjustments */
+        [data-theme="dark"] .hero {
+            background: linear-gradient(135deg, 
+                rgba(59, 130, 246, 0.2) 0%, 
+                rgba(16, 185, 129, 0.1) 50%, 
+                rgba(59, 130, 246, 0.2) 100%);
+        }
+
+        [data-theme="dark"] .stats-section {
+            background: linear-gradient(135deg, var(--primary-800), var(--accent-800));
+        }
+
+        [data-theme="dark"] .contact-section {
+            background: var(--bg-secondary);
+        }
+
+        [data-theme="dark"] .mobile-nav-links a:hover,
+        [data-theme="dark"] .mobile-nav-links a.active {
+            background: var(--primary-900);
+            color: var(--primary-400);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="flex items-center justify-between py-4">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <img src="/static/images/logo.jpg" alt="SUZZ Logo" width="48" height="48" class="rounded-xl">
+                    <div>
+                        <h1 class="text-xl font-bold text-primary">SUZZ</h1>
+                        <p class="text-xs text-muted">Drive-Thru</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <ul class="nav-links hidden md:flex items-center gap-2">
+                    <li><a href="/home" class="nav-link active">الرئيسية</a></li>
+                    <li><a href="/menu" class="nav-link">المنيو</a></li>
+                    <li><a href="/location" class="nav-link">الموقع</a></li>
+                    <li><a href="/order" class="nav-link">اطلب الآن</a></li>
+                    <li><a href="/contact" class="nav-link">تواصل معنا</a></li>
+                    <li><a href="/" class="nav-link">كود الخصم</a></li>
+                </ul>
+
+                <!-- Controls -->
+                <div class="flex items-center gap-2">
+                    <!-- Theme Toggle -->
+                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="تغيير المظهر">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button class="theme-toggle md:hidden" onclick="toggleMobileNav()" aria-label="القائمة">
+                        <i class="fas fa-bars" id="mobile-menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav-overlay" id="mobile-nav-overlay" onclick="toggleMobileNav()"></div>
+    <nav class="mobile-nav" id="mobile-nav">
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+                <img src="/static/images/logo.jpg" alt="SUZZ Logo" width="40" height="40" class="rounded-lg">
+                <div>
+                    <h2 class="text-lg font-bold">SUZZ</h2>
+                    <p class="text-xs text-muted">Drive-Thru</p>
+                </div>
+            </div>
+            <button class="theme-toggle" onclick="toggleMobileNav()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <ul class="mobile-nav-links">
+            <li><a href="/home" class="active">الرئيسية</a></li>
+            <li><a href="/menu">المنيو</a></li>
+            <li><a href="/location">الموقع</a></li>
+            <li><a href="/order">اطلب الآن</a></li>
+            <li><a href="/contact">تواصل معنا</a></li>
+            <li><a href="/">كود الخصم</a></li>
+        </ul>
+        
+        <div class="mt-8 pt-8 border-t border-gray-200">
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-muted">المظهر:</span>
+                <button class="btn btn-outline btn-sm" onclick="toggleTheme()">
+                    <i class="fas fa-palette"></i>
+                    تغيير
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content animate-fade-in">
+                <h1 class="hero-title">
+                    أسرع Drive-Thru في مصر
+                </h1>
+                <p class="hero-subtitle">
+                    استمتع بأفضل قهوة وأسرع خدمة في SUZZ Drive-Thru - أول وأسرع كافيه في السويس. 
+                    قهوة طازجة وخدمة سريعة في أقل من 3 دقائق!
+                </p>
+                <div class="hero-cta">
+                    <a href="/order" class="btn btn-primary btn-lg">
+                        <i class="fas fa-shopping-cart"></i>
+                        اطلب الآن
+                    </a>
+                    <a href="/menu" class="btn btn-outline btn-lg">
+                        <i class="fas fa-book-open"></i>
+                        شاهد المنيو
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Floating Elements -->
+        <div class="floating-coffee floating-element">
+            <i class="fas fa-coffee"></i>
+        </div>
+        <div class="floating-car floating-element">
+            <i class="fas fa-car"></i>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-primary mb-4 animate-fade-in">لماذا SUZZ؟</h2>
+                <p class="text-xl text-secondary max-w-2xl mx-auto animate-fade-in">
+                    نحن نقدم أفضل تجربة Drive-Thru في السويس مع خدمة سريعة وجودة عالية
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card feature-card animate-scale-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">خدمة سريعة</h3>
+                    <p class="text-secondary">
+                        طلبك جاهز في أقل من 3 دقائق مع خدمة Drive-Thru السريعة والمريحة
+                    </p>
+                </div>
+                
+                <div class="card feature-card animate-scale-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">جودة عالية</h3>
+                    <p class="text-secondary">
+                        أفضل أنواع القهوة والمشروبات بجودة عالية ومكونات طازجة يومياً
+                    </p>
+                </div>
+                
+                <div class="card feature-card animate-scale-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">موقع مميز</h3>
+                    <p class="text-secondary">
+                        أول Drive-Thru في السويس في موقع متميز وسهل الوصول من أي مكان
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">إنجازاتنا</h2>
+                <p class="text-lg opacity-90">أرقام تتحدث عن نفسها</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="stat-card">
+                    <span class="stat-number counter" data-target="1000">0</span>
+                    <span class="stat-label">عميل سعيد</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number counter" data-target="50">0</span>
+                    <span class="stat-label">منتج مختلف</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number counter" data-target="24">0</span>
+                    <span class="stat-label">ساعة خدمة</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number counter" data-target="3">0</span>
+                    <span class="stat-label">دقائق فقط</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Preview Section -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-primary mb-4">منتجاتنا المميزة</h2>
+                <p class="text-xl text-secondary">اكتشف مجموعة واسعة من المشروبات الشهية</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="menu-preview-card">
+                    <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop&auto=format&q=80" 
+                         alt="قهوة لاتيه" class="menu-preview-image">
+                    <div class="menu-preview-overlay">
+                        <h3 class="text-lg font-bold mb-2">قهوة لاتيه</h3>
+                        <p class="text-sm opacity-90">قهوة إيطالية كلاسيكية بحليب مبخر</p>
+                    </div>
+                </div>
+                
+                <div class="menu-preview-card">
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=80" 
+                         alt="فرابيه كراميل" class="menu-preview-image">
+                    <div class="menu-preview-overlay">
+                        <h3 class="text-lg font-bold mb-2">فرابيه كراميل</h3>
+                        <p class="text-sm opacity-90">مشروب بارد منعش بنكهة الكراميل</p>
+                    </div>
+                </div>
+                
+                <div class="menu-preview-card">
+                    <img src="https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=80" 
+                         alt="موكا ساخن" class="menu-preview-image">
+                    <div class="menu-preview-overlay">
+                        <h3 class="text-lg font-bold mb-2">موكا ساخن</h3>
+                        <p class="text-sm opacity-90">مزيج مثالي من القهوة والشوكولاتة</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="/menu" class="btn btn-primary btn-lg">
+                    <i class="fas fa-eye"></i>
+                    شاهد المنيو كاملاً
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section-sm">
+        <div class="container">
+            <div class="contact-section">
+                <div class="contact-content">
+                    <h2 class="text-3xl font-bold text-primary mb-6">تواصل معنا</h2>
+                    <p class="text-lg text-secondary mb-8">
+                        نحن هنا لخدمتك على مدار الساعة
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <a href="https://wa.me/201050689899?text=مرحباً، أريد معرفة المزيد عن SUZZ Drive-Thru" 
+                           target="_blank" class="btn btn-secondary btn-lg">
+                            <i class="fab fa-whatsapp"></i>
+                            واتس آب: 105 068 9899
+                        </a>
+                        <a href="tel:+201050689899" class="btn btn-outline btn-lg">
+                            <i class="fas fa-phone"></i>
+                            اتصال مباشر
+                        </a>
+                        <a href="/location" class="btn btn-ghost btn-lg">
+                            <i class="fas fa-map-marker-alt"></i>
+                            موقعنا
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-secondary py-12 border-t border-gray-200">
+        <div class="container">
+            <div class="text-center">
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <img src="/static/images/logo.jpg" alt="SUZZ Logo" width="40" height="40" class="rounded-lg">
+                    <div>
+                        <h3 class="text-lg font-bold text-primary">SUZZ</h3>
+                        <p class="text-xs text-muted">Drive-Thru</p>
+                    </div>
+                </div>
+                <p class="text-base text-secondary mb-2">© 2025 SUZZ Drive-Thru. جميع الحقوق محفوظة.</p>
+                <p class="text-sm text-muted">🏆 أول وأسرع Drive-Thru في السويس</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('suzz-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('suzz-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Mobile Navigation
+        function toggleMobileNav() {
+            const mobileNav = document.getElementById('mobile-nav');
+            const overlay = document.getElementById('mobile-nav-overlay');
+            const icon = document.getElementById('mobile-menu-icon');
+            
+            const isOpen = mobileNav.classList.contains('open');
+            
+            if (isOpen) {
+                mobileNav.classList.remove('open');
+                overlay.classList.remove('open');
+                icon.className = 'fas fa-bars';
+                document.body.style.overflow = 'auto';
+            } else {
+                mobileNav.classList.add('open');
+                overlay.classList.add('open');
+                icon.className = 'fas fa-times';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Counter Animation
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const counter = entry.target;
+                        const target = parseInt(counter.getAttribute('data-target'));
+                        let current = 0;
+                        const increment = target / 100;
+                        
+                        const updateCounter = () => {
+                            if (current < target) {
+                                current += increment;
+                                counter.textContent = Math.ceil(current);
+                                requestAnimationFrame(updateCounter);
+                            } else {
+                                counter.textContent = target;
+                            }
+                        };
+                        
+                        updateCounter();
+                        observer.unobserve(counter);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            counters.forEach(counter => observer.observe(counter));
+        }
+
+        // Scroll Animations
+        function initializeScrollAnimations() {
+            const elements = document.querySelectorAll('.animate-fade-in, .animate-scale-in, .animate-slide-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            elements.forEach(el => {
+                el.style.animationPlayState = 'paused';
+                observer.observe(el);
+            });
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            animateCounters();
+            initializeScrollAnimations();
+            
+            // Close mobile nav when clicking on a link
+            document.querySelectorAll('.mobile-nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768) {
+                        toggleMobileNav();
+                    }
+                });
+            });
+            
+            // Handle navbar scroll effect
+            let lastScrollY = window.scrollY;
+            window.addEventListener('scroll', () => {
+                const navbar = document.querySelector('.navbar');
+                if (window.scrollY > lastScrollY && window.scrollY > 100) {
+                    navbar.style.transform = 'translateY(-100%)';
+                } else {
+                    navbar.style.transform = 'translateY(0)';
+                }
+                lastScrollY = window.scrollY;
+            });
+        });
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768) {
+                const mobileNav = document.getElementById('mobile-nav');
+                const overlay = document.getElementById('mobile-nav-overlay');
+                
+                if (mobileNav.classList.contains('open')) {
+                    mobileNav.classList.remove('open');
+                    overlay.classList.remove('open');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

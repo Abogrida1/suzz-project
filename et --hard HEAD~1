@@ -1,0 +1,5 @@
+[33m52a20fb[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m تكبير الهيدر والبار السفلي في صفحة الرئيسية على الموبايل
+[33m80f5bad[m feat: add elegant social media icons to homepage
+[33m45f0927[m fix: improve database operations error handling for Railway deployment
+[33meab4e9b[m fix admin API calls for Railway deployment
+[33m95c243f[m Railway stability: run Gunicorn with single worker to avoid SQLite locks

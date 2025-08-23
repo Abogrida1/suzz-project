@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUZZ - موقعنا</title>
+    <meta name="description" content="SUZZ - أول Drive-Thru في السويس">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/6JTrCJGK/IMG-5877.jpg">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="SUZZ - موقعنا">
+    <meta property="og:description" content="SUZZ - أول Drive-Thru في السويس">
+    <meta property="og:image" content="https://i.ibb.co/MDHwvrfG/IMG-5849.jpg">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Modern Design System -->
+    <link rel="stylesheet" href="/static/css/modern-design.css">
+    
+    <!-- Mobile Enhancements -->
+    <link rel="stylesheet" href="/static/css/mobile-enhancements.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo Section -->
+                <div class="logo-section">
+                    <img src="https://i.ibb.co/6JTrCJGK/IMG-5877.jpg" alt="SUZZ Logo" class="logo-image">
+                    <div class="logo-text">
+                        <h1>SUZZ</h1>
+                        <p>🏆 أول Drive-Thru في السويس</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="/home" class="desktop-nav-link">الرئيسية</a>
+                    <a href="/menu" class="desktop-nav-link">المنيو</a>
+                    <a href="/location" class="desktop-nav-link active">الموقع</a>
+                    <a href="/order" class="desktop-nav-link">اطلب الآن</a>
+                    <a href="/contact" class="desktop-nav-link">تواصل معنا</a>
+                    <a href="/" class="desktop-nav-link">كود الخصم</a>
+                </nav>
+
+                <!-- Header Controls -->
+                <div class="header-controls">
+                    <button class="control-btn theme-toggle" onclick="toggleTheme()" aria-label="تغيير المظهر">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bottom Navigation (Mobile) - المنيو بار الرسمي -->
+    <nav class="bottom-nav md:hidden" id="bottom-nav">
+        <a href="/home" class="bottom-nav-item">
+            <i class="nav-icon fas fa-home"></i>
+            <span class="nav-label">الرئيسية</span>
+        </a>
+        <a href="/menu" class="bottom-nav-item">
+            <i class="nav-icon fas fa-book-open"></i>
+            <span class="nav-label">المنيو</span>
+        </a>
+        <a href="/order" class="bottom-nav-item">
+            <i class="nav-icon fas fa-shopping-cart"></i>
+            <span class="nav-label">اطلب</span>
+        </a>
+        <a href="/location" class="bottom-nav-item active">
+            <i class="nav-icon fas fa-map-marker-alt"></i>
+            <span class="nav-label">الموقع</span>
+        </a>
+        <a href="/" class="bottom-nav-item">
+            <i class="nav-icon fas fa-qrcode"></i>
+            <span class="nav-label">خصم</span>
+        </a>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" style="min-height: 60vh;">
+        <!-- Video Overlay -->
+        <div class="hero-overlay"></div>
+        
+        <!-- Hero Content -->
+        <div class="hero-content">
+            <h1 class="hero-title">موقع SUZZ</h1>
+            <p class="hero-subtitle">اكتشف موقعنا واستمتع بخدمة Drive-Thru المميزة</p>
+            <div class="hero-cta">
+                <a href="/order" class="btn btn-primary btn-lg">
+                    <i class="fas fa-shopping-cart"></i>
+                    اطلب الآن
+                </a>
+                <a href="/contact" class="btn btn-outline btn-lg">
+                    <i class="fas fa-phone"></i>
+                    تواصل معنا
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Location Section -->
+    <section class="section">
+        <div class="container">
+            <div class="text-center mb-12">
+                <h2 class="gradient-text">موقع SUZZ</h2>
+                <p class="text-muted">اكتشف موقعنا واستمتع بخدمة Drive-Thru المميزة</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+                <!-- Map Card -->
+                <div class="card animate-fade-in">
+                    <div class="card-content">
+                        <h3 class="card-title">موقعنا على الخريطة</h3>
+                        <p class="card-text mb-6">SUZZ يقع في قلب السويس، سهل الوصول إليه</p>
+                        
+                        <div class="map-container">
+                            <iframe 
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.5!2d32.5!3d30.0!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDAwJzAwLjAiTiAzMsKwMzAnMDAuMCJF!5e0!3m2!1sen!2seg!4v1234567890"
+                                width="100%" 
+                                height="300" 
+                                style="border:0; border-radius: var(--radius-lg);" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <a href="https://maps.google.com" target="_blank" class="btn btn-outline">
+                                <i class="fas fa-external-link-alt"></i>
+                                افتح في Google Maps
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Location Info Card -->
+                <div class="card animate-fade-in" style="animation-delay: 0.2s;">
+                    <div class="card-content">
+                        <h3 class="card-title">معلومات الموقع</h3>
+                        <p class="card-text mb-6">تفاصيل موقعنا وطريقة الوصول</p>
+                        
+                        <div class="space-y-6">
+                            <!-- Address -->
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-accent/10 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-map-marker-alt text-accent text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg">العنوان</h4>
+                                    <p class="text-muted text-lg">السويس، مصر</p>
+                                    <p class="text-muted text-sm">أول Drive-Thru في المدينة</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Working Hours -->
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-green-500/10 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-clock text-green-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg">ساعات العمل</h4>
+                                    <p class="text-muted text-lg">24/7 - على مدار الساعة</p>
+                                    <p class="text-muted text-sm">خدمة Drive-Thru السريعة</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Phone -->
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-blue-500/10 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-phone text-blue-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg">الهاتف</h4>
+                                    <a href="tel:+201050689899" class="text-accent hover:opacity-80 text-lg">
+                                        +20 105 068 9899
+                                    </a>
+                                    <p class="text-muted text-sm">متاح 24/7</p>
+                                </div>
+                            </div>
+                            
+                            <!-- WhatsApp -->
+                            <div class="flex items-center space-x-4">
+                                <div class="w-14 h-14 bg-green-500/10 rounded-full flex items-center justify-center">
+                                    <i class="fab fa-whatsapp text-green-500 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg">WhatsApp</h4>
+                                    <a href="https://wa.me/201050689899" target="_blank" class="text-accent hover:opacity-80 text-lg">
+                                        +20 105 068 9899
+                                    </a>
+                                    <p class="text-muted text-sm">رد فوري</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="mt-8 space-y-3">
+                            <a href="/order" class="btn btn-primary w-full">
+                                <i class="fas fa-shopping-cart"></i>
+                                اطلب الآن
+                            </a>
+                            <a href="/contact" class="btn btn-outline w-full">
+                                <i class="fas fa-phone"></i>
+                                تواصل معنا
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Directions Section -->
+            <div class="mt-16">
+                <div class="card max-w-4xl mx-auto">
+                    <div class="card-content">
+                        <h3 class="card-title text-center mb-6">كيف تصل إلينا؟</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="text-center">
+                                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-car text-white text-2xl"></i>
+                                </div>
+                                <h4 class="font-semibold mb-2">بالسيارة</h4>
+                                <p class="text-muted text-sm">سهل الوصول بالسيارة مع موقف سيارات مجاني</p>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-motorcycle text-white text-2xl"></i>
+                                </div>
+                                <h4 class="font-semibold mb-2">بالدراجة النارية</h4>
+                                <p class="text-muted text-sm">خدمة Drive-Thru سريعة للدراجات النارية</p>
+                            </div>
+                            
+                            <div class="text-center">
+                                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-walking text-white text-2xl"></i>
+                                </div>
+                                <h4 class="font-semibold mb-2">مشياً</h4>
+                                <p class="text-muted text-sm">موقع مركزي سهل الوصول إليه مشياً</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <img src="https://i.ibb.co/6JTrCJGK/IMG-5877.jpg" alt="SUZZ Logo">
+                    <h3>SUZZ</h3>
+                </div>
+                <p class="footer-text">© 2025 SUZZ. جميع الحقوق محفوظة.</p>
+                <p class="footer-text">🏆 أول Drive-Thru في السويس</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('suzz-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('suzz-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Header Scroll Effect
+        function handleHeaderScroll() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            window.addEventListener('scroll', handleHeaderScroll);
+        });
+    </script>
+
+    <style>
+        .map-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+        }
+        
+        .map-container iframe {
+            transition: transform var(--transition-slow);
+        }
+        
+        .map-container:hover iframe {
+            transform: scale(1.02);
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                min-height: 50vh;
+            }
+            
+            .hero-title {
+                font-size: clamp(2rem, 8vw, 3rem);
+            }
+            
+            .hero-subtitle {
+                font-size: clamp(1rem, 4vw, 1.25rem);
+            }
+        }
+    </style>
+</body>
+</html>

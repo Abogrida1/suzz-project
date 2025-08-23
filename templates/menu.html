@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUZZ - المنيو</title>
+    <meta name="description" content="SUZZ - أول Drive-Thru في السويس">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/6JTrCJGK/IMG-5877.jpg">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="SUZZ - المنيو">
+    <meta property="og:description" content="SUZZ - أول Drive-Thru في السويس">
+    <meta property="og:image" content="https://i.ibb.co/MDHwvrfG/IMG-5849.jpg">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+
+    
+    <!-- Modern Design System -->
+    <link rel="stylesheet" href="/static/css/modern-design.css">
+    
+    <!-- Menu Mobile Enhancements -->
+    <link rel="stylesheet" href="/static/css/menu-mobile.css">
+    
+    <!-- General Mobile Menu Improvements -->
+    <link rel="stylesheet" href="/static/css/mobile-menu-general.css">
+</head>
+<body class="menu-page">
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo Section -->
+                <div class="logo-section">
+                    <img src="https://i.ibb.co/6JTrCJGK/IMG-5877.jpg" alt="SUZZ Logo" class="logo-image">
+                    <div class="logo-text">
+                        <h1>SUZZ</h1>
+                        <p>🏆 أول Drive-Thru في السويس</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <nav class="desktop-nav">
+                    <a href="/home" class="desktop-nav-link">الرئيسية</a>
+                    <a href="/menu" class="desktop-nav-link active">المنيو</a>
+                    <a href="/location" class="desktop-nav-link">الموقع</a>
+                    <a href="/order" class="desktop-nav-link">اطلب الآن</a>
+                    <a href="/contact" class="desktop-nav-link">تواصل معنا</a>
+                    <a href="/" class="desktop-nav-link">كود الخصم</a>
+                </nav>
+
+                <!-- Header Controls -->
+                <div class="header-controls">
+                    <button class="control-btn theme-toggle" onclick="toggleTheme()" aria-label="تغيير المظهر">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Bottom Navigation (Mobile) - المنيو بار الرسمي -->
+    <nav class="bottom-nav md:hidden" id="bottom-nav">
+        <a href="/home" class="bottom-nav-item">
+            <i class="nav-icon fas fa-home"></i>
+            <span class="nav-label">الرئيسية</span>
+        </a>
+        <a href="/menu" class="bottom-nav-item active">
+            <i class="nav-icon fas fa-book-open"></i>
+            <span class="nav-label">المنيو</span>
+        </a>
+        <a href="/order" class="bottom-nav-item">
+            <i class="nav-icon fas fa-shopping-cart"></i>
+            <span class="nav-label">اطلب</span>
+        </a>
+        <a href="/location" class="bottom-nav-item">
+            <i class="nav-icon fas fa-map-marker-alt"></i>
+            <span class="nav-label">الموقع</span>
+        </a>
+        <a href="/" class="bottom-nav-item">
+            <i class="nav-icon fas fa-qrcode"></i>
+            <span class="nav-label">خصم</span>
+        </a>
+    </nav>
+
+    <!-- Desktop Menu Section -->
+    <section class="menu-section desktop-menu">
+        <div class="menu-grid">
+            <div class="menu-item" onclick="openMenuViewer('/static/images/menu/menu photo 1.jpg', '/static/images/menu/menu photo 2.jpg', 0)">
+                <img src="/static/images/menu/menu photo 1.jpg" alt="Menu 1" class="menu-image">
+                <div class="menu-overlay">
+                    <p class="menu-text">اضغط لرؤية المنيو</p>
+                </div>
+            </div>
+            
+            <div class="menu-item" onclick="openMenuViewer('/static/images/menu/menu photo 1.jpg', '/static/images/menu/menu photo 2.jpg', 1)">
+                <img src="/static/images/menu/menu photo 2.jpg" alt="Menu 2" class="menu-image">
+                <div class="menu-overlay">
+                    <p class="menu-text">اضغط لرؤية المنيو</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mobile Menu Section -->
+    <section class="mobile-menu-section">
+        <!-- Download Menu Button - Above Menu -->
+        <div class="download-menu-section">
+            <button class="download-menu-btn" onclick="downloadMenu()">
+                <i class="fas fa-download"></i>
+                تحميل منيو SUZZ كامل (صورتين)
+            </button>
+        </div>
+        
+        <div class="mobile-menu-container">
+            <div class="mobile-menu-slider">
+                <div class="mobile-menu-slide active" data-index="0">
+                    <img src="/static/images/menu/menu photo 1.jpg" alt="Menu 1" class="mobile-menu-image">
+                </div>
+                <div class="mobile-menu-slide" data-index="1">
+                    <img src="/static/images/menu/menu photo 2.jpg" alt="Menu 2" class="mobile-menu-image">
+                </div>
+            </div>
+            
+            <div class="mobile-menu-indicator">
+                <span>1</span> من <span>2</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Viewer Modal -->
+    <div id="menuViewer" class="menu-viewer">
+        <div class="menu-viewer-content">
+            <button class="menu-viewer-close" onclick="closeMenuViewer()">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="menu-viewer-image-container">
+                <img id="viewerImage" src="" alt="Menu" class="viewer-image">
+            </div>
+            
+            <div class="menu-viewer-thumbnails">
+                <div class="thumbnail-container">
+                    <img src="/static/images/menu/menu photo 1.jpg" alt="Menu 1" class="thumbnail" data-index="0" onclick="goToImage(0)">
+                    <span class="thumbnail-number">1</span>
+                </div>
+                <div class="thumbnail-container">
+                    <img src="/static/images/menu/menu photo 2.jpg" alt="Menu 2" class="thumbnail" data-index="1" onclick="goToImage(1)">
+                    <span class="thumbnail-number">2</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('suzz-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('suzz-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            if (icon) {
+                icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+        }
+
+        // Header Scroll Effect
+        function handleHeaderScroll() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+
+        // Mobile Menu Functions
+        let currentMobileSlide = 0;
+        const mobileSlides = document.querySelectorAll('.mobile-menu-slide');
+        const mobileIndicators = document.querySelectorAll('.mobile-indicator');
+        let isZoomed = false;
+        let currentScale = 1;
+        let startDistance = 0;
+        let startScale = 1;
+
+        function showMobileSlide(index) {
+            // Hide all slides
+            mobileSlides.forEach(slide => slide.classList.remove('active'));
+            mobileIndicators.forEach(indicator => indicator.classList.remove('active'));
+            
+            // Show current slide
+            mobileSlides[index].classList.add('active');
+            mobileIndicators[index].classList.add('active');
+            
+            currentMobileSlide = index;
+            
+            // Reset zoom when changing slides
+            resetZoom();
+        }
+
+        function nextMobileSlide() {
+            const nextIndex = (currentMobileSlide + 1) % mobileSlides.length;
+            showMobileSlide(nextIndex);
+        }
+
+        function previousMobileSlide() {
+            const prevIndex = (currentMobileSlide - 1 + mobileSlides.length) % mobileSlides.length;
+            showMobileSlide(prevIndex);
+        }
+
+        function resetZoom() {
+            isZoomed = false;
+            currentScale = 1;
+            const activeSlide = document.querySelector('.mobile-menu-slide.active');
+            if (activeSlide) {
+                const image = activeSlide.querySelector('.mobile-menu-image');
+                if (image) {
+                    image.style.transform = 'scale(1)';
+                    image.classList.remove('zoomed');
+                }
+            }
+        }
+
+        // Touch support for mobile swipe and zoom
+        let startX = 0;
+        let startY = 0;
+        let isSwiping = false;
+        let touchStartTime = 0;
+
+        document.addEventListener('touchstart', function(e) {
+            if (document.querySelector('.mobile-menu-container')) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                touchStartTime = Date.now();
+                
+                // Handle pinch to zoom
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    startDistance = Math.sqrt(
+                        Math.pow(e.touches[0].clientX - e.touches[1].clientX, 2) +
+                        Math.pow(e.touches[0].clientY - e.touches[1].clientY, 2)
+                    );
+                    startScale = currentScale;
+                }
+            }
+        });
+
+        document.addEventListener('touchmove', function(e) {
+            if (document.querySelector('.mobile-menu-container')) {
+                if (e.touches.length === 2) {
+                    // Pinch to zoom
+                    e.preventDefault();
+                    const currentDistance = Math.sqrt(
+                        Math.pow(e.touches[0].clientX - e.touches[1].clientX, 2) +
+                        Math.pow(e.touches[0].clientY - e.touches[1].clientY, 2)
+                    );
+                    
+                    const scale = (currentDistance / startDistance) * startScale;
+                    currentScale = Math.min(Math.max(scale, 1), 3); // Limit zoom between 1x and 3x
+                    
+                    const activeSlide = document.querySelector('.mobile-menu-slide.active');
+                    if (activeSlide) {
+                        const image = activeSlide.querySelector('.mobile-menu-image');
+                        if (image) {
+                            image.style.transform = `scale(${currentScale})`;
+                            isZoomed = currentScale > 1;
+                            if (isZoomed) {
+                                image.classList.add('zoomed');
+                            } else {
+                                image.classList.remove('zoomed');
+                            }
+                        }
+                    }
+                } else if (e.touches.length === 1 && !isZoomed) {
+                    // Single touch swipe for navigation
+                    const currentX = e.touches[0].clientX;
+                    const currentY = e.touches[0].clientY;
+                    const diffX = Math.abs(currentX - startX);
+                    const diffY = Math.abs(currentY - startY);
+                    
+                    if (diffX > 10 && diffX > diffY) {
+                        isSwiping = true;
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
+
+        document.addEventListener('touchend', function(e) {
+            if (document.querySelector('.mobile-menu-container')) {
+                const touchEndTime = Date.now();
+                const touchDuration = touchEndTime - touchStartTime;
+                
+                if (e.touches.length === 0 && isSwiping && !isZoomed && touchDuration < 500) {
+                    // Handle swipe navigation
+                    const endX = e.changedTouches[0].clientX;
+                    const endY = e.changedTouches[0].clientY;
+                    const diffX = startX - endX;
+                    const diffY = startY - endY;
+
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                        if (diffX > 0) {
+                            nextMobileSlide();
+                        } else {
+                            previousMobileSlide();
+                        }
+                    }
+                }
+                
+                isSwiping = false;
+            }
+        });
+
+        // Double tap to zoom
+        let lastTap = 0;
+        document.addEventListener('touchend', function(e) {
+            if (document.querySelector('.mobile-menu-container')) {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                
+                if (tapLength < 300 && tapLength > 0) {
+                    // Double tap detected
+                    const activeSlide = document.querySelector('.mobile-menu-slide.active');
+                    if (activeSlide) {
+                        const image = activeSlide.querySelector('.mobile-menu-image');
+                        if (image) {
+                            if (isZoomed) {
+                                resetZoom();
+                            } else {
+                                currentScale = 2;
+                                isZoomed = true;
+                                image.style.transform = 'scale(2)';
+                                image.classList.add('zoomed');
+                            }
+                        }
+                    }
+                    e.preventDefault();
+                }
+                
+                lastTap = currentTime;
+            }
+        });
+
+        // Menu Viewer Functions
+        let currentImages = [];
+        let currentImageIndex = 0;
+        let isViewerZoomed = false;
+        let viewerScale = 1;
+        let startViewerDistance = 0;
+        let startViewerScale = 1;
+        let startViewerX = 0;
+        let startViewerY = 0;
+        let viewerTranslateX = 0;
+        let viewerTranslateY = 0;
+
+        function openMenuViewer(imageSrc1, imageSrc2, startIndex = 0) {
+            const viewer = document.getElementById('menuViewer');
+            const viewerImage = document.getElementById('viewerImage');
+            
+            // Always set both images for navigation
+            currentImages = ['/static/images/menu/menu photo 1.jpg', '/static/images/menu/menu photo 2.jpg'];
+            currentImageIndex = startIndex;
+            viewerImage.src = currentImages[currentImageIndex];
+            
+            console.log('Menu viewer opened with images:', currentImages);
+            console.log('Starting with image index:', currentImageIndex);
+            
+            // Reset zoom and position
+            resetViewerZoom();
+            updateThumbnailActive();
+            viewer.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function openFullScreenImage(imageSrc) {
+            const viewer = document.getElementById('menuViewer');
+            const viewerImage = document.getElementById('viewerImage');
+            
+            // Always set both images for navigation
+            currentImages = ['/static/images/menu/menu photo 1.jpg', '/static/images/menu/menu photo 2.jpg'];
+            
+            // Find which image was clicked and set it as current
+            if (imageSrc.includes('menu photo 1')) {
+                currentImageIndex = 0;
+            } else if (imageSrc.includes('menu photo 2')) {
+                currentImageIndex = 1;
+            } else {
+                currentImageIndex = 0;
+            }
+            
+            viewerImage.src = currentImages[currentImageIndex];
+            
+            console.log('Full screen opened with images:', currentImages);
+            console.log('Starting with image index:', currentImageIndex);
+            
+            // Reset zoom and position
+            resetViewerZoom();
+            updateThumbnailActive();
+            viewer.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenuViewer() {
+            const viewer = document.getElementById('menuViewer');
+            viewer.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleFullScreen() {
+            const viewerImage = document.getElementById('viewerImage');
+            if (!isFullScreen) {
+                // Enter full screen mode
+                isFullScreen = true;
+                viewerImage.style.objectFit = 'cover';
+                viewerImage.style.width = '100vw';
+                viewerImage.style.height = '100vh';
+                viewerImage.style.borderRadius = '0';
+                console.log('Entered full screen mode');
+            } else {
+                // Exit full screen mode
+                isFullScreen = false;
+                viewerImage.style.objectFit = 'contain';
+                viewerImage.style.width = '100%';
+                viewerImage.style.height = '100%';
+                viewerImage.style.borderRadius = '16px';
+                console.log('Exited full screen mode');
+            }
+        }
+
+        function previousImage() {
+            console.log('Previous image clicked');
+            console.log('Current images array:', currentImages);
+            console.log('Current index before:', currentImageIndex);
+            
+            if (currentImages.length > 1) {
+                currentImageIndex = (currentImageIndex - 1 + currentImages.length) % currentImages.length;
+                const viewerImage = document.getElementById('viewerImage');
+                viewerImage.src = currentImages[currentImageIndex];
+                
+                console.log('Switched to image:', currentImageIndex);
+                console.log('New image src:', currentImages[currentImageIndex]);
+                
+                resetViewerZoom();
+                updateThumbnailActive();
+            } else {
+                console.log('Only one image available, cannot navigate');
+            }
+        }
+
+        function nextImage() {
+            console.log('Next image clicked');
+            console.log('Current images array:', currentImages);
+            console.log('Current index before:', currentImageIndex);
+            
+            if (currentImages.length > 1) {
+                currentImageIndex = (currentImageIndex + 1) % currentImages.length;
+                const viewerImage = document.getElementById('viewerImage');
+                viewerImage.src = currentImages[currentImageIndex];
+                
+                console.log('Switched to image:', currentImageIndex);
+                console.log('New image src:', currentImages[currentImageIndex]);
+                
+                resetViewerZoom();
+                updateThumbnailActive();
+            } else {
+                console.log('Only one image available, cannot navigate');
+            }
+        }
+
+        function goToImage(index) {
+            console.log('Go to image clicked, index:', index);
+            console.log('Current images array:', currentImages);
+            
+            if (index >= 0 && index < currentImages.length) {
+                currentImageIndex = index;
+                const viewerImage = document.getElementById('viewerImage');
+                viewerImage.src = currentImages[currentImageIndex];
+                
+                console.log('Went to image:', currentImageIndex);
+                console.log('New image src:', currentImages[currentImageIndex]);
+                
+                resetViewerZoom();
+                updateThumbnailActive();
+            } else {
+                console.log('Invalid index:', index);
+            }
+        }
+
+        function resetViewerZoom() {
+            isViewerZoomed = false;
+            viewerScale = 1;
+            viewerTranslateX = 0;
+            viewerTranslateY = 0;
+            const viewerImage = document.getElementById('viewerImage');
+            if (viewerImage) {
+                viewerImage.style.transform = 'scale(1) translate(0px, 0px)';
+            }
+        }
+
+        function updateThumbnailActive() {
+            const thumbnails = document.querySelectorAll('.thumbnail-container');
+            
+            console.log('Updating thumbnails, currentIndex:', currentImageIndex);
+            console.log('Total images:', currentImages.length);
+            
+            thumbnails.forEach((thumb, index) => {
+                if (index === currentImageIndex) {
+                    thumb.classList.add('active');
+                    console.log('Thumbnail', index, 'set to active');
+                } else {
+                    thumb.classList.remove('active');
+                    console.log('Thumbnail', index, 'set to inactive');
+                }
+            });
+        }
+
+        // Download menu function
+        function downloadMenu() {
+            // Download images individually for better mobile compatibility
+            downloadImagesIndividually();
+        }
+
+        // Fallback function to download images individually
+        function downloadImagesIndividually() {
+            // Download first image
+            const link1 = document.createElement('a');
+            link1.href = '/static/images/menu/menu photo 1.jpg';
+            link1.download = 'suzz-menu-drinks.jpg';
+            document.body.appendChild(link1);
+            link1.click();
+            document.body.removeChild(link1);
+            
+            // Download second image after a short delay
+            setTimeout(() => {
+                const link2 = document.createElement('a');
+                link2.href = '/static/images/menu/menu photo 2.jpg';
+                link2.download = 'suzz-menu-food.jpg';
+                document.body.appendChild(link2);
+                link2.click();
+                document.body.removeChild(link2);
+            }, 500);
+        }
+
+        // Viewer touch events for zoom and pan
+        let viewerStartX = 0;
+        let viewerStartY = 0;
+        let isViewerSwiping = false;
+
+        document.addEventListener('touchstart', function(e) {
+            if (document.getElementById('menuViewer').classList.contains('show')) {
+                viewerStartX = e.touches[0].clientX;
+                viewerStartY = e.touches[0].clientY;
+                
+                if (e.touches.length === 2) {
+                    // Pinch to zoom
+                    e.preventDefault();
+                    startViewerDistance = Math.sqrt(
+                        Math.pow(e.touches[0].clientX - e.touches[1].clientX, 2) +
+                        Math.pow(e.touches[0].clientY - e.touches[1].clientY, 2)
+                    );
+                    startViewerScale = viewerScale;
+                } else if (e.touches.length === 1 && isViewerZoomed) {
+                    // Single touch for panning when zoomed
+                    startViewerX = e.touches[0].clientX - viewerTranslateX;
+                    startViewerY = e.touches[0].clientY - viewerTranslateY;
+                }
+            }
+        });
+
+        document.addEventListener('touchmove', function(e) {
+            if (document.getElementById('menuViewer').classList.contains('show')) {
+                if (e.touches.length === 2) {
+                    // Pinch to zoom
+                    e.preventDefault();
+                    const currentDistance = Math.sqrt(
+                        Math.pow(e.touches[0].clientX - e.touches[1].clientX, 2) +
+                        Math.pow(e.touches[0].clientY - e.touches[1].clientY, 2)
+                    );
+                    
+                    const scale = (currentDistance / startViewerDistance) * startViewerScale;
+                    viewerScale = Math.min(Math.max(scale, 1), 4); // Limit zoom between 1x and 3x
+                    isViewerZoomed = viewerScale > 1;
+                    
+                    const viewerImage = document.getElementById('viewerImage');
+                    if (viewerImage) {
+                        viewerImage.style.transform = `scale(${viewerScale}) translate(${viewerTranslateX}px, ${viewerTranslateY}px)`;
+                    }
+                } else if (e.touches.length === 1 && isViewerZoomed) {
+                    // Panning when zoomed
+                    e.preventDefault();
+                    viewerTranslateX = e.touches[0].clientX - startViewerX;
+                    viewerTranslateY = e.touches[0].clientY - startViewerY;
+                    
+                    const viewerImage = document.getElementById('viewerImage');
+                    if (viewerImage) {
+                        viewerImage.style.transform = `scale(${viewerScale}) translate(${viewerTranslateX}px, ${viewerTranslateY}px)`;
+                    }
+                } else if (e.touches.length === 1 && !isViewerZoomed) {
+                    // Swipe for navigation when not zoomed
+                    const currentX = e.touches[0].clientX;
+                    const currentY = e.touches[0].clientY;
+                    const diffX = Math.abs(currentX - viewerStartX);
+                    const diffY = Math.abs(currentY - viewerStartY);
+                    
+                    if (diffX > 10 && diffX > diffY) {
+                        isViewerSwiping = true;
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
+
+        document.addEventListener('touchend', function(e) {
+            if (document.getElementById('menuViewer').classList.contains('show')) {
+                if (e.touches.length === 0 && isViewerSwiping && !isViewerZoomed && currentImages.length > 1) {
+                    // Handle swipe navigation
+                    const endX = e.changedTouches[0].clientX;
+                    const endY = e.changedTouches[0].clientY;
+                    const diffX = viewerStartX - endX;
+                    const diffY = viewerStartY - endY;
+
+                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                        if (diffX > 0) {
+                            nextImage();
+                        } else {
+                            previousImage();
+                        }
+                    }
+                }
+                
+                isViewerSwiping = false;
+            }
+        });
+
+        // Double tap to zoom in viewer
+        let lastViewerTap = 0;
+        document.addEventListener('touchend', function(e) {
+            if (document.getElementById('menuViewer').classList.contains('show')) {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastViewerTap;
+                
+                if (tapLength < 300 && tapLength > 0) {
+                    // Double tap detected
+                    const viewerImage = document.getElementById('viewerImage');
+                    if (viewerImage) {
+                        if (isViewerZoomed) {
+                            resetViewerZoom();
+                        } else {
+                            viewerScale = 2;
+                            isViewerZoomed = true;
+                            viewerImage.style.transform = 'scale(2)';
+                        }
+                    }
+                    e.preventDefault();
+                }
+                
+                lastViewerTap = currentTime;
+            }
+        });
+
+        // Close viewer when clicking outside
+        document.getElementById('menuViewer').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeMenuViewer();
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            if (document.getElementById('menuViewer').classList.contains('show')) {
+                if (event.key === 'ArrowLeft') {
+                    previousImage();
+                } else if (event.key === 'ArrowRight') {
+                    nextImage();
+                } else if (event.key === 'Escape') {
+                    closeMenuViewer();
+                }
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            window.addEventListener('scroll', handleHeaderScroll);
+            
+            // Initialize mobile indicators
+            mobileIndicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => showMobileSlide(index));
+            });
+
+            // Add click event to mobile images
+            mobileSlides.forEach(slide => {
+                const image = slide.querySelector('.mobile-menu-image');
+                if (image) {
+                    image.addEventListener('click', function() {
+                        openFullScreenImage(this.src);
+                    });
+                }
+            });
+
+            // Test navigation buttons
+            console.log('Page loaded, testing navigation...');
+            
+            // Add event listeners for navigation buttons
+            const prevBtn = document.querySelector('.prev-btn');
+            const nextBtn = document.querySelector('.next-btn');
+            
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Previous button clicked via event listener');
+                    previousImage();
+                });
+                
+                // Also add onclick as backup
+                prevBtn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Previous button clicked via onclick');
+                    previousImage();
+                };
+            }
+            
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Next button clicked via event listener');
+                    nextImage();
+                });
+                
+                // Also add onclick as backup
+                nextBtn.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Next button clicked via onclick');
+                    nextImage();
+                };
+            }
+            
+            // Test thumbnail clicks
+            const thumbnails = document.querySelectorAll('.thumbnail-container');
+            thumbnails.forEach((thumb, index) => {
+                thumb.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Thumbnail clicked:', index);
+                    goToImage(index);
+                });
+            });
+        });
+    </script>
+
+    <style>
+        /* Modern Mobile-First Menu Styles */
+        :root {
+            --primary-color: #059669;
+            --primary-light: #10b981;
+            --primary-dark: #047857;
+            --secondary-color: #1e293b;
+            --accent-color: #fbbf24;
+            --text-primary: #ffffff;
+            --text-secondary: #cbd5e1;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: rgba(30, 41, 59, 0.8);
+            --border-color: rgba(5, 150, 105, 0.3);
+            --shadow-light: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.2);
+            --shadow-heavy: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header Styles */
+        .header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .header.scrolled {
+            background: rgba(15, 23, 42, 0.98);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .control-btn {
+            background: rgba(5, 150, 105, 0.2);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(5, 150, 105, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Bottom Navigation (Mobile Only) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(5, 150, 105, 0.2);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            z-index: 1000;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+            border-radius: 12px;
+            min-width: 60px;
+        }
+
+        .bottom-nav-item:hover,
+        .bottom-nav-item.active {
+            color: white;
+            background: rgba(5, 150, 105, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .bottom-nav-item.active {
+            background: rgba(5, 150, 105, 0.6);
+            box-shadow: 0 4px 15px rgba(5, 150, 105, 0.2);
+        }
+
+        .nav-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .nav-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* Desktop Menu Section */
+        .desktop-menu {
+            display: block;
+        }
+
+        .menu-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1rem 2rem;
+        }
+
+        /* Desktop Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .menu-item {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-heavy);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 500px;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+        }
+
+        .menu-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-item:hover .menu-image {
+            transform: scale(1.02);
+        }
+
+        .menu-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 3rem 1rem 2rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-item:hover .menu-overlay {
+            opacity: 1;
+        }
+
+        .menu-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        /* Mobile Menu Section */
+        .mobile-menu-section {
+            display: none;
+        }
+
+        .mobile-menu-container {
+            width: 100%;
+            height: 70vh;
+            position: relative;
+            overflow: hidden;
+            margin: 2rem auto;
+            max-width: 500px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .mobile-menu-slider {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mobile-menu-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .mobile-menu-slide.active {
+            opacity: 1;
+        }
+
+        .mobile-menu-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+            transition: transform 0.3s ease;
+            transform-origin: center center;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            cursor: pointer;
+        }
+
+        .mobile-menu-image:hover {
+            transform: scale(1.02);
+        }
+
+        .mobile-menu-image.zoomed {
+            cursor: grab;
+            border-radius: 0;
+        }
+
+        .mobile-menu-image.zoomed:hover {
+            transform: none;
+        }
+
+        .mobile-menu-image.zoomed:active {
+            cursor: grabbing;
+        }
+
+        .mobile-menu-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 2rem 1.5rem 1.5rem;
+            text-align: center;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .mobile-menu-overlay h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-menu-overlay p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .mobile-menu-nav {
+            display: none;
+        }
+
+        .mobile-menu-indicator {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Menu Viewer Modal */
+        .menu-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .menu-viewer.show {
+            display: flex;
+        }
+
+        .menu-viewer-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-viewer-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .menu-viewer-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .menu-viewer-image-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .viewer-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: all 0.3s ease;
+            transform-origin: center center;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -o-crisp-edges;
+            -ms-interpolation-mode: nearest-neighbor;
+            cursor: grab;
+            max-width: none;
+            max-height: none;
+            min-width: 100%;
+            min-height: 100%;
+        }
+
+        .viewer-image:hover {
+            transform: scale(1.01);
+        }
+
+        .viewer-image.zoomed {
+            cursor: grab;
+        }
+
+        .viewer-image.zoomed:active {
+            cursor: grabbing;
+        }
+
+        .viewer-image.fullscreen {
+            object-fit: cover;
+            width: 100vw;
+            height: 100vh;
+            border-radius: 0;
+        }
+
+        /* Thumbnails */
+        .menu-viewer-thumbnails {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .thumbnail-container {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .thumbnail-container:hover {
+            transform: scale(1.05);
+        }
+
+        .thumbnail-container:active {
+            transform: scale(0.95);
+        }
+
+        .thumbnail-container.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(5, 150, 105, 0.5);
+        }
+
+        .thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
+            pointer-events: none;
+        }
+
+        .thumbnail-number {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--primary-color);
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .menu-viewer-info {
+            display: none;
+        }
+
+        .menu-viewer-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .image-counter {
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+            background: rgba(5, 150, 105, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        /* Navigation Buttons */
+        .viewer-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .viewer-nav-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .viewer-nav-btn:active {
+            background: rgba(255, 255, 255, 0.6);
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        .viewer-nav-btn.hidden {
+            display: none !important;
+        }
+
+        .prev-btn {
+            left: 1rem;
+        }
+
+        .next-btn {
+            right: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .desktop-menu {
+                display: none;
+            }
+            
+            .mobile-menu-section {
+                display: block;
+            }
+            
+            .bottom-nav {
+                display: flex;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .desktop-menu {
+                display: block;
+            }
+            
+            .mobile-menu-section {
+                display: none;
+            }
+            
+            .bottom-nav {
+                display: none;
+            }
+        }
+
+        /* Menu Viewer Controls */
+        .menu-viewer-controls {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 1000;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+        }
+
+        .download-btn {
+            background: rgba(5, 150, 105, 0.8);
+            border-color: rgba(5, 150, 105, 0.9);
+        }
+
+        .download-btn:hover {
+            background: rgba(5, 150, 105, 0.9);
+            border-color: rgba(5, 150, 105, 1);
+        }
+
+        /* Hide navigation buttons */
+        .viewer-nav-btn {
+            display: none !important;
+        }
+
+        /* Menu Viewer Controls - Hidden */
+        .menu-viewer-controls {
+            display: none !important;
+        }
+
+        .control-btn {
+            display: none !important;
+        }
+
+        .download-btn {
+            display: none !important;
+        }
+
+        /* Download Menu Section */
+        .download-menu-section {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            z-index: 100;
+        }
+
+        .download-menu-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(5, 150, 105, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            white-space: nowrap;
+        }
+
+        .download-menu-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(5, 150, 105, 0.4);
+        }
+
+        .download-menu-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .download-menu-btn i {
+            font-size: 1.125rem;
+        }
+    </style>
+</body>
+</html>
+

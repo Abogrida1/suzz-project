@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اطلب الآن - SUZZ Drive-Thru</title>
+    <meta name="description" content="اطلب من SUZZ Drive-Thru - أسرع كافيه في السويس">
+    <link rel="icon" href="/static/images/logo.jpg">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #1e293b;
+            --secondary: #334155;
+            --accent: #059669;
+            --accent-light: #10b981;
+            --accent-dark: #047857;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --success: #10b981;
+            --error: #ef4444;
+            --background: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(4, 120, 87, 0.05) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .card-elegant {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(51, 65, 85, 0.6));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-elegant:hover {
+            border-color: rgba(5, 150, 105, 0.4);
+        }
+
+        .btn-elegant {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 1rem 1.75rem;
+            border-radius: 1rem;
+            border: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 25px rgba(5, 150, 105, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-elegant::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-elegant:hover::before {
+            left: 100%;
+        }
+
+        .btn-elegant:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 
+                0 15px 35px rgba(5, 150, 105, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, #047857 0%, #10b981 100%);
+            color: #ffffff;
+        }
+
+        .btn-elegant:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(5, 150, 105, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(5, 150, 105, 0.1);
+            color: var(--accent-light);
+        }
+
+        /* Menu Item Styles */
+        .menu-item {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(51, 65, 85, 0.5));
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-3px);
+            border-color: rgba(5, 150, 105, 0.4);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-item-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+
+        .menu-item-content {
+            padding: 1rem;
+        }
+
+        .menu-item-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item-price {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--accent-light);
+            margin-bottom: 0.75rem;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .qty-btn {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.3), rgba(5, 150, 105, 0.5));
+            border: 1px solid rgba(5, 150, 105, 0.4);
+            color: var(--text);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+        }
+
+        .qty-btn:hover {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.6), rgba(5, 150, 105, 0.8));
+            border-color: rgba(5, 150, 105, 0.7);
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        .qty-btn:active {
+            transform: scale(0.95);
+        }
+
+        .qty-input {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            text-align: center;
+            width: 40px;
+            padding: 0.5rem 0;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Category Filter */
+        .category-filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 1.25rem;
+            border: 2px solid rgba(5, 150, 105, 0.3);
+            background: linear-gradient(135deg, rgba(51, 65, 85, 0.8), rgba(30, 41, 59, 0.9));
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 0.9rem;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .filter-btn:hover::before {
+            left: 100%;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            border-color: rgba(5, 150, 105, 0.8);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+        }
+
+        .filter-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(5, 150, 105, 0.2);
+            transition: left 0.3s ease;
+            padding: 1.5rem;
+            z-index: 1001;
+            overflow-y: auto;
+        }
+
+        .cart-sidebar.open {
+            left: 0;
+        }
+
+        .cart-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .cart-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .cart-item {
+            background: rgba(30, 41, 59, 0.6);
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(5, 150, 105, 0.2);
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .cart-item-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        /* Menu Grid */
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+            padding: 0 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .menu-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1.5rem;
+                padding: 0 0.5rem;
+            }
+            
+            .cart-sidebar {
+                max-width: 100%;
+                padding: 1rem;
+            }
+
+            .btn-elegant {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.95rem;
+            }
+
+            .filter-btn {
+                padding: 0.625rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .category-filters {
+                gap: 0.5rem;
+                padding: 0 1rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+                gap: 1.25rem;
+                padding: 0;
+            }
+            
+            .category-filters {
+                gap: 0.4rem;
+                padding: 0 0.5rem;
+                justify-content: flex-start;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding-bottom: 0.5rem;
+            }
+            
+            .filter-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .menu-item {
+                margin: 0 0.5rem;
+            }
+
+            .menu-item-content {
+                padding: 0.75rem;
+            }
+
+            .quantity-controls {
+                flex-direction: column;
+                gap: 0.75rem;
+                align-items: stretch;
+            }
+
+            .quantity-selector {
+                justify-content: center;
+                max-width: 200px;
+                margin: 0 auto;
+            }
+
+            .btn-elegant {
+                width: 100%;
+                justify-content: center;
+                padding: 1rem;
+                font-size: 1rem;
+            }
+
+            /* Header adjustments */
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            /* Navigation adjustments */
+            .navbar .container {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+
+            .menu-item-name {
+                font-size: 0.9rem;
+            }
+
+            .menu-item-price {
+                font-size: 1.1rem;
+            }
+
+            .qty-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+
+            .qty-input {
+                width: 35px;
+                font-size: 0.85rem;
+            }
+
+            .filter-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .cart-item {
+                padding: 0.5rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Success Animation */
+        .success-animation {
+            animation: successPop 0.6s ease-out;
+        }
+
+        @keyframes successPop {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <img src="/static/images/logo.jpg" 
+                         alt="SUZZ Logo" 
+                         class="w-10 h-10 rounded-lg object-cover">
+                    <div>
+                        <h1 class="text-lg font-bold text-white">SUZZ</h1>
+                        <p class="text-xs text-green-400">Drive-Thru</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-6">
+                    <a href="/home" class="nav-link">الرئيسية</a>
+                    <a href="/menu" class="nav-link">المنيو</a>
+                    <a href="/location" class="nav-link">الموقع</a>
+                    <a href="/order" class="nav-link active">اطلب الآن</a>
+                    <a href="/contact" class="nav-link">تواصل معنا</a>
+                    <a href="/" class="nav-link">كود الخصم</a>
+                </div>
+
+                <!-- Cart & Mobile Menu -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleCart()" class="relative">
+                        <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-shopping-cart text-white text-sm"></i>
+                        </div>
+                        <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
+                    </button>
+                    
+                    <button class="md:hidden text-white text-lg">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-bold text-white">سلة الطلبات</h2>
+            <button onclick="toggleCart()" class="text-white text-lg">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="cart-items" class="mb-6">
+            <p class="text-gray-400 text-center text-sm">السلة فارغة</p>
+        </div>
+        
+        <div class="border-t border-gray-600 pt-4">
+            <div class="flex justify-between items-center mb-4">
+                <span class="font-bold text-white">المجموع:</span>
+                <span id="cart-total" class="text-lg font-bold text-green-400">0 جنيه</span>
+            </div>
+            <button id="checkout-btn" class="btn-elegant w-full" onclick="checkout()" disabled>
+                <i class="fas fa-credit-card"></i>
+                إتمام الطلب
+            </button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="relative z-10 pt-16 hero-section">
+        <div class="container mx-auto px-4 py-8">
+            <div class="text-center">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">اطلب من SUZZ</h1>
+                <p class="text-lg md:text-xl text-gradient font-semibold">🛒 اختر منتجاتك المفضلة</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="card-elegant rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-white text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">تسجيل الدخول</h2>
+                <p class="text-gray-300">يجب تسجيل الدخول أولاً للطلب</p>
+            </div>
+            
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-white font-semibold mb-2">رقم الهاتف</label>
+                    <input type="tel" id="login-phone" required 
+                           class="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white focus:border-green-400 focus:outline-none"
+                           placeholder="01XXXXXXXXX" dir="ltr">
+                </div>
+                
+                <div>
+                    <label class="block text-white font-semibold mb-2">الاسم</label>
+                    <input type="text" id="login-name" required 
+                           class="w-full px-4 py-3 rounded-xl bg-gray-700 border border-gray-600 text-white focus:border-green-400 focus:outline-none"
+                           placeholder="اسمك الكريم">
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="btn-elegant flex-1">
+                        <i class="fas fa-sign-in-alt"></i>
+                        دخول
+                    </button>
+                    <button type="button" onclick="closeLoginModal()" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- User Info Bar -->
+    <div id="user-info-bar" class="bg-gradient-to-r from-green-600 to-green-700 text-white py-3 hidden">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-user-circle text-xl"></i>
+                <span>مرحباً، <span id="user-name-display" class="font-bold"></span></span>
+            </div>
+            <button onclick="logout()" class="text-sm hover:underline">
+                <i class="fas fa-sign-out-alt"></i> تسجيل خروج
+            </button>
+        </div>
+    </div>
+
+    <!-- Category Filter -->
+    <section class="container mx-auto px-4 py-4">
+        <div class="category-filters">
+            <button class="filter-btn active" data-category="all">الكل</button>
+            <button class="filter-btn" data-category="frappe">🧊 فرابيه</button>
+            <button class="filter-btn" data-category="cold-coffee">❄️ قهوة باردة</button>
+            <button class="filter-btn" data-category="cold-beverages">🥤 مشروبات باردة</button>
+            <button class="filter-btn" data-category="hot-coffee">☕ قهوة ساخنة</button>
+            <button class="filter-btn" data-category="tea">🍵 شاي وأعشاب</button>
+            <button class="filter-btn" data-category="hot-beverages">🍫 مشروبات ساخنة</button>
+            <button class="filter-btn" data-category="additions">➕ إضافات</button>
+        </div>
+    </section>
+
+    <!-- Menu Items -->
+    <main class="container mx-auto px-4 pb-8">
+        <div id="menu-grid" class="menu-grid">
+            <!-- Menu items will be loaded here by JavaScript -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-8 border-t border-gray-700 mt-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-sm text-gray-400">© 2025 SUZZ Drive-Thru. 🏆 أول Drive-Thru في السويس</p>
+        </div>
+    </footer>
+
+    <script>
+        // Complete Menu Data with Real Images
+        const menuItems = [
+            // FRAPPE
+            { id: 1, name: "Latte Frappe", price: 95, category: "frappe", image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 2, name: "Latte Caramel Frappe", price: 110, category: "frappe", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 3, name: "DBL Espresso Frappe", price: 100, category: "frappe", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 4, name: "Mocha Frappe", price: 110, category: "frappe", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 5, name: "White Mocha Frappe", price: 110, category: "frappe", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 6, name: "Lotus Latte Frappe", price: 130, category: "frappe", image: "https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 7, name: "Spanish Latte Frappe", price: 120, category: "frappe", image: "https://images.unsplash.com/photo-1511081692775-05d0f180a065?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 8, name: "White Chocolate Frappe", price: 95, category: "frappe", image: "https://images.unsplash.com/photo-1534778101976-62847782c213?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 9, name: "Caramel Frappe", price: 95, category: "frappe", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 10, name: "Oreo Frappe", price: 95, category: "frappe", image: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 11, name: "Nutella Frappe", price: 120, category: "frappe", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=60" },
+
+            // COLD COFFEE
+            { id: 12, name: "Iced Mocha", price: 110, category: "cold-coffee", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 13, name: "Iced White Mocha", price: 110, category: "cold-coffee", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 14, name: "Iced Caramel Macchiato", price: 110, category: "cold-coffee", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 15, name: "Iced Caffè Americano", price: 90, category: "cold-coffee", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 16, name: "Iced Cafe Latte", price: 95, category: "cold-coffee", image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 17, name: "Iced Spanish Latte", price: 110, category: "cold-coffee", image: "https://images.unsplash.com/photo-1511081692775-05d0f180a065?w=400&h=300&fit=crop&auto=format&q=60" },
+
+            // COLD BEVERAGES
+            { id: 18, name: "Smoothies", price: 90, category: "cold-beverages", image: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 19, name: "Yogurt", price: 100, category: "cold-beverages", image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 20, name: "Cherry Cola", price: 75, category: "cold-beverages", image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 21, name: "Pina Colada", price: 75, category: "cold-beverages", image: "https://images.unsplash.com/photo-1594736797933-d0beaa5c2b50?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 22, name: "Summer Drink", price: 95, category: "cold-beverages", image: "https://images.unsplash.com/photo-1546171753-97d7676e4602?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 23, name: "Fresh Juice", price: 80, category: "cold-beverages", image: "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 24, name: "Soda Up", price: 80, category: "cold-beverages", image: "https://images.unsplash.com/photo-1544145945-f90425340c7e?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 25, name: "Mojito", price: 80, category: "cold-beverages", image: "https://images.unsplash.com/photo-1563227812-0ea4c22e6cc8?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 26, name: "Milk Shake Premium", price: 120, category: "cold-beverages", image: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 27, name: "Milk Shake Regular", price: 95, category: "cold-beverages", image: "https://images.unsplash.com/photo-1553787825-6f6b18f86b87?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 28, name: "Iced Honey Matcha", price: 105, category: "cold-beverages", image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 29, name: "Iced Matcha", price: 110, category: "cold-beverages", image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 30, name: "Iced Spanish Matcha", price: 120, category: "cold-beverages", image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400&h=300&fit=crop&auto=format&q=60" },
+
+            // HOT COFFEE
+            { id: 31, name: "Mocha", price: 105, category: "hot-coffee", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 32, name: "White Mocha", price: 105, category: "hot-coffee", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 33, name: "Cappuccino", price: 93, category: "hot-coffee", image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 34, name: "Latte", price: 93, category: "hot-coffee", image: "https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 35, name: "Lotus Latte", price: 125, category: "hot-coffee", image: "https://images.unsplash.com/photo-1485808191679-5f86510681a2?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 36, name: "Spanish Latte", price: 105, category: "hot-coffee", image: "https://images.unsplash.com/photo-1511081692775-05d0f180a065?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 37, name: "Flat White", price: 100, category: "hot-coffee", image: "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 38, name: "Caramel Macchiato", price: 100, category: "hot-coffee", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 39, name: "DBL Chocolate Mocha", price: 97, category: "hot-coffee", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 40, name: "American Coffee", price: 82, category: "hot-coffee", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 41, name: "Americano", price: 90, category: "hot-coffee", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 42, name: "Salted Caramel", price: 110, category: "hot-coffee", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 43, name: "Espresso", price: 55, category: "hot-coffee", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 44, name: "Macchiato", price: 55, category: "hot-coffee", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 45, name: "Turkish Coffee", price: 48, category: "hot-coffee", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 46, name: "French Coffee", price: 55, category: "hot-coffee", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 47, name: "Nutella Coffee", price: 78, category: "hot-coffee", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=60" },
+
+            // TEA & HERBS
+            { id: 48, name: "Breakfast Tea", price: 40, category: "tea", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 49, name: "Flavored Tea", price: 45, category: "tea", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 50, name: "Milk Tea", price: 50, category: "tea", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 51, name: "Karak Tea", price: 65, category: "tea", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 52, name: "Mint Tea", price: 40, category: "tea", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 53, name: "Flu Cocktail", price: 65, category: "tea", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+
+            // HOT BEVERAGES
+            { id: 54, name: "Hot Chocolate", price: 82, category: "hot-beverages", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 55, name: "White Hot Chocolate", price: 82, category: "hot-beverages", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 56, name: "Hot Cider", price: 65, category: "hot-beverages", image: "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 57, name: "Honey Matcha", price: 105, category: "hot-beverages", image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 58, name: "Vanilla Matcha", price: 110, category: "hot-beverages", image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 59, name: "Spanish Matcha", price: 120, category: "hot-beverages", image: "https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400&h=300&fit=crop&auto=format&q=60" },
+
+            // ADDITIONS
+            { id: 60, name: "Extra Espresso Shot", price: 35, category: "additions", image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 61, name: "Milk", price: 27, category: "additions", image: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 62, name: "Flavour Syrup", price: 35, category: "additions", image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 63, name: "Whipped Cream", price: 40, category: "additions", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 64, name: "Extra Sauce", price: 40, category: "additions", image: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 65, name: "Ice Cream Ball", price: 40, category: "additions", image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 66, name: "Extra Nutella", price: 55, category: "additions", image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 67, name: "Marshmallow", price: 40, category: "additions", image: "https://images.unsplash.com/photo-1578374173704-14296d5d72a5?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 68, name: "Oreo", price: 40, category: "additions", image: "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400&h=300&fit=crop&auto=format&q=60" },
+            { id: 69, name: "Condensed Milk", price: 40, category: "additions", image: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=300&fit=crop&auto=format&q=60" }
+        ];
+
+        let cart = [];
+        let currentUser = null;
+
+        // DOM Elements
+        const menuGrid = document.getElementById('menu-grid');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const cartOverlay = document.getElementById('cart-overlay');
+        const cartItems = document.getElementById('cart-items');
+        const cartTotal = document.getElementById('cart-total');
+        const cartCount = document.getElementById('cart-count');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const loginModal = document.getElementById('login-modal');
+        const userInfoBar = document.getElementById('user-info-bar');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Don't check login on page load - let users browse and add items first
+            renderMenuItems();
+            setupCategoryFilters();
+            updateCartDisplay();
+            setupLoginForm();
+        });
+
+        // Login System
+        function checkUserLogin() {
+            const savedUser = localStorage.getItem('suzz_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showUserInfo();
+            } else {
+                showLoginModal();
+            }
+        }
+
+        function showLoginModal() {
+            loginModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLoginModal() {
+            if (currentUser) {
+                loginModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            } else {
+                // Just close the modal, don't redirect - let users continue browsing
+                loginModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function showUserInfo() {
+            if (currentUser) {
+                document.getElementById('user-name-display').textContent = currentUser.name;
+                userInfoBar.classList.remove('hidden');
+                loginModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('suzz_user');
+            currentUser = null;
+            userInfoBar.classList.add('hidden');
+            showLoginModal();
+        }
+
+        function setupLoginForm() {
+            document.getElementById('login-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const phone = document.getElementById('login-phone').value.trim();
+                const name = document.getElementById('login-name').value.trim();
+                
+                if (phone.length < 11) {
+                    alert('رقم الهاتف يجب أن يكون 11 رقم');
+                    return;
+                }
+
+                if (name.length < 2) {
+                    alert('الاسم يجب أن يكون حرفين على الأقل');
+                    return;
+                }
+
+                // Save user info
+                currentUser = { name, phone };
+                localStorage.setItem('suzz_user', JSON.stringify(currentUser));
+                
+                showUserInfo();
+                
+                // Show success message
+                alert(`مرحباً ${name}! يمكنك الآن البدء في الطلب 🎉`);
+            });
+        }
+
+        // Render menu items
+        function renderMenuItems(category = 'all') {
+            const filteredItems = category === 'all' ? menuItems : menuItems.filter(item => item.category === category);
+            
+            menuGrid.innerHTML = filteredItems.map(item => `
+                <div class="menu-item fade-in" data-category="${item.category}">
+                    <img src="${item.image}" alt="${item.name}" class="menu-item-image" 
+                         onerror="this.src='https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop&auto=format&q=60'">
+                    <div class="menu-item-content">
+                        <div class="menu-item-name">${item.name}</div>
+                        <div class="menu-item-price">${item.price} جنيه</div>
+                        
+                        <div class="quantity-controls">
+                            <div class="quantity-selector">
+                                <button class="qty-btn" onclick="decreaseQuantity(${item.id})">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" class="qty-input" id="qty-${item.id}" value="1" min="1" max="10" readonly>
+                                <button class="qty-btn" onclick="increaseQuantity(${item.id})">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            
+                            <button class="btn-elegant" onclick="addToCart(${item.id})">
+                                <i class="fas fa-cart-plus"></i>
+                                إضافة
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Setup category filters
+        function setupCategoryFilters() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const category = btn.getAttribute('data-category');
+                    renderMenuItems(category);
+                });
+            });
+        }
+
+        // Quantity controls
+        function increaseQuantity(itemId) {
+            const input = document.getElementById(`qty-${itemId}`);
+            const currentValue = parseInt(input.value);
+            if (currentValue < 10) {
+                input.value = currentValue + 1;
+            }
+        }
+
+        function decreaseQuantity(itemId) {
+            const input = document.getElementById(`qty-${itemId}`);
+            const currentValue = parseInt(input.value);
+            if (currentValue > 1) {
+                input.value = currentValue - 1;
+            }
+        }
+
+        // Add to cart
+        function addToCart(itemId) {
+            const item = menuItems.find(item => item.id === itemId);
+            const quantity = parseInt(document.getElementById(`qty-${itemId}`).value);
+            
+            const existingItem = cart.find(cartItem => cartItem.id === itemId);
+            
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    ...item,
+                    quantity: quantity
+                });
+            }
+            
+            updateCartDisplay();
+            showAddedToCartAnimation(itemId);
+        }
+
+        // Remove from cart
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.id !== itemId);
+            updateCartDisplay();
+        }
+
+        // Update cart quantity
+        function updateCartQuantity(itemId, quantity) {
+            const item = cart.find(item => item.id === itemId);
+            if (item) {
+                item.quantity = Math.max(1, quantity);
+                updateCartDisplay();
+            }
+        }
+
+        // Update cart display
+        function updateCartDisplay() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            // Update cart count
+            if (totalItems > 0) {
+                cartCount.textContent = totalItems;
+                cartCount.classList.remove('hidden');
+            } else {
+                cartCount.classList.add('hidden');
+            }
+            
+            // Update cart items
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p class="text-gray-400 text-center text-sm">السلة فارغة</p>';
+                checkoutBtn.disabled = true;
+            } else {
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-name">${item.name}</div>
+                        <div class="cart-item-details">
+                            <div class="flex items-center gap-2">
+                                <button onclick="updateCartQuantity(${item.id}, ${item.quantity - 1})" class="qty-btn">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="text-white font-bold">${item.quantity}</span>
+                                <button onclick="updateCartQuantity(${item.id}, ${item.quantity + 1})" class="qty-btn">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-green-400 font-bold">${item.price * item.quantity} جنيه</span>
+                                <button onclick="removeFromCart(${item.id})" class="text-red-400 hover:text-red-300">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                checkoutBtn.disabled = false;
+            }
+            
+            // Update total
+            cartTotal.textContent = `${totalPrice} جنيه`;
+        }
+
+        // Show added to cart animation
+        function showAddedToCartAnimation(itemId) {
+            // Reset quantity to 1 after adding
+            document.getElementById(`qty-${itemId}`).value = 1;
+            
+            // Show success message
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> تم';
+            button.classList.add('success-animation');
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.classList.remove('success-animation');
+            }, 1500);
+        }
+
+        // Toggle cart
+        function toggleCart() {
+            cartSidebar.classList.toggle('open');
+            cartOverlay.classList.toggle('open');
+            document.body.style.overflow = cartSidebar.classList.contains('open') ? 'hidden' : 'auto';
+        }
+
+        // Checkout
+        function checkout() {
+            if (cart.length === 0) {
+                alert('السلة فارغة! أضف بعض المنتجات أولاً');
+                return;
+            }
+            
+            // Check if user is logged in, if not show login modal
+            if (!currentUser) {
+                showLoginModal();
+                return;
+            }
+            
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const orderSummary = cart.map(item => `${item.name} x${item.quantity}`).join('\n');
+            
+            alert(`تم تأكيد طلبك! 🎉\n\nالعميل: ${currentUser.name}\nالهاتف: ${currentUser.phone}\n\nتفاصيل الطلب:\n${orderSummary}\n\nالمجموع: ${totalPrice} جنيه\n\nسيكون طلبك جاهز في خلال 3 دقائق في SUZZ Drive-Thru! 🚗☕\n\nسيتم التواصل معك على رقم ${currentUser.phone}`);
+            
+            // Clear cart
+            cart = [];
+            updateCartDisplay();
+            toggleCart();
+        }
+    </script>
+</body>
+</html>

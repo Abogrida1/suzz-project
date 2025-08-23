@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUZZ Drive-Thru - أسرع كافيه في مصر</title>
+    <meta name="description" content="SUZZ Drive-Thru - أول وأسرع Drive-Thru في السويس - قهوة طازجة في أقل من 3 دقائق">
+    <link rel="icon" href="/static/images/logo.jpg">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Modern Theme CSS -->
+    <link rel="stylesheet" href="/static/css/modern-theme.css">
+    
+    <style>
+        :root {
+            --primary: #1e293b;
+            --secondary: #334155;
+            --accent: #059669;
+            --accent-light: #10b981;
+            --accent-dark: #047857;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --success: #10b981;
+            --error: #ef4444;
+            --background: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(4, 120, 87, 0.05) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="%23ffffff" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .card-elegant {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(51, 65, 85, 0.6));
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card-elegant:hover {
+            transform: translateY(-5px);
+            border-color: rgba(5, 150, 105, 0.4);
+            box-shadow: 
+                0 35px 60px -15px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-elegant {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: #ffffff;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            border: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(5, 150, 105, 0.3);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-elegant::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-elegant:hover::before {
+            left: 100%;
+        }
+
+        .btn-elegant:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(5, 150, 105, 0.4);
+            background: linear-gradient(135deg, #047857 0%, #059669 100%);
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: rgba(51, 65, 85, 0.6);
+            border: 1px solid rgba(5, 150, 105, 0.3);
+            color: var(--text);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: rgba(5, 150, 105, 0.5);
+            transform: translateY(-1px);
+            color: var(--text);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #059669, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Navigation Styles */
+        .navbar {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(5, 150, 105, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(15, 23, 42, 0.98);
+            border-bottom-color: rgba(5, 150, 105, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(5, 150, 105, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(5, 150, 105, 0.1);
+            color: var(--accent-light);
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 300px;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(5, 150, 105, 0.2);
+            transition: right 0.3s ease;
+            padding: 2rem;
+            z-index: 1001;
+        }
+
+        .mobile-menu.open {
+            right: 0;
+        }
+
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .mobile-menu-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Hero Video Styles - Enhanced for Desktop */
+        .hero-video-container {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .hero-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .hero-video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Desktop Video Optimization */
+        @media (min-width: 1024px) {
+            .hero-video {
+                min-width: 120%;
+                min-height: 120%;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+            
+            .hero-video-container {
+                height: 100vh;
+            }
+        }
+
+        /* Tablet Video Optimization */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .hero-video {
+                min-width: 110%;
+                min-height: 110%;
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+        }
+
+        .hero-content {
+            text-align: center;
+            color: white;
+            z-index: 3;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 3vw, 1.5rem);
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stats-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.6), rgba(51, 65, 85, 0.4));
+            border: 1px solid rgba(5, 150, 105, 0.2);
+            backdrop-filter: blur(15px);
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(5, 150, 105, 0.4);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-elegant,
+            .btn-secondary {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-content">
+                <!-- Logo -->
+                <div class="flex items-center gap-md">
+                    <img src="/static/images/logo.jpg" alt="SUZZ Logo" width="40" height="40" class="rounded-lg">
+                    <div>
+                        <h1 style="font-size: 1.125rem; font-weight: 700; margin: 0; color: var(--text-primary);">SUZZ</h1>
+                        <p style="font-size: 0.75rem; color: var(--accent-secondary); margin: 0;">Drive-Thru</p>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <ul class="nav-links" style="display: none;" id="desktop-nav">
+                    <li><a href="/home" class="nav-link active">الرئيسية</a></li>
+                    <li><a href="/menu" class="nav-link">المنيو</a></li>
+                    <li><a href="/location" class="nav-link">الموقع</a></li>
+                    <li><a href="/order" class="nav-link">اطلب الآن</a></li>
+                    <li><a href="/contact" class="nav-link">تواصل معنا</a></li>
+                    <li><a href="/" class="nav-link">كود الخصم</a></li>
+                </ul>
+
+                <!-- Controls -->
+                <div class="flex items-center gap-md">
+                    <!-- Theme Toggle -->
+                    <button class="theme-toggle" onclick="toggleTheme()" aria-label="تغيير الثيم">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                    
+                    <!-- Mobile Menu -->
+                    <button class="theme-toggle" onclick="toggleMobileMenu()" id="mobile-menu-btn" style="display: none;">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-xl font-bold text-white">القائمة</h2>
+            <button onclick="toggleMobileMenu()" class="text-white text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="space-y-4">
+            <a href="/home" class="nav-link block active">الرئيسية</a>
+            <a href="/menu" class="nav-link block">المنيو</a>
+            <a href="/location" class="nav-link block">الموقع</a>
+            <a href="/order" class="nav-link block">اطلب الآن</a>
+            <a href="/contact" class="nav-link block">تواصل معنا</a>
+            <a href="/" class="nav-link block">كود الخصم</a>
+        </div>
+    </div>
+
+    <!-- Hero Section with Video -->
+    <section class="hero-video-container">
+        <video class="hero-video" autoplay muted loop playsinline preload="auto">
+            <source src="/assets/videos/drive thru auto vid.mp4" type="video/mp4">
+        </video>
+        <div class="hero-video-overlay">
+            <div class="hero-content fade-in">
+                <h1 class="hero-title">SUZZ Drive-Thru</h1>
+                <p class="hero-subtitle">
+                    🏆 أول وأسرع Drive-Thru في السويس<br>
+                    قهوة طازجة وخدمة سريعة في أقل من 3 دقائق
+                </p>
+                <div class="hero-buttons">
+                    <a href="/order" class="btn-elegant">
+                        <i class="fas fa-shopping-cart"></i>
+                        اطلب الآن
+                    </a>
+                    <a href="/menu" class="btn-secondary">
+                        <i class="fas fa-utensils"></i>
+                        شاهد المنيو
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-16 md:py-20">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">لماذا SUZZ؟</h2>
+                <p class="text-lg text-gray-300">نقدم أفضل تجربة قهوة مع خدمة Drive-Thru الأسرع في مصر</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <div class="card-elegant rounded-2xl p-8 text-center fade-in">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 rounded-full flex items-center justify-center animate-float relative">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white drop-shadow-lg">
+                            <!-- Lightning bolt with energy effects -->
+                            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+                            <!-- Energy sparks -->
+                            <circle cx="7" cy="7" r="1" fill="currentColor" opacity="0.8"/>
+                            <circle cx="17" cy="17" r="1" fill="currentColor" opacity="0.8"/>
+                            <circle cx="5" cy="16" r="0.5" fill="currentColor" opacity="0.6"/>
+                            <circle cx="19" cy="8" r="0.5" fill="currentColor" opacity="0.6"/>
+                            <!-- Speed lines -->
+                            <path d="M2 12h3M19 12h3M6 6l2 2M16 16l2 2" stroke="currentColor" strokeWidth="0.8" strokeLinecap="round" opacity="0.7"/>
+                        </svg>
+                        <div class="absolute inset-0 bg-gradient-to-br from-yellow-400 to-red-500 rounded-full animate-pulse opacity-20"></div>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">سرعة خيالية ⚡</h3>
+                    <p class="text-gray-300">طلبك جاهز في أقل من 3 دقائق مع ضمان أعلى جودة</p>
+                </div>
+                
+                <div class="card-elegant rounded-2xl p-8 text-center fade-in">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 rounded-full flex items-center justify-center animate-float relative">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white drop-shadow-lg">
+                            <!-- Stylized car with drive-thru elements -->
+                            <path d="M5 12V8c0-1 1-2 2-2h10c1 0 2 1 2 2v4M5 12h14M5 12v2c0 1 1 2 2 2h1m11 0h1c1 0 2-1 2-2v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                            <!-- Wheels with motion -->
+                            <circle cx="8" cy="16" r="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                            <circle cx="16" cy="16" r="2" stroke="currentColor" strokeWidth="1.5" fill="none"/>
+                            <circle cx="8" cy="16" r="0.8" fill="currentColor"/>
+                            <circle cx="16" cy="16" r="0.8" fill="currentColor"/>
+                            <!-- Speed/movement lines -->
+                            <path d="M2 10h3M2 14h2M21 10h1M21 14h1" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.7"/>
+                            <!-- Drive-thru window -->
+                            <rect x="11" y="8" width="3" height="2" rx="0.5" stroke="currentColor" strokeWidth="1" fill="none" opacity="0.8"/>
+                        </svg>
+                        <div class="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full animate-pulse opacity-20"></div>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">Drive-Thru مريح 🚗</h3>
+                    <p class="text-gray-300">اطلب من سيارتك بدون النزول واستلم طلبك بسرعة</p>
+                </div>
+                
+                <div class="card-elegant rounded-2xl p-8 text-center fade-in">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 rounded-full flex items-center justify-center animate-float relative">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white drop-shadow-lg">
+                            <!-- Premium coffee cup with steam and quality elements -->
+                            <path d="M7 10V9c0-3 2-5 5-5s5 2 5 5v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                            <!-- Cup body -->
+                            <path d="M6 10h12c1 0 2 1 2 2v4c0 2-1 3-3 3H7c-2 0-3-1-3-3v-4c0-1 1-2 2-2z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                            <!-- Handle -->
+                            <path d="M18 12h1c1 0 2 1 2 2s-1 2-2 2h-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                            <!-- Steam lines -->
+                            <path d="M10 6c0-1 0-2 1-2s1 1 1 2M12 5c0-1 0-2 1-2s1 1 1 2M14 6c0-1 0-2 1-2s1 1 1 2" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.8"/>
+                            <!-- Quality stars -->
+                            <circle cx="9" cy="14" r="0.5" fill="currentColor" opacity="0.7"/>
+                            <circle cx="12" cy="13" r="0.5" fill="currentColor" opacity="0.7"/>
+                            <circle cx="15" cy="14" r="0.5" fill="currentColor" opacity="0.7"/>
+                        </svg>
+                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-400 to-teal-600 rounded-full animate-pulse opacity-20"></div>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-4">جودة مضمونة ☕</h3>
+                    <p class="text-gray-300">أفضل حبوب القهوة ومكونات طازجة في كل كوب</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-gradient-to-r from-green-600 to-green-700">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center text-white">
+                <div>
+                    <div class="text-4xl md:text-5xl font-bold mb-2">1000+</div>
+                    <div class="text-lg">عميل سعيد يومياً</div>
+                </div>
+                <div>
+                    <div class="text-4xl md:text-5xl font-bold mb-2">3</div>
+                    <div class="text-lg">دقائق متوسط الانتظار</div>
+                </div>
+                <div>
+                    <div class="text-4xl md:text-5xl font-bold mb-2">24</div>
+                    <div class="text-lg">ساعة في اليوم</div>
+                </div>
+                <div>
+                    <div class="text-4xl md:text-5xl font-bold mb-2">5⭐</div>
+                    <div class="text-lg">تقييم العملاء</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 md:py-20">
+        <div class="container mx-auto px-4 text-center">
+            <div class="card-elegant max-w-3xl mx-auto rounded-2xl p-8 md:p-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">جاهز لتجربة أفضل قهوة؟</h2>
+                <p class="text-lg text-gray-300 mb-8">
+                    اطلب الآن واستمتع بخدمة Drive-Thru السريعة والمريحة في SUZZ
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="/order" class="btn-elegant text-lg">
+                        <i class="fas fa-rocket"></i>
+                        ابدأ طلبك الآن
+                    </a>
+                    <a href="/location" class="btn-secondary text-lg">
+                        <i class="fas fa-map-marker-alt"></i>
+                        اعرف موقعنا
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="py-16 border-t border-gray-700">
+        <div class="container mx-auto px-4">
+            <div class="card-elegant rounded-2xl p-8 md:p-12 text-center fade-in">
+                <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-phone text-white text-3xl"></i>
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">تواصل معنا</h2>
+                <p class="text-lg text-gray-300 mb-8">
+                    نحن هنا لخدمتك على مدار الساعة
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+                    <a href="https://wa.me/201050689899?text=مرحباً، أريد معرفة المزيد عن SUZZ Drive-Thru" 
+                       target="_blank" 
+                       class="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-xl transition-all transform hover:scale-105 font-bold text-lg shadow-lg">
+                        <i class="fab fa-whatsapp mr-3 text-xl"></i>
+                        واتس آب: 20 105 068 9899
+                    </a>
+                    <a href="tel:+201050689899" 
+                       class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-xl transition-all transform hover:scale-105 font-bold text-lg shadow-lg">
+                        <i class="fas fa-phone mr-3 text-xl"></i>
+                        اتصال مباشر
+                    </a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="bg-gray-800/50 rounded-xl p-6">
+                        <i class="fas fa-clock text-green-400 text-2xl mb-3"></i>
+                        <h3 class="text-white font-bold mb-2">ساعات العمل</h3>
+                        <p class="text-gray-300">24 ساعة / 7 أيام</p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-xl p-6">
+                        <i class="fas fa-map-marker-alt text-green-400 text-2xl mb-3"></i>
+                        <h3 class="text-white font-bold mb-2">الموقع</h3>
+                        <p class="text-gray-300">السويس، مصر</p>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-xl p-6">
+                        <i class="fas fa-car text-green-400 text-2xl mb-3"></i>
+                        <h3 class="text-white font-bold mb-2">خدمة Drive-Thru</h3>
+                        <p class="text-gray-300">جاهز في 3 دقائق</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-gray-700">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex items-center justify-center space-x-4 mb-6">
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <p class="text-xl font-bold text-white">SUZZ</p>
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            </div>
+            <p class="text-base text-gray-300 mb-2">© 2025 SUZZ. جميع الحقوق محفوظة.</p>
+            <p class="text-sm text-gray-400">🏆 أول Drive-Thru في السويس</p>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const menuIcon = document.getElementById('menu-icon');
+            
+            mobileMenu.classList.toggle('open');
+            overlay.classList.toggle('open');
+            
+            if (mobileMenu.classList.contains('open')) {
+                menuIcon.className = 'fas fa-times';
+            } else {
+                menuIcon.className = 'fas fa-bars';
+            }
+        }
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Initialize theme and responsive nav
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            setupResponsiveNav();
+            
+            // Enhanced Video handling
+            const video = document.querySelector('.hero-video');
+            if (video) {
+                video.addEventListener('loadeddata', function() {
+                    video.play().catch(e => console.log('Video autoplay prevented:', e));
+                });
+                
+                // Ensure video quality
+                video.addEventListener('canplay', function() {
+                    this.style.opacity = '1';
+                });
+            }
+            
+            // Animate elements on scroll
+            animateOnScroll();
+            
+            // Animate counters
+            animateCounters();
+        });
+
+        // Theme management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('suzz-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('suzz-theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Responsive navigation
+        function setupResponsiveNav() {
+            const desktopNav = document.getElementById('desktop-nav');
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            
+            function updateNav() {
+                if (window.innerWidth >= 768) {
+                    desktopNav.style.display = 'flex';
+                    mobileBtn.style.display = 'none';
+                } else {
+                    desktopNav.style.display = 'none';
+                    mobileBtn.style.display = 'block';
+                }
+            }
+            
+            updateNav();
+            window.addEventListener('resize', updateNav);
+        }
+
+        function toggleMobileMenu() {
+            // Simple mobile menu - could be enhanced
+            alert('Mobile menu - يمكن تطويره لاحقاً');
+        }
+
+        // Scroll animations
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            elements.forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                observer.observe(el);
+            });
+        }
+
+        // Animate counters
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-number');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const target = entry.target;
+                        const finalValue = target.textContent;
+                        const numValue = parseInt(finalValue);
+                        
+                        if (!isNaN(numValue)) {
+                            animateNumber(target, 0, numValue, 2000);
+                        }
+                        
+                        observer.unobserve(target);
+                    }
+                });
+            }, { threshold: 0.5 });
+
+            counters.forEach(counter => observer.observe(counter));
+        }
+
+        function animateNumber(element, start, end, duration) {
+            const range = end - start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                element.textContent = current + (element.textContent.includes('⭐') ? '⭐' : '');
+                
+                if (current === end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+    </script>
+</body>
+</html>
