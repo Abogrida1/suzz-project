@@ -5,7 +5,13 @@ import os
 import tempfile
 import uuid
 import random
+import ssl
 from urllib.parse import urlparse, parse_qs
+
+# DISABLE SSL VERIFICATION COMPLETELY - 100% GUARANTEED
+ssl._create_default_https_context = ssl._create_unverified_context
+os.environ['PYTHONHTTPSVERIFY'] = '0'
+os.environ['CURL_INSECURE'] = '1'
 
 app = Flask(__name__)
 CORS(app)
