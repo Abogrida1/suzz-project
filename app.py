@@ -55,6 +55,13 @@ def get_info_extractor():
         'fragment_retries': 5,
         'extractor_retries': 5,
         'file_access_retries': 5,
+        # SSL and certificate fixes
+        'nocheckcertificate': True,
+        'no_check_certificate': True,
+        'prefer_insecure': True,
+        'legacy_server_connect': True,
+        'http_chunk_size': 10485760,
+        'buffersize': 1024,
         'extractor_args': {
             'youtube': {
                 'skip': ['dash', 'live_chat'],
@@ -100,6 +107,13 @@ def get_downloader():
         'fragment_retries': 5,
         'extractor_retries': 5,
         'file_access_retries': 5,
+        # SSL and certificate fixes
+        'nocheckcertificate': True,
+        'no_check_certificate': True,
+        'prefer_insecure': True,
+        'legacy_server_connect': True,
+        'http_chunk_size': 10485760,
+        'buffersize': 1024,
         'extractor_args': {
             'youtube': {
                 'skip': ['dash', 'live_chat'],
@@ -156,6 +170,11 @@ def search_video():
             'sleep_interval_requests': 1,
             'max_sleep_interval_requests': 5,
             # Add additional anti-bot measures
+            'no_check_certificate': True,
+            'prefer_insecure': True,
+            'legacy_server_connect': True,
+            # SSL certificate fixes
+            'nocheckcertificate': True,
             'no_check_certificate': True,
             'prefer_insecure': True,
             'legacy_server_connect': True,
@@ -315,6 +334,10 @@ def download():
             'fragment_retries': 5,
             'extractor_retries': 5,
             'file_access_retries': 5,
+            # SSL certificate fixes
+            'no_check_certificate': True,
+            'prefer_insecure': True,
+            'legacy_server_connect': True,
             'extractor_args': {
                 'youtube': {
                     'skip': ['dash', 'live_chat'],
