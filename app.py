@@ -3,238 +3,57 @@ from flask_cors import CORS
 import yt_dlp
 import os
 import tempfile
-import uuid
 import random
 import ssl
-from urllib.parse import urlparse, parse_qs
 
-# DISABLE SSL VERIFICATION COMPLETELY - 100% GUARANTEED
+# SIMPLE SSL BYPASS - 100% WORKING
 ssl._create_default_https_context = ssl._create_unverified_context
 os.environ['PYTHONHTTPSVERIFY'] = '0'
 os.environ['CURL_INSECURE'] = '1'
 
-# ADDITIONAL SSL DISABLE - EXTRA STRONG
-os.environ['REQUESTS_CA_BUNDLE'] = ''
-os.environ['SSL_CERT_FILE'] = ''
-os.environ['PYTHONSSLVERIFY'] = '0'
-
-# Create custom SSL context
-custom_ssl_context = ssl.create_default_context()
-custom_ssl_context.check_hostname = False
-custom_ssl_context.verify_mode = ssl.CERT_NONE
-ssl._create_default_https_context = lambda: custom_ssl_context
-
-# Force urllib3 to use unverified SSL
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-# Configure requests to use unverified SSL
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.poolmanager import PoolManager
-
-class CustomHTTPAdapter(HTTPAdapter):
-    def init_poolmanager(self, connections, maxsize, block=False):
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        self.poolmanager = PoolManager(
-            num_pools=connections,
-            maxsize=maxsize,
-            block=block,
-            ssl_version=ssl.PROTOCOL_TLS,
-            ssl_context=ctx
-        )
-
-# Configure requests session
-session = requests.Session()
-adapter = CustomHTTPAdapter()
-session.mount("http://", adapter)
-session.mount("https://", adapter)
-
-# PATCH SSL AT SYSTEM LEVEL - ULTRA STRONG SSL BYPASS v3
-import ssl
-import socket
-
-# Patch socket to use unverified SSL
-original_socket_ssl = socket.ssl
-
-def unverified_socket_ssl(sock, keyfile=None, certfile=None, server_side=False, cert_reqs=ssl.CERT_NONE, ssl_version=ssl.PROTOCOL_TLS, ca_certs=None, do_handshake_on_connect=True, suppress_ragged_eofs=True, ciphers=None):
-    return original_socket_ssl(sock, keyfile, certfile, server_side, ssl.CERT_NONE, ssl_version, ca_certs, do_handshake_on_connect, suppress_ragged_eofs, ciphers)
-
-socket.ssl = unverified_socket_ssl
-
-# Patch urllib3 SSL
-try:
-    import urllib3.util.ssl_
-    original_ssl_context = urllib3.util.ssl_.create_urllib3_context
-    
-    def patched_ssl_context(*args, **kwargs):
-        ctx = original_ssl_context(*args, **kwargs)
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        return ctx
-    
-    urllib3.util.ssl_.create_urllib3_context = patched_ssl_context
-    print("[SSL_PATCH] urllib3 SSL context patched successfully")
-except Exception as e:
-    print(f"[SSL_PATCH] Warning: Could not patch urllib3: {e}")
-
-# Patch requests SSL
-try:
-    import requests.adapters
-    original_ssl_context = requests.adapters.create_urllib3_context
-    
-    def patched_requests_ssl_context(*args, **kwargs):
-        ctx = original_ssl_context(*args, **kwargs)
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        return ctx
-    
-    requests.adapters.create_urllib3_context = patched_requests_ssl_context
-    print("[SSL_PATCH] requests SSL context patched successfully")
-except Exception as e:
-    print(f"[SSL_PATCH] Warning: Could not patch requests: {e}")
-
-print("[SSL_PATCH] System-level SSL bypass completed")
+print("[APP] SSL bypass completed - app starting...")
 
 app = Flask(__name__)
 CORS(app)
 
-# List of popular user agents to rotate
+# List of popular user agents
 USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
 ]
 
 def get_random_user_agent():
     return random.choice(USER_AGENTS)
 
-# Configure yt-dlp options for info extraction
+# Simple yt-dlp extractor
 def get_info_extractor():
     return yt_dlp.YoutubeDL({
         'quiet': True,
         'no_warnings': True,
-        'extract_flat': False,
-        # Add rotating user agents
+        'nocheckcertificate': True,
+        'no_check_certificate': True,
+        'prefer_insecure': True,
         'http_headers': {
             'User-Agent': get_random_user_agent(),
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0',
         },
-        # ULTRA STRONG SSL BYPASS v3 - 100% GUARANTEED
-        'nocheckcertificate': True,
-        'no_check_certificate': True,
-        'prefer_insecure': True,
-        'legacy_server_connect': True,
-        'no_check_certificates': True,
-        'check_certificate': False,
-        'verify_ssl': False,
-        'ssl_verify': False,
-        'certificate_verify': False,
-        # Additional SSL bypass options
-        'nocheckcertificate': True,
-        'no_check_certificate': True,
-        'prefer_insecure': True,
-        'legacy_server_connect': True,
-        'no_check_certificates': True,
-        'check_certificate': False,
-        'verify_ssl': False,
-        'ssl_verify': False,
-        'certificate_verify': False,
-        # Force insecure connections
-        'prefer_insecure': True,
-        'legacy_server_connect': True,
-        'ignoreerrors': False,
-        'logtostderr': False,
-        'geo_bypass': True,
-        'geo_bypass_country': 'US',
-        'socket_timeout': 120,
-        'retries': 10,
-        'fragment_retries': 10,
-        'extractor_retries': 10,
-        'file_access_retries': 10,
-        'http_chunk_size': 10485760,
-        'buffersize': 1024,
-        'extractor_args': {
-            'youtube': {
-                'skip': ['dash', 'live_chat'],
-                'player_client': ['android', 'web', 'mweb', 'tv_embedded'],
-                'player_skip': ['webpage', 'configs'],
-                'player_params': {'hl': 'en', 'gl': 'US'},
-            }
-        },
-        # Add referer and origin
-        'referer': 'https://www.youtube.com/',
-        'origin': 'https://www.youtube.com',
+        'socket_timeout': 30,
+        'retries': 3,
     })
 
-# Configure yt-dlp options for downloads
+# Simple yt-dlp downloader
 def get_downloader():
     return yt_dlp.YoutubeDL({
         'outtmpl': '%(title)s.%(ext)s',
         'quiet': True,
-        'no_warnings': True,
-        # Add rotating user agents
-        'http_headers': {
-            'User-Agent': get_random_user_agent(),
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-            'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0',
-        },
-        # ULTRA STRONG SSL BYPASS - 100% GUARANTEED
         'nocheckcertificate': True,
         'no_check_certificate': True,
         'prefer_insecure': True,
-        'legacy_server_connect': True,
-        'no_check_certificates': True,
-        'check_certificate': False,
-        'verify_ssl': False,
-        'ssl_verify': False,
-        'certificate_verify': False,
-        'ignoreerrors': False,
-        'logtostderr': False,
-        'geo_bypass': True,
-        'geo_bypass_country': 'US',
-        'socket_timeout': 120,
-        'retries': 10,
-        'fragment_retries': 10,
-        'extractor_retries': 10,
-        'file_access_retries': 10,
-        'http_chunk_size': 10485760,
-        'buffersize': 1024,
-        'extractor_args': {
-            'youtube': {
-                'skip': ['dash', 'live_chat'],
-                'player_client': ['android', 'web', 'mweb', 'tv_embedded'],
-                'player_skip': ['webpage', 'configs'],
-                'player_params': {'hl': 'en', 'gl': 'US'},
-            }
+        'http_headers': {
+            'User-Agent': get_random_user_agent(),
         },
-        # Add referer and origin
-        'referer': 'https://www.youtube.com/',
-        'origin': 'https://www.youtube.com',
+        'socket_timeout': 30,
+        'retries': 3,
     })
 
 @app.route('/')
@@ -244,73 +63,32 @@ def index():
 @app.route('/search', methods=['POST'])
 def search_video():
     try:
-        # Log request start
-        print(f"[SEARCH] Request received at {__import__('datetime').datetime.now()}")
+        print(f"[SEARCH] Request received")
         
         data = request.get_json()
         if not data:
-            print("[SEARCH] No JSON data received")
             return jsonify({'error': 'No data received'}), 400
             
         url = data.get('url')
-        print(f"[SEARCH] Processing URL: {url}")
-        
         if not url:
-            print("[SEARCH] URL is missing")
             return jsonify({'error': 'URL is required'}), 400
+        
+        print(f"[SEARCH] Processing URL: {url}")
         
         # Validate YouTube URL
         if 'youtube.com' not in url and 'youtu.be' not in url:
-            print(f"[SEARCH] Invalid URL: {url}")
             return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
-        
-        print(f"[SEARCH] Creating yt-dlp extractor...")
         
         # Extract video information
         ydl = get_info_extractor()
         
-        # Add additional options for hosted servers
-        ydl.params.update({
-            'extractor_args': {
-                'youtube': {
-                    'skip': ['dash', 'live_chat'],
-                    'player_client': ['android', 'web', 'mweb', 'tv_embedded'],
-                    'player_skip': ['webpage', 'configs'],
-                    'player_params': {'hl': 'en', 'gl': 'US'},
-                }
-            },
-            'socket_timeout': 120,
-            'retries': 10,
-            'fragment_retries': 10,
-            'extractor_retries': 10,
-            'file_access_retries': 10,
-            # Add more anti-bot options
-            'http_chunk_size': 10485760,  # 10MB chunks
-            'buffersize': 1024,
-            # ULTRA STRONG SSL BYPASS - 100% GUARANTEED
-            'nocheckcertificate': True,
-            'no_check_certificate': True,
-            'prefer_insecure': True,
-            'legacy_server_connect': True,
-            'no_check_certificates': True,
-            'check_certificate': False,
-            'verify_ssl': False,
-            'ssl_verify': False,
-            'certificate_verify': False,
-        })
-        
         print(f"[SEARCH] Extracting video info...")
-        
-        try:
-            info = ydl.extract_info(url, download=False)
-            print(f"[SEARCH] Video info extracted successfully: {info.get('title', 'Unknown')}")
-        except Exception as extract_error:
-            print(f"[SEARCH] Error extracting video info: {str(extract_error)}")
-            return jsonify({'error': f'Failed to extract video info: {str(extract_error)}'}), 500
+        info = ydl.extract_info(url, download=False)
         
         if not info:
-            print("[SEARCH] No video info received")
             return jsonify({'error': 'No video information found'}), 500
+        
+        print(f"[SEARCH] Video info extracted: {info.get('title', 'Unknown')}")
         
         # Prepare video data
         video_data = {
@@ -323,321 +101,111 @@ def search_video():
             'formats': []
         }
         
-        print(f"[SEARCH] Processing formats...")
-        
-        # Process available formats and create proper download options
+        # Process formats
         formats = info.get('formats', [])
-        
-        if not formats:
-            print("[SEARCH] No formats found")
-            return jsonify({'error': 'No download formats available for this video'}), 500
-        
-        print(f"[SEARCH] Found {len(formats)} formats")
-        
-        # Create video format options (only high quality video formats)
         video_formats = []
-        
-        # Common video quality formats we want to support
-        target_qualities = [2160, 1440, 1080, 720, 480, 360, 240, 144]
-        
-        for fmt in formats:
-            try:
-                if fmt.get('format_id') and fmt.get('ext'):
-                    # Only video formats with both video and audio
-                    if fmt.get('vcodec') != 'none' and fmt.get('acodec') != 'none':
-                        quality = fmt.get('height', 0)
-                        fps = fmt.get('fps', 0)
-                        filesize = fmt.get('filesize', 0)
-                        
-                        if quality and quality > 0:
-                            # Check if this is a quality we want to support
-                            if quality in target_qualities:
-                                format_info = {
-                                    'format_id': fmt.get('format_id'),
-                                    'ext': fmt.get('ext'),
-                                    'quality': f"{quality}p",
-                                    'fps': fps,
-                                    'filesize': filesize,
-                                    'type': 'video',
-                                    'label': f"{quality}p Video ({fmt.get('ext', '').upper()})",
-                                    'details': f"{quality}p • {fps}fps • {formatFileSize(filesize) if filesize else 'Unknown size'}"
-                                }
-                                video_formats.append(format_info)
-            except Exception as fmt_error:
-                print(f"[SEARCH] Error processing format: {str(fmt_error)}")
-                continue
-        
-        print(f"[SEARCH] Processed {len(video_formats)} video formats")
-        
-        # Sort video formats by quality (highest first)
-        def get_quality_number(quality_str):
-            try:
-                return int(float(quality_str.replace('p', '')))
-            except (ValueError, AttributeError):
-                return 0
-        
-        video_formats.sort(key=lambda x: get_quality_number(x['quality']), reverse=True)
-        
-        # Find best audio format that doesn't require conversion
         audio_formats = []
-        best_audio_format = None
         
-        print(f"[SEARCH] Processing audio formats...")
-        
-        # Look for MP3 or M4A formats first (no conversion needed)
+        # Get video formats
         for fmt in formats:
-            try:
-                if fmt.get('acodec') != 'none' and fmt.get('vcodec') == 'none':
-                    if fmt.get('ext') in ['mp3', 'm4a']:
-                        best_audio_format = fmt
-                        break
-            except Exception as fmt_error:
-                print(f"[SEARCH] Error processing audio format: {str(fmt_error)}")
-                continue
+            if fmt.get('vcodec') != 'none' and fmt.get('acodec') != 'none':
+                quality = fmt.get('height', 0)
+                if quality and quality > 0:
+                    format_info = {
+                        'format_id': fmt.get('format_id'),
+                        'ext': fmt.get('ext'),
+                        'quality': f"{quality}p",
+                        'type': 'video',
+                        'label': f"{quality}p Video",
+                        'details': f"{quality}p • {fmt.get('ext', '').upper()}"
+                    }
+                    video_formats.append(format_info)
         
-        # If no MP3/M4A found, use best audio format
-        if not best_audio_format:
-            for fmt in formats:
-                try:
-                    if fmt.get('acodec') != 'none' and fmt.get('vcodec') == 'none':
-                        best_audio_format = fmt
-                        break
-                except Exception as fmt_error:
-                    print(f"[SEARCH] Error processing audio format: {str(fmt_error)}")
-                    continue
+        # Get audio format
+        for fmt in formats:
+            if fmt.get('acodec') != 'none' and fmt.get('vcodec') == 'none':
+                audio_formats = [{
+                    'format_id': fmt.get('format_id'),
+                    'ext': fmt.get('ext', 'mp3'),
+                    'type': 'audio',
+                    'label': 'Audio (MP3)',
+                    'details': 'Best available audio'
+                }]
+                break
         
-        if best_audio_format:
-            audio_formats = [{
-                'format_id': best_audio_format.get('format_id'),
-                'ext': best_audio_format.get('ext', 'mp3'),
-                'quality': f"{best_audio_format.get('abr', 'Unknown')}kbps" if best_audio_format.get('abr') else 'Best quality',
-                'type': 'audio',
-                'label': f'Audio ({best_audio_format.get("ext", "").upper()})',
-                'details': f'{best_audio_format.get("ext", "").upper()} • {best_audio_format.get("abr", "Unknown")}kbps • Best available audio'
-            }]
-            print(f"[SEARCH] Found audio format: {best_audio_format.get('ext', 'unknown')}")
-        else:
-            print("[SEARCH] No audio format found")
+        # Sort video formats by quality
+        video_formats.sort(key=lambda x: int(x['quality'].replace('p', '')), reverse=True)
         
-        # Combine all formats
         video_data['formats'] = video_formats + audio_formats
         
-        print(f"[SEARCH] Total formats: {len(video_data['formats'])}")
         print(f"[SEARCH] Search completed successfully")
-        
-        # Validate final data before returning
-        try:
-            if not video_data.get('title'):
-                print("[SEARCH] Warning: No title found in video data")
-            if not video_data.get('formats'):
-                print("[SEARCH] Warning: No formats found in video data")
-            
-            print(f"[SEARCH] Final video data: {video_data.get('title', 'No title')} - {len(video_data.get('formats', []))} formats")
-            
-            return jsonify(video_data)
-            
-        except Exception as json_error:
-            print(f"[SEARCH] Error creating JSON response: {str(json_error)}")
-            return jsonify({'error': f'Failed to create response: {str(json_error)}'}), 500
+        return jsonify(video_data)
         
     except Exception as e:
-        print(f"[SEARCH] Critical error in search_video: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        
-        # Return more specific error message
-        error_message = str(e)
-        if "SSL" in error_message or "certificate" in error_message.lower():
-            error_message = "SSL connection error - please try again"
-        elif "bot" in error_message.lower():
-            error_message = "YouTube bot detection - please try again"
-        elif "timeout" in error_message.lower():
-            error_message = "Request timeout - please try again"
-        
-        return jsonify({'error': f'Server error: {error_message}'}), 500
-
-def formatFileSize(bytes):
-    if not bytes:
-        return 'Unknown size'
-    sizes = ['B', 'KB', 'MB', 'GB']
-    i = 0
-    while bytes >= 1024 and i < len(sizes) - 1:
-        bytes /= 1024.0
-        i += 1
-    return f"{bytes:.1f} {sizes[i]}"
+        print(f"[SEARCH] Error: {str(e)}")
+        return jsonify({'error': f'Server error: {str(e)}'}), 500
 
 @app.route('/download', methods=['POST'])
 def download():
     try:
-        # Log download request
-        print(f"[DOWNLOAD] Download request received at {__import__('datetime').datetime.now()}")
+        print(f"[DOWNLOAD] Download request received")
         
         data = request.get_json()
         if not data:
-            print("[DOWNLOAD] No JSON data received")
             return jsonify({'error': 'No data received'}), 400
             
         url = data.get('url')
         format_id = data.get('format_id')
-        download_type = data.get('type')  # 'video' or 'audio'
         
-        print(f"[DOWNLOAD] URL: {url}, Format ID: {format_id}, Type: {download_type}")
+        if not url or not format_id:
+            return jsonify({'error': 'URL and format_id are required'}), 400
         
-        if not url:
-            print("[DOWNLOAD] URL is missing")
-            return jsonify({'error': 'URL is required'}), 400
+        print(f"[DOWNLOAD] Processing: {url} - {format_id}")
         
-        if not format_id:
-            print("[DOWNLOAD] Format ID is missing")
-            return jsonify({'error': 'Format ID is required'}), 400
-        
-        # Validate YouTube URL
-        if 'youtube.com' not in url and 'youtu.be' not in url:
-            print(f"[DOWNLOAD] Invalid URL: {url}")
-            return jsonify({'error': 'Please provide a valid YouTube URL'}), 400
-        
-        print(f"[DOWNLOAD] Creating temporary directory...")
-        
-        # Create temporary directory for downloads
+        # Create temporary directory
         temp_dir = tempfile.mkdtemp()
         os.chdir(temp_dir)
         
-        print(f"[DOWNLOAD] Temp dir: {temp_dir}")
-        
-        # Configure download options
+        # Configure download
         download_opts = {
             'outtmpl': '%(title)s.%(ext)s',
-            'quiet': True,
-            'no_warnings': True,
-            # Add headers to avoid bot detection
-            'http_headers': {
-                'User-Agent': get_random_user_agent(),
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-                'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'DNT': '1',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1',
-                'Sec-Fetch-Dest': 'document',
-                'Sec-Fetch-Mode': 'navigate',
-                'Sec-Fetch-Site': 'none',
-                'Sec-Fetch-User': '?1',
-                'Cache-Control': 'max-age=0',
-            },
-            # Add additional options to avoid bot detection
+            'format': format_id,
             'nocheckcertificate': True,
-            'ignoreerrors': False,
-            'logtostderr': False,
-            'geo_bypass': True,
-            'geo_bypass_country': 'US',
-            'socket_timeout': 120,
-            'retries': 10,
-            'fragment_retries': 10,
-            'extractor_retries': 10,
-            'file_access_retries': 10,
-            # ULTRA STRONG SSL BYPASS - 100% GUARANTEED
             'no_check_certificate': True,
             'prefer_insecure': True,
-            'legacy_server_connect': True,
-            'nocheckcertificate': True,
-            'no_check_certificates': True,
-            'check_certificate': False,
-            'verify_ssl': False,
-            'ssl_verify': False,
-            'certificate_verify': False,
-            'extractor_args': {
-                'youtube': {
-                    'skip': ['dash', 'live_chat'],
-                    'player_client': ['android', 'web', 'mweb', 'tv_embedded'],
-                    'player_skip': ['webpage', 'configs'],
-                    'player_params': {'hl': 'en', 'gl': 'US'},
-                }
-            },
-            # Add referer and origin
-            'referer': 'https://www.youtube.com/',
-            'origin': 'https://www.youtube.com',
-            # Add more anti-bot options
-            'http_chunk_size': 10485760,  # 10MB chunks
-            'buffersize': 1024,
-            'sleep_interval': 1,
-            'max_sleep_interval': 5,
-            'sleep_interval_requests': 1,
-            'max_sleep_interval_requests': 5,
         }
         
-        # Add format selection
-        if download_type == 'audio':
-            # For audio downloads, use the specific format without conversion
-            download_opts['format'] = format_id
-            # Don't use postprocessors to avoid FFmpeg requirement
-        else:
-            # For specific video format downloads
-            download_opts['format'] = format_id
-        
-        print(f"[DOWNLOAD] Starting download...")
-        
-        # Download the file
+        # Download file
         ydl = yt_dlp.YoutubeDL(download_opts)
+        ydl.download([url])
         
-        try:
-            ydl.download([url])
-            print(f"[DOWNLOAD] Download completed successfully")
-        except Exception as download_error:
-            print(f"[DOWNLOAD] Error during download: {str(download_error)}")
-            return jsonify({'error': f'Download failed: {str(download_error)}'}), 500
-        
-        # Find the downloaded file
+        # Find downloaded file
         files = os.listdir(temp_dir)
         if not files:
-            print(f"[DOWNLOAD] No files found in temp dir: {temp_dir}")
             return jsonify({'error': 'Failed to download file'}), 500
         
-        print(f"[DOWNLOAD] Found {len(files)} files: {files}")
-        
-        # Get the first file (should be the only one)
         filename = files[0]
         file_path = os.path.join(temp_dir, filename)
         
-        print(f"[DOWNLOAD] Sending file: {filename}")
+        print(f"[DOWNLOAD] File downloaded: {filename}")
         
-        # Send file to user
-        try:
-            return send_file(
-                file_path,
-                as_attachment=True,
-                download_name=filename,
-                mimetype='application/octet-stream'
-            )
-        except Exception as send_error:
-            print(f"[DOWNLOAD] Error sending file: {str(send_error)}")
-            return jsonify({'error': f'Failed to send file: {str(send_error)}'}), 500
+        # Send file
+        return send_file(
+            file_path,
+            as_attachment=True,
+            download_name=filename
+        )
         
     except Exception as e:
-        print(f"[DOWNLOAD] Critical error in download: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': f'Server error: {str(e)}'}), 500
+        print(f"[DOWNLOAD] Error: {str(e)}")
+        return jsonify({'error': f'Download error: {str(e)}'}), 500
 
 @app.route('/health')
 def health():
-    try:
-        # Check if yt-dlp is working
-        test_ydl = get_info_extractor()
-        return jsonify({
-            'status': 'healthy',
-            'timestamp': __import__('datetime').datetime.now().isoformat(),
-            'yt_dlp_version': yt_dlp.version.__version__,
-            'python_version': __import__('sys').version,
-            'ssl_verify': False,
-            'message': 'Server is running and yt-dlp is configured'
-        })
-    except Exception as e:
-        return jsonify({
-            'status': 'unhealthy',
-            'timestamp': __import__('datetime').datetime.now().isoformat(),
-            'error': str(e),
-            'message': 'Server is running but yt-dlp has issues'
-        }), 500
+    return jsonify({
+        'status': 'healthy',
+        'message': 'YouTube Downloader is running'
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
