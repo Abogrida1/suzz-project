@@ -23,6 +23,31 @@ def get_downloader():
         'outtmpl': '%(title)s.%(ext)s',
         'quiet': True,
         'no_warnings': True,
+        # Add headers to avoid bot detection
+        'http_headers': {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+        },
+        # Add additional options to avoid bot detection
+        'nocheckcertificate': True,
+        'ignoreerrors': False,
+        'logtostderr': False,
+        'geo_bypass': True,
+        'geo_bypass_country': 'US',
+        'socket_timeout': 30,
+        'retries': 3,
+        'extractor_args': {
+            'youtube': {
+                'skip': ['dash', 'live_chat'],
+                'player_client': ['android', 'web'],
+                'player_skip': ['webpage', 'configs'],
+            }
+        },
     })
 
 @app.route('/')
@@ -44,6 +69,20 @@ def search_video():
         
         # Extract video information
         ydl = get_info_extractor()
+        
+        # Add additional options for hosted servers
+        ydl.params.update({
+            'extractor_args': {
+                'youtube': {
+                    'skip': ['dash', 'live_chat'],
+                    'player_client': ['android', 'web'],
+                    'player_skip': ['webpage', 'configs'],
+                }
+            },
+            'socket_timeout': 30,
+            'retries': 3,
+        })
+        
         info = ydl.extract_info(url, download=False)
         
         # Prepare video data
