@@ -16,7 +16,6 @@ os.environ['CURL_INSECURE'] = '1'
 # ADDITIONAL SSL DISABLE - EXTRA STRONG
 os.environ['REQUESTS_CA_BUNDLE'] = ''
 os.environ['SSL_CERT_FILE'] = ''
-os.environ['PYTHONHTTPSVERIFY'] = '0'
 os.environ['PYTHONSSLVERIFY'] = '0'
 
 # Create custom SSL context
@@ -24,6 +23,34 @@ custom_ssl_context = ssl.create_default_context()
 custom_ssl_context.check_hostname = False
 custom_ssl_context.verify_mode = ssl.CERT_NONE
 ssl._create_default_https_context = lambda: custom_ssl_context
+
+# Force urllib3 to use unverified SSL
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Configure requests to use unverified SSL
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.poolmanager import PoolManager
+
+class CustomHTTPAdapter(HTTPAdapter):
+    def init_poolmanager(self, connections, maxsize, block=False):
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        self.poolmanager = PoolManager(
+            num_pools=connections,
+            maxsize=maxsize,
+            block=block,
+            ssl_version=ssl.PROTOCOL_TLS,
+            ssl_context=ctx
+        )
+
+# Configure requests session
+session = requests.Session()
+adapter = CustomHTTPAdapter()
+session.mount("http://", adapter)
+session.mount("https://", adapter)
 
 app = Flask(__name__)
 CORS(app)
@@ -339,13 +366,36 @@ def search_video():
         print(f"[SEARCH] Total formats: {len(video_data['formats'])}")
         print(f"[SEARCH] Search completed successfully")
         
-        return jsonify(video_data)
+        # Validate final data before returning
+        try:
+            if not video_data.get('title'):
+                print("[SEARCH] Warning: No title found in video data")
+            if not video_data.get('formats'):
+                print("[SEARCH] Warning: No formats found in video data")
+            
+            print(f"[SEARCH] Final video data: {video_data.get('title', 'No title')} - {len(video_data.get('formats', []))} formats")
+            
+            return jsonify(video_data)
+            
+        except Exception as json_error:
+            print(f"[SEARCH] Error creating JSON response: {str(json_error)}")
+            return jsonify({'error': f'Failed to create response: {str(json_error)}'}), 500
         
     except Exception as e:
         print(f"[SEARCH] Critical error in search_video: {str(e)}")
         import traceback
         traceback.print_exc()
-        return jsonify({'error': f'Server error: {str(e)}'}), 500
+        
+        # Return more specific error message
+        error_message = str(e)
+        if "SSL" in error_message or "certificate" in error_message.lower():
+            error_message = "SSL connection error - please try again"
+        elif "bot" in error_message.lower():
+            error_message = "YouTube bot detection - please try again"
+        elif "timeout" in error_message.lower():
+            error_message = "Request timeout - please try again"
+        
+        return jsonify({'error': f'Server error: {error_message}'}), 500
 
 def formatFileSize(bytes):
     if not bytes:
