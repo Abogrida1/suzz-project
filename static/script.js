@@ -53,14 +53,46 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Response status:', response.status); // Debug log
 
             if (response.ok) {
-                const data = await response.json();
+                // Check if response has content
+                const responseText = await response.text();
+                console.log('Raw response:', responseText); // Debug log
+                
+                if (!responseText || responseText.trim() === '') {
+                    throw new Error('Empty response from server');
+                }
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('JSON parse error:', parseError);
+                    console.error('Response text:', responseText);
+                    throw new Error('Invalid JSON response from server');
+                }
+                
                 console.log('Video data received:', data); // Debug log
+                
+                if (!data || typeof data !== 'object') {
+                    throw new Error('Invalid data format from server');
+                }
                 
                 displayVideoInfo(data);
                 displayDownloadOptions(data.formats);
                 showStatus('Video found! Choose your download format.', 'success');
             } else {
-                const errorData = await response.json();
+                let errorData;
+                try {
+                    const errorText = await response.text();
+                    if (errorText && errorText.trim() !== '') {
+                        errorData = JSON.parse(errorText);
+                    } else {
+                        errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing error response:', parseError);
+                    errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+                }
+                
                 console.error('Server error:', errorData); // Debug log
                 showStatus(errorData.error || 'Failed to get video information', 'error');
             }
@@ -75,18 +107,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display video information
     function displayVideoInfo(videoData) {
         try {
-            videoThumbnail.src = videoData.thumbnail || '';
+            if (!videoData || typeof videoData !== 'object') {
+                throw new Error('Invalid video data received');
+            }
+            
+            // Validate required fields
+            if (!videoData.title) {
+                throw new Error('Video title is missing');
+            }
+            
+            // Set video information with fallbacks
+            videoThumbnail.src = videoData.thumbnail || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDMyMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMjAiIGhlaWdodD0iMTgwIiBmaWxsPSIjMzMzIi8+Cjx0ZXh0IHg9IjE2MCIgeT0iOTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2ZmZiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+Tm8gVGh1bWJuYWlsPC90ZXh0Pgo8L3N2Zz4K';
             videoTitle.textContent = videoData.title || 'Unknown Title';
             videoChannel.textContent = videoData.channel || 'Unknown Channel';
-            videoDuration.textContent = formatDuration(videoData.duration);
-            videoViews.textContent = formatViews(videoData.view_count);
-            videoDate.textContent = formatDate(videoData.upload_date);
+            videoDuration.textContent = formatDuration(videoData.duration || 0);
+            videoViews.textContent = formatViews(videoData.view_count || 0);
+            videoDate.textContent = formatDate(videoData.upload_date || '');
             
             videoPreview.style.display = 'block';
             downloadOptions.style.display = 'block';
         } catch (error) {
             console.error('Error displaying video info:', error);
-            showStatus('Error displaying video information', 'error');
+            showStatus(`Error displaying video information: ${error.message}`, 'error');
+            
+            // Hide video preview on error
+            videoPreview.style.display = 'none';
+            downloadOptions.style.display = 'none';
         }
     }
 
@@ -117,6 +163,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (videoFormats.length > 0) {
                 videoFormats.forEach((format, index) => {
                     try {
+                        if (!format || !format.format_id) {
+                            console.warn('Invalid video format:', format);
+                            return;
+                        }
                         const option = createVideoQualityOption(format, index === 0);
                         videoQualities.appendChild(option);
                     } catch (error) {
@@ -131,6 +181,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (audioFormats.length > 0) {
                 audioFormats.forEach(format => {
                     try {
+                        if (!format || !format.format_id) {
+                            console.warn('Invalid audio format:', format);
+                            return;
+                        }
                         const option = createAudioQualityOption(format);
                         audioQualities.appendChild(option);
                     } catch (error) {
@@ -187,15 +241,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const downloadBtn = document.createElement('button');
             downloadBtn.className = 'download-btn video-download-btn';
             downloadBtn.textContent = 'Download Video';
-            downloadBtn.addEventListener('click', () => handleDownload(format));
+            downloadBtn.addEventListener('click', () => {
+                try {
+                    handleDownload(format);
+                } catch (error) {
+                    console.error('Error in download button click:', error);
+                    showStatus('Error starting download', 'error');
+                }
+            });
             
             option.appendChild(qualityInfo);
             option.appendChild(downloadBtn);
             
             return option;
         } catch (error) {
-            console.error('Error creating video quality option:', error, format);
-            return document.createElement('div');
+            console.error('Error creating video quality option:', error);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'quality-option error';
+            errorDiv.innerHTML = '<p>Error creating option</p>';
+            return errorDiv;
         }
     }
 
@@ -230,15 +294,25 @@ document.addEventListener('DOMContentLoaded', function() {
             // Set button text based on audio format
             const audioExt = format.ext ? format.ext.toUpperCase() : 'AUDIO';
             downloadBtn.textContent = `Download ${audioExt}`;
-            downloadBtn.addEventListener('click', () => handleDownload(format));
+            downloadBtn.addEventListener('click', () => {
+                try {
+                    handleDownload(format);
+                } catch (error) {
+                    console.error('Error in audio download button click:', error);
+                    showStatus('Error starting audio download', 'error');
+                }
+            });
             
             option.appendChild(qualityInfo);
             option.appendChild(downloadBtn);
             
             return option;
         } catch (error) {
-            console.error('Error creating audio quality option:', error, format);
-            return document.createElement('div');
+            console.error('Error creating audio quality option:', error);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'quality-option error';
+            errorDiv.innerHTML = '<p>Error creating audio option</p>';
+            return errorDiv;
         }
     }
 
@@ -296,7 +370,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Video downloaded successfully!';
                 showStatus(successMessage, 'success');
             } else {
-                const errorData = await response.json();
+                let errorData;
+                try {
+                    const errorText = await response.text();
+                    if (errorText && errorText.trim() !== '') {
+                        errorData = JSON.parse(errorText);
+                    } else {
+                        errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+                    }
+                } catch (parseError) {
+                    console.error('Error parsing error response:', parseError);
+                    errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+                }
+                
                 showStatus(errorData.error || `Failed to download ${format.type || 'file'}`, 'error');
             }
         } catch (error) {
