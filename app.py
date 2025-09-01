@@ -63,13 +63,6 @@ def get_info_extractor():
                 'player_params': {'hl': 'en', 'gl': 'US'},
             }
         },
-        # Add cookies and session handling
-        'cookiefile': 'cookies.txt',
-        'cookiesfrombrowser': ('chrome',),
-        'cookiesfrombrowser_args': {
-            'browser_name': 'chrome',
-            'profile_name': 'Default',
-        },
         # Add referer and origin
         'referer': 'https://www.youtube.com/',
         'origin': 'https://www.youtube.com',
@@ -114,13 +107,6 @@ def get_downloader():
                 'player_skip': ['webpage', 'configs'],
                 'player_params': {'hl': 'en', 'gl': 'US'},
             }
-        },
-        # Add cookies and session handling
-        'cookiefile': 'cookies.txt',
-        'cookiesfrombrowser': ('chrome',),
-        'cookiesfrombrowser_args': {
-            'browser_name': 'chrome',
-            'profile_name': 'Default',
         },
         # Add referer and origin
         'referer': 'https://www.youtube.com/',
@@ -169,6 +155,10 @@ def search_video():
             'max_sleep_interval': 5,
             'sleep_interval_requests': 1,
             'max_sleep_interval_requests': 5,
+            # Add additional anti-bot measures
+            'no_check_certificate': True,
+            'prefer_insecure': True,
+            'legacy_server_connect': True,
         })
         
         info = ydl.extract_info(url, download=False)
@@ -332,13 +322,6 @@ def download():
                     'player_skip': ['webpage', 'configs'],
                     'player_params': {'hl': 'en', 'gl': 'US'},
                 }
-            },
-            # Add cookies and session handling
-            'cookiefile': 'cookies.txt',
-            'cookiesfrombrowser': ('chrome',),
-            'cookiesfrombrowser_args': {
-                'browser_name': 'chrome',
-                'profile_name': 'Default',
             },
             # Add referer and origin
             'referer': 'https://www.youtube.com/',
