@@ -170,3 +170,7 @@ downloads/
 config.ini
 .env.local
 .env.production
+
+# Cookies and session files
+cookies.txt
+*.cookies

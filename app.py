@@ -4,10 +4,24 @@ import yt_dlp
 import os
 import tempfile
 import uuid
+import random
 from urllib.parse import urlparse, parse_qs
 
 app = Flask(__name__)
 CORS(app)
+
+# List of popular user agents to rotate
+USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
+]
+
+def get_random_user_agent():
+    return random.choice(USER_AGENTS)
 
 # Configure yt-dlp options for info extraction
 def get_info_extractor():
@@ -15,6 +29,50 @@ def get_info_extractor():
         'quiet': True,
         'no_warnings': True,
         'extract_flat': False,
+        # Add rotating user agents
+        'http_headers': {
+            'User-Agent': get_random_user_agent(),
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
+        },
+        # Advanced anti-bot options
+        'nocheckcertificate': True,
+        'ignoreerrors': False,
+        'logtostderr': False,
+        'geo_bypass': True,
+        'geo_bypass_country': 'US',
+        'socket_timeout': 60,
+        'retries': 5,
+        'fragment_retries': 5,
+        'extractor_retries': 5,
+        'file_access_retries': 5,
+        'extractor_args': {
+            'youtube': {
+                'skip': ['dash', 'live_chat'],
+                'player_client': ['android', 'web', 'mweb', 'tv_embedded'],
+                'player_skip': ['webpage', 'configs'],
+                'player_params': {'hl': 'en', 'gl': 'US'},
+            }
+        },
+        # Add cookies and session handling
+        'cookiefile': 'cookies.txt',
+        'cookiesfrombrowser': ('chrome',),
+        'cookiesfrombrowser_args': {
+            'browser_name': 'chrome',
+            'profile_name': 'Default',
+        },
+        # Add referer and origin
+        'referer': 'https://www.youtube.com/',
+        'origin': 'https://www.youtube.com',
     })
 
 # Configure yt-dlp options for downloads
@@ -23,31 +81,50 @@ def get_downloader():
         'outtmpl': '%(title)s.%(ext)s',
         'quiet': True,
         'no_warnings': True,
-        # Add headers to avoid bot detection
+        # Add rotating user agents
         'http_headers': {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
+            'User-Agent': get_random_user_agent(),
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
             'DNT': '1',
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
         },
-        # Add additional options to avoid bot detection
+        # Advanced anti-bot options
         'nocheckcertificate': True,
         'ignoreerrors': False,
         'logtostderr': False,
         'geo_bypass': True,
         'geo_bypass_country': 'US',
-        'socket_timeout': 30,
-        'retries': 3,
+        'socket_timeout': 60,
+        'retries': 5,
+        'fragment_retries': 5,
+        'extractor_retries': 5,
+        'file_access_retries': 5,
         'extractor_args': {
             'youtube': {
                 'skip': ['dash', 'live_chat'],
-                'player_client': ['android', 'web'],
+                'player_client': ['android', 'web', 'mweb', 'tv_embedded'],
                 'player_skip': ['webpage', 'configs'],
+                'player_params': {'hl': 'en', 'gl': 'US'},
             }
         },
+        # Add cookies and session handling
+        'cookiefile': 'cookies.txt',
+        'cookiesfrombrowser': ('chrome',),
+        'cookiesfrombrowser_args': {
+            'browser_name': 'chrome',
+            'profile_name': 'Default',
+        },
+        # Add referer and origin
+        'referer': 'https://www.youtube.com/',
+        'origin': 'https://www.youtube.com',
     })
 
 @app.route('/')
@@ -75,12 +152,23 @@ def search_video():
             'extractor_args': {
                 'youtube': {
                     'skip': ['dash', 'live_chat'],
-                    'player_client': ['android', 'web'],
+                    'player_client': ['android', 'web', 'mweb', 'tv_embedded'],
                     'player_skip': ['webpage', 'configs'],
+                    'player_params': {'hl': 'en', 'gl': 'US'},
                 }
             },
-            'socket_timeout': 30,
-            'retries': 3,
+            'socket_timeout': 60,
+            'retries': 5,
+            'fragment_retries': 5,
+            'extractor_retries': 5,
+            'file_access_retries': 5,
+            # Add more anti-bot options
+            'http_chunk_size': 10485760,  # 10MB chunks
+            'buffersize': 1024,
+            'sleep_interval': 1,
+            'max_sleep_interval': 5,
+            'sleep_interval_requests': 1,
+            'max_sleep_interval_requests': 5,
         })
         
         info = ydl.extract_info(url, download=False)
@@ -211,6 +299,57 @@ def download():
             'outtmpl': '%(title)s.%(ext)s',
             'quiet': True,
             'no_warnings': True,
+            # Add headers to avoid bot detection
+            'http_headers': {
+                'User-Agent': get_random_user_agent(),
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+                'Accept-Language': 'en-US,en;q=0.9,ar;q=0.8',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'none',
+                'Sec-Fetch-User': '?1',
+                'Cache-Control': 'max-age=0',
+            },
+            # Add additional options to avoid bot detection
+            'nocheckcertificate': True,
+            'ignoreerrors': False,
+            'logtostderr': False,
+            'geo_bypass': True,
+            'geo_bypass_country': 'US',
+            'socket_timeout': 60,
+            'retries': 5,
+            'fragment_retries': 5,
+            'extractor_retries': 5,
+            'file_access_retries': 5,
+            'extractor_args': {
+                'youtube': {
+                    'skip': ['dash', 'live_chat'],
+                    'player_client': ['android', 'web', 'mweb', 'tv_embedded'],
+                    'player_skip': ['webpage', 'configs'],
+                    'player_params': {'hl': 'en', 'gl': 'US'},
+                }
+            },
+            # Add cookies and session handling
+            'cookiefile': 'cookies.txt',
+            'cookiesfrombrowser': ('chrome',),
+            'cookiesfrombrowser_args': {
+                'browser_name': 'chrome',
+                'profile_name': 'Default',
+            },
+            # Add referer and origin
+            'referer': 'https://www.youtube.com/',
+            'origin': 'https://www.youtube.com',
+            # Add more anti-bot options
+            'http_chunk_size': 10485760,  # 10MB chunks
+            'buffersize': 1024,
+            'sleep_interval': 1,
+            'max_sleep_interval': 5,
+            'sleep_interval_requests': 1,
+            'max_sleep_interval_requests': 5,
         }
         
         # Add format selection
