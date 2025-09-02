@@ -7,9 +7,33 @@ const MessageBubble = ({
   isOwn, 
   showAvatar, 
   showTimestamp, 
-  isGrouped 
+  isGrouped,
+  onDelete,
+  onReply,
+  onEdit
 }) => {
   const [showActions, setShowActions] = useState(false);
+
+  const handleReply = () => {
+    if (onReply) {
+      onReply(message);
+    }
+    setShowActions(false);
+  };
+
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(message);
+    }
+    setShowActions(false);
+  };
+
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(message);
+    }
+    setShowActions(false);
+  };
 
   const getStatusIcon = () => {
     switch (message.status) {

@@ -309,4 +309,74 @@ router.get('/conversations/recent', async (req, res) => {
   }
 });
 
+// Delete message
+router.delete('/:messageId', async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const userId = req.query.userId;
+    
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID required' });
+    }
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: 'Message not found' });
+    }
+
+    // Check if user is the sender
+    if (message.sender.toString() !== userId) {
+      return res.status(403).json({ message: 'Not authorized to delete this message' });
+    }
+
+    // Soft delete
+    message.deleted = true;
+    message.deletedAt = new Date();
+    await message.save();
+
+    res.json({ message: 'Message deleted successfully' });
+  } catch (error) {
+    console.error('Delete message error:', error);
+    res.status(500).json({ message: 'Failed to delete message' });
+  }
+});
+
+// Edit message
+router.put('/:messageId', async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { content } = req.body;
+    const userId = req.query.userId;
+    
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID required' });
+    }
+
+    if (!content) {
+      return res.status(400).json({ message: 'Content required' });
+    }
+
+    const message = await Message.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: 'Message not found' });
+    }
+
+    // Check if user is the sender
+    if (message.sender.toString() !== userId) {
+      return res.status(403).json({ message: 'Not authorized to edit this message' });
+    }
+
+    // Update message
+    message.content = content;
+    message.edited = true;
+    message.editedAt = new Date();
+    await message.save();
+
+    res.json({ message: 'Message updated successfully', updatedMessage: message });
+  } catch (error) {
+    console.error('Edit message error:', error);
+    res.status(500).json({ message: 'Failed to edit message' });
+  }
+});
+
 module.exports = router;

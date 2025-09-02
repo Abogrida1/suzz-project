@@ -125,6 +125,18 @@ export const SocketProvider = ({ children }) => {
         window.dispatchEvent(new CustomEvent('newMessage', { detail: message }));
       });
 
+      // Handle optimistic messages
+      newSocket.on('optimistic_message', (message) => {
+        // Emit custom event for optimistic messages
+        window.dispatchEvent(new CustomEvent('optimisticMessage', { detail: message }));
+      });
+
+      // Handle message sent confirmation
+      newSocket.on('message_sent', (message) => {
+        // Replace optimistic message with real message
+        window.dispatchEvent(new CustomEvent('messageSent', { detail: message }));
+      });
+
       newSocket.on('new_private_message', (data) => {
         // Show notification for new private messages
         if (data.sender._id !== user._id) {
@@ -187,6 +199,20 @@ export const SocketProvider = ({ children }) => {
 
   const sendMessage = (messageData) => {
     if (socket && connected) {
+      // Create optimistic message
+      const optimisticMessage = {
+        ...messageData,
+        _id: `temp_${Date.now()}`,
+        sender: user._id,
+        createdAt: new Date().toISOString(),
+        status: 'sending',
+        isOptimistic: true
+      };
+
+      // Emit optimistic message event
+      socket.emit('optimistic_message', optimisticMessage);
+      
+      // Send actual message
       socket.emit('send_message', messageData);
     } else {
       console.error('Socket not connected');

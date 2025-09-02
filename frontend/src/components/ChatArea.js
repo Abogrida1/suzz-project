@@ -4,6 +4,8 @@ import { useSocket } from '../contexts/SocketContext';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import ChatHeader from './ChatHeader';
+import api from '../config/axios';
+import toast from 'react-hot-toast';
 import { FaArrowLeft } from 'react-icons/fa';
 
 const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
@@ -163,6 +165,50 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     }
   };
 
+  // Handle message actions
+  const handleDeleteMessage = async (message) => {
+    try {
+      await api.delete(`/api/messages/${message._id}?userId=${user._id}`);
+      // Remove message from local state
+      setMessages(prev => prev.filter(m => m._id !== message._id));
+      toast.success('Message deleted');
+    } catch (error) {
+      console.error('Delete message error:', error);
+      toast.error('Failed to delete message');
+    }
+  };
+
+  const handleEditMessage = async (message) => {
+    const newContent = prompt('Edit message:', message.content);
+    if (newContent && newContent !== message.content) {
+      try {
+        await api.put(`/api/messages/${message._id}?userId=${user._id}`, {
+          content: newContent
+        });
+        // Update message in local state
+        setMessages(prev => prev.map(m => 
+          m._id === message._id 
+            ? { ...m, content: newContent, edited: true, editedAt: new Date().toISOString() }
+            : m
+        ));
+        toast.success('Message updated');
+      } catch (error) {
+        console.error('Edit message error:', error);
+        toast.error('Failed to edit message');
+      }
+    }
+  };
+
+  const handleReplyToMessage = (message) => {
+    // Set reply message in input
+    setReplyTo(message);
+    // Focus on input
+    const input = document.querySelector('.message-input textarea');
+    if (input) {
+      input.focus();
+    }
+  };
+
   // Get chat title
   const getChatTitle = () => {
     if (activeChat === 'global') {
@@ -202,6 +248,9 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
           typingUsers={typingUsers}
           currentUser={user}
           messagesEndRef={messagesEndRef}
+          onDeleteMessage={handleDeleteMessage}
+          onEditMessage={handleEditMessage}
+          onReplyToMessage={handleReplyToMessage}
         />
       </div>
 

@@ -8,7 +8,10 @@ const MessageList = ({
   loading, 
   typingUsers, 
   currentUser, 
-  messagesEndRef 
+  messagesEndRef,
+  onDeleteMessage,
+  onEditMessage,
+  onReplyToMessage
 }) => {
   const messagesContainerRef = useRef(null);
 
@@ -61,6 +64,9 @@ const MessageList = ({
           showAvatar={showAvatar}
           showTimestamp={showTimestamp}
           isGrouped={!isLastMessage}
+          onDelete={onDeleteMessage}
+          onEdit={onEditMessage}
+          onReply={onReplyToMessage}
         />
       );
     });
@@ -134,6 +140,9 @@ const MessageList = ({
                   showAvatar={!isGrouped}
                   showTimestamp={isLastMessage}
                   isGrouped={isGrouped}
+                  onDelete={onDeleteMessage}
+                  onEdit={onEditMessage}
+                  onReply={onReplyToMessage}
                 />
               );
             })}
