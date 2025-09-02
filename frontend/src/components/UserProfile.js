@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { FaTimes, FaEdit, FaSignOutAlt, FaUser, FaEnvelope, FaCalendar, FaCamera } from 'react-icons/fa';
 import { format } from 'date-fns';
-import axios from 'axios';
+import api from '../config/axios';
 import toast from 'react-hot-toast';
 
 const UserProfile = ({ user, onClose, onLogout }) => {
@@ -24,7 +24,7 @@ const UserProfile = ({ user, onClose, onLogout }) => {
 
   const handleSave = async () => {
     try {
-      const response = await axios.put('/api/users/profile', profileData);
+      const response = await api.put('/api/users/profile', profileData);
       updateUser(response.data.user);
       setIsEditing(false);
       toast.success('Profile updated successfully');
@@ -57,7 +57,7 @@ const UserProfile = ({ user, onClose, onLogout }) => {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await axios.post('/api/upload/avatar', formData, {
+      const response = await api.post('/api/upload/avatar', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

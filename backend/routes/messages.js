@@ -209,13 +209,19 @@ router.get('/conversations/recent', async (req, res) => {
   try {
     const { limit = 20 } = req.query;
     
+    // Get user ID from query or return empty array
+    const userId = req.query.userId;
+    if (!userId) {
+      return res.json({ conversations: [] });
+    }
+    
     // Get recent private conversations
     const privateMessages = await Message.aggregate([
       {
         $match: {
           $or: [
-            { sender: req.user._id, chatType: 'private' },
-            { privateChatWith: req.user._id, chatType: 'private' }
+            { sender: userId, chatType: 'private' },
+            { privateChatWith: userId, chatType: 'private' }
           ],
           deleted: false
         }

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaPaperPlane, FaImage, FaSmile, FaPaperclip } from 'react-icons/fa';
 import EmojiPicker from 'emoji-picker-react';
 import { useDropzone } from 'react-dropzone';
-import axios from 'axios';
+import api from '../config/axios';
 import toast from 'react-hot-toast';
 
 const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder }) => {
@@ -82,7 +82,7 @@ const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder 
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await axios.post('/api/upload/single', formData, {
+      const response = await api.post('/api/upload/single', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

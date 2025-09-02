@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
-import axios from 'axios';
+import api from '../config/axios';
 import { 
   FaSearch, 
   FaTimes, 
@@ -28,7 +28,7 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
   useEffect(() => {
     const fetchRecentConversations = async () => {
       try {
-        const response = await axios.get('/api/messages/conversations/recent');
+        const response = await api.get(`/api/messages/conversations/recent?userId=${user._id}`);
         setRecentConversations(response.data.conversations);
       } catch (error) {
         console.error('Error fetching conversations:', error);
@@ -52,7 +52,7 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
 
     setLoading(true);
     try {
-      const response = await axios.get(`/api/users/search?q=${encodeURIComponent(query)}`);
+      const response = await api.get(`/api/users/search?q=${encodeURIComponent(query)}`);
       setSearchResults(response.data.users);
     } catch (error) {
       console.error('Search error:', error);
