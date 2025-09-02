@@ -18,7 +18,13 @@ export const SocketProvider = ({ children }) => {
         auth: {
           token: token
         },
-        transports: ['websocket', 'polling']
+        transports: ['websocket', 'polling'],
+        timeout: 20000,
+        forceNew: true,
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5,
+        maxReconnectionAttempts: 5
       });
 
       newSocket.on('connect', () => {
@@ -34,6 +40,23 @@ export const SocketProvider = ({ children }) => {
 
       newSocket.on('connect_error', (error) => {
         console.error('Connection error:', error);
+        setConnected(false);
+        // Don't show error toast immediately, let reconnection handle it
+      });
+
+      newSocket.on('reconnect', () => {
+        console.log('Reconnected to server');
+        setConnected(true);
+        toast.success('Reconnected to server');
+      });
+
+      newSocket.on('reconnect_error', (error) => {
+        console.error('Reconnection error:', error);
+        toast.error('Connection failed. Please refresh the page.');
+      });
+
+      newSocket.on('reconnect_failed', () => {
+        console.error('Reconnection failed');
         toast.error('Connection failed. Please refresh the page.');
       });
 
