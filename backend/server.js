@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -61,25 +62,43 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// Root endpoint
+// Root endpoint - serve frontend if available, otherwise show API info
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Secure Chat App Backend API',
-    status: 'Running',
-    endpoints: {
-      health: '/api/health',
-      auth: '/api/auth',
-      users: '/api/users',
-      messages: '/api/messages',
-      upload: '/api/upload'
-    },
-    timestamp: new Date().toISOString()
-  });
+  const frontendPath = path.join(__dirname, '../frontend/build/index.html');
+  
+  // Check if frontend build exists
+  if (fs.existsSync(frontendPath)) {
+    res.sendFile(frontendPath);
+  } else {
+    res.json({ 
+      message: 'Secure Chat App Backend API',
+      status: 'Running',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        users: '/api/users',
+        messages: '/api/messages',
+        upload: '/api/upload'
+      },
+      frontend: 'Frontend not built yet. Use /app route or build frontend first.',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Serve frontend build files
 app.get('/app', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  const frontendPath = path.join(__dirname, '../frontend/build/index.html');
+  
+  if (fs.existsSync(frontendPath)) {
+    res.sendFile(frontendPath);
+  } else {
+    res.status(404).json({
+      error: 'Frontend not built',
+      message: 'Please build the frontend first or check the build process',
+      instructions: 'Run: cd frontend && npm install && npm run build'
+    });
+  }
 });
 
 // Serve frontend static files
