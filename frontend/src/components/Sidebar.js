@@ -32,6 +32,14 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
         setRecentConversations(response.data.conversations);
       } catch (error) {
         console.error('Error fetching conversations:', error);
+        console.error('Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        // Don't show error to user, just log it
+        // Set empty conversations as fallback
+        setRecentConversations([]);
       }
     };
 

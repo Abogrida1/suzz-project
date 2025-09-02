@@ -233,7 +233,7 @@ router.get('/conversations/recent', async (req, res) => {
         $group: {
           _id: {
             $cond: [
-              { $eq: ['$sender', req.user._id] },
+              { $eq: ['$sender', userId] },
               '$privateChatWith',
               '$sender'
             ]
@@ -244,8 +244,8 @@ router.get('/conversations/recent', async (req, res) => {
               $cond: [
                 {
                   $and: [
-                    { $ne: ['$sender', req.user._id] },
-                    { $not: { $in: [req.user._id, '$readBy.user'] } }
+                    { $ne: ['$sender', userId] },
+                    { $not: { $in: [userId, '$readBy.user'] } }
                   ]
                 },
                 1,
@@ -297,7 +297,15 @@ router.get('/conversations/recent', async (req, res) => {
     res.json({ conversations: privateMessages });
   } catch (error) {
     console.error('Get recent conversations error:', error);
-    res.status(500).json({ message: 'Failed to fetch recent conversations' });
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      userId: req.query.userId
+    });
+    res.status(500).json({ 
+      message: 'Failed to fetch recent conversations',
+      error: error.message 
+    });
   }
 });
 
