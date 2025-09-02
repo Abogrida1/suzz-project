@@ -9,16 +9,11 @@
     "client": "cd frontend && npm start",
     "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "build": "cd frontend && npm run build",
-    "start": "cd backend && npm start",
-    "postinstall": "cd backend && npm install --production"
+    "start": "cd backend && npm start"
   },
   "keywords": ["chat", "messaging", "real-time", "react", "nodejs", "socketio"],
   "author": "Your Name",
   "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
   "devDependencies": {
     "concurrently": "^8.2.2"
   }
