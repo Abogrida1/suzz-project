@@ -21,7 +21,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "REACT_APP_SERVER_URL=${REACT_APP_SERVER_URL:-https://suzz-project-5.onrender.com} REACT_APP_APP_NAME=${REACT_APP_APP_NAME:-Secure Chat App} react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

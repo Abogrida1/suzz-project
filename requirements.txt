@@ -1,3 +1,0 @@
-# This file is intentionally empty
-# This project uses Node.js, not Python
-# Dependencies are managed in package.json files
