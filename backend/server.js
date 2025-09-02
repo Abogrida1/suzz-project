@@ -22,21 +22,68 @@ const server = createServer(app);
 // Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN || process.env.CLIENT_URL || "http://localhost:3000",
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        process.env.CORS_ORIGIN,
+        process.env.CLIENT_URL,
+        "http://localhost:3000",
+        "https://secure-chat-app.onrender.com"
+      ].filter(Boolean);
+      
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true
   },
-  pingTimeout: 60000,
-  pingInterval: 25000,
-  transports: ['websocket', 'polling']
+  pingTimeout: 120000, // 2 minutes
+  pingInterval: 30000, // 30 seconds
+  transports: ['websocket', 'polling'],
+  allowEIO3: true,
+  serveClient: false
 });
 
 // Security middleware
-app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || process.env.CLIENT_URL || "http://localhost:3000",
-  credentials: true
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      connectSrc: ["'self'", "ws:", "wss:", "https:", "http:"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      manifestSrc: ["'self'"]
+    }
+  }
 }));
+
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.CORS_ORIGIN,
+      process.env.CLIENT_URL,
+      "http://localhost:3000",
+      "https://secure-chat-app.onrender.com"
+    ].filter(Boolean);
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with']
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting - more lenient for production
 const limiter = rateLimit({
@@ -73,7 +120,7 @@ const checkDatabaseConnection = (req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', authenticateToken, checkDatabaseConnection, userRoutes);
-app.use('/api/messages', authenticateToken, checkDatabaseConnection, messageRoutes);
+app.use('/api/messages', checkDatabaseConnection, messageRoutes);
 app.use('/api/upload', authenticateToken, checkDatabaseConnection, uploadRoutes);
 
 // Health check endpoint
@@ -127,6 +174,16 @@ app.get('/app', (req, res) => {
 
 // Serve frontend static files
 app.use('/static', express.static(path.join(__dirname, '../frontend/build/static')));
+
+// Serve manifest.json
+app.get('/manifest.json', (req, res) => {
+  const manifestPath = path.join(__dirname, '../frontend/build/manifest.json');
+  if (fs.existsSync(manifestPath)) {
+    res.sendFile(manifestPath);
+  } else {
+    res.status(404).json({ error: 'Manifest not found' });
+  }
+});
 
 // Serve all frontend routes
 app.get('/chat', (req, res) => {

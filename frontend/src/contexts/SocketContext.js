@@ -18,13 +18,18 @@ export const SocketProvider = ({ children }) => {
         auth: {
           token: token
         },
-        transports: ['websocket', 'polling'],
-        timeout: 20000,
+        transports: ['polling'],
+        timeout: 30000,
         forceNew: true,
         reconnection: true,
-        reconnectionDelay: 1000,
-        reconnectionAttempts: 5,
-        maxReconnectionAttempts: 5
+        reconnectionDelay: 2000,
+        reconnectionDelayMax: 10000,
+        reconnectionAttempts: 10,
+        maxReconnectionAttempts: 10,
+        randomizationFactor: 0.5,
+        autoConnect: true,
+        upgrade: true,
+        rememberUpgrade: true
       });
 
       newSocket.on('connect', () => {
