@@ -5,9 +5,13 @@ import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import Navigation from './components/Navigation';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Chat from './pages/Chat';
+import HomePage from './pages/HomePage';
+import ChatsPage from './pages/ChatsPage';
+import AccountPage from './pages/AccountPage';
+import SettingsPage from './pages/SettingsPage';
 import './App.css';
 
 function App() {
@@ -21,14 +25,37 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route 
-                  path="/chat" 
+                  path="/" 
                   element={
                     <ProtectedRoute>
-                      <Chat />
+                      <HomePage />
                     </ProtectedRoute>
                   } 
                 />
-                <Route path="/" element={<Navigate to="/chat" replace />} />
+                <Route 
+                  path="/chats" 
+                  element={
+                    <ProtectedRoute>
+                      <ChatsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/account" 
+                  element={
+                    <ProtectedRoute>
+                      <AccountPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/settings" 
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  } 
+                />
               </Routes>
               <Toaster 
                 position="top-right"
