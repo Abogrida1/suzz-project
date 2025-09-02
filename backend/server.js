@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -46,6 +47,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static files for uploads
 app.use('/uploads', express.static('uploads'));
 
+// Serve static files from root
+app.use(express.static('.'));
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', authenticateToken, userRoutes);
@@ -56,6 +60,30 @@ app.use('/api/upload', authenticateToken, uploadRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Secure Chat App Backend API',
+    status: 'Running',
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      users: '/api/users',
+      messages: '/api/messages',
+      upload: '/api/upload'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Serve frontend build files
+app.get('/app', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+// Serve frontend static files
+app.use('/static', express.static(path.join(__dirname, '../frontend/build/static')));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

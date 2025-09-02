@@ -9,7 +9,7 @@ cd backend
 npm install --production
 cd ..
 
-# Build frontend (if needed)
+# Build frontend
 echo "Building frontend..."
 cd frontend
 npm install
