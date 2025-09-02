@@ -9,9 +9,11 @@ cd backend
 npm install --production
 cd ..
 
-# Build frontend
+# Build frontend with environment variables
 echo "Building frontend..."
 cd frontend
+export REACT_APP_SERVER_URL=https://suzz-project-5.onrender.com
+export REACT_APP_APP_NAME="Secure Chat App"
 npm install
 npm run build
 cd ..

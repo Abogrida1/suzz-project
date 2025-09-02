@@ -4,7 +4,7 @@ services:
     name: secure-chat-backend
     env: node
     plan: free
-    buildCommand: cd backend && npm install --production
+    buildCommand: chmod +x build.sh && ./build.sh
     startCommand: chmod +x start.sh && ./start.sh
     envVars:
       - key: NODE_ENV
@@ -22,6 +22,8 @@ services:
       - key: MAX_FILE_SIZE
         value: 5242880
       - key: CORS_ORIGIN
+        value: https://suzz-project-5.onrender.com
+      - key: REACT_APP_SERVER_URL
         value: https://suzz-project-5.onrender.com
 
   # Frontend Service
