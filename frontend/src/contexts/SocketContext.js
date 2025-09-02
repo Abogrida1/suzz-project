@@ -14,7 +14,14 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated && token && user) {
-      const newSocket = io(process.env.REACT_APP_SERVER_URL || 'http://localhost:5000', {
+      const getSocketURL = () => {
+        if (process.env.NODE_ENV === 'production') {
+          return window.location.origin;
+        }
+        return process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
+      };
+
+      const newSocket = io(getSocketURL(), {
         auth: {
           token: token
         },

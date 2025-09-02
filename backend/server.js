@@ -27,7 +27,7 @@ const io = new Server(server, {
         process.env.CORS_ORIGIN,
         process.env.CLIENT_URL,
         "http://localhost:3000",
-        "https://secure-chat-app.onrender.com"
+        "https://suzz-project-11.onrender.com"
       ].filter(Boolean);
       
       if (!origin || allowedOrigins.includes(origin)) {
@@ -69,7 +69,7 @@ const corsOptions = {
       process.env.CORS_ORIGIN,
       process.env.CLIENT_URL,
       "http://localhost:3000",
-      "https://secure-chat-app.onrender.com"
+      "https://suzz-project-11.onrender.com"
     ].filter(Boolean);
     
     if (!origin || allowedOrigins.includes(origin)) {

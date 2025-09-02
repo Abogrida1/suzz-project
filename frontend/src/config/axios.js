@@ -1,8 +1,18 @@
 import axios from 'axios';
 
 // Create axios instance with base configuration
+const getBaseURL = () => {
+  // Check if we're in production
+  if (process.env.NODE_ENV === 'production') {
+    // In production, use the current domain
+    return window.location.origin;
+  }
+  // In development, use localhost
+  return process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
+};
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_SERVER_URL || 'http://localhost:5000',
+  baseURL: getBaseURL(),
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

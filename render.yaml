@@ -15,10 +15,10 @@ services:
       - key: JWT_SECRET
         value: secure-chat-app-super-secret-jwt-key-2024-production
       - key: CLIENT_URL
-        value: https://secure-chat-app.onrender.com
+        value: https://suzz-project-11.onrender.com
       - key: CORS_ORIGIN
-        value: https://secure-chat-app.onrender.com
+        value: https://suzz-project-11.onrender.com
       - key: REACT_APP_SERVER_URL
-        value: https://secure-chat-app.onrender.com
+        value: https://suzz-project-11.onrender.com
       - key: REACT_APP_APP_NAME
         value: Secure Chat App
