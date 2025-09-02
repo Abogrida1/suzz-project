@@ -51,15 +51,32 @@ app.use('/uploads', express.static('uploads'));
 // Serve static files from root
 app.use(express.static('.'));
 
+// Database connection middleware
+const checkDatabaseConnection = (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(503).json({
+      error: 'Database not connected',
+      message: 'Please check MongoDB connection',
+      status: 'Service Unavailable'
+    });
+  }
+  next();
+};
+
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', authenticateToken, userRoutes);
-app.use('/api/messages', authenticateToken, messageRoutes);
-app.use('/api/upload', authenticateToken, uploadRoutes);
+app.use('/api/users', authenticateToken, checkDatabaseConnection, userRoutes);
+app.use('/api/messages', authenticateToken, checkDatabaseConnection, messageRoutes);
+app.use('/api/upload', authenticateToken, checkDatabaseConnection, uploadRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.json({ 
+    status: 'OK', 
+    database: dbStatus,
+    timestamp: new Date().toISOString() 
+  });
 });
 
 // Root endpoint - serve frontend if available, otherwise show API info
@@ -141,7 +158,8 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/secure-ch
 })
 .catch((error) => {
   console.error('MongoDB connection error:', error);
-  process.exit(1);
+  console.log('Server will continue running without database connection');
+  // Don't exit the process, just log the error
 });
 
 // Setup Socket.IO handlers
