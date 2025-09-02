@@ -1,0 +1,29 @@
+services:
+  # Backend Service (includes frontend build)
+  - type: web
+    name: secure-chat-backend
+    env: node
+    plan: free
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: chmod +x start.sh && ./start.sh
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        value: mongodb+srv://madoabogrida05_db_user:gdfk1C6pfnlFIG6I@cluster0.3kkot5p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      - key: JWT_SECRET
+        value: secure-chat-app-super-secret-jwt-key-2024-production
+      - key: CLIENT_URL
+        value: https://suzz-project-5.onrender.com
+      - key: UPLOAD_PATH
+        value: ./uploads
+      - key: MAX_FILE_SIZE
+        value: 5242880
+      - key: CORS_ORIGIN
+        value: https://suzz-project-5.onrender.com
+      - key: REACT_APP_SERVER_URL
+        value: https://suzz-project-5.onrender.com
+      - key: REACT_APP_APP_NAME
+        value: Secure Chat App

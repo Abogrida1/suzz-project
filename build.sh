@@ -20,8 +20,10 @@ echo "Installing frontend dependencies and building..."
 cd frontend
 npm install --legacy-peer-deps
 echo "Building frontend with environment variables..."
-npx react-scripts build
+REACT_APP_SERVER_URL=${REACT_APP_SERVER_URL:-https://suzz-project-5.onrender.com} REACT_APP_APP_NAME=${REACT_APP_APP_NAME:-Secure Chat App} npx react-scripts build
 echo "Frontend build completed successfully!"
+echo "Frontend build files:"
+ls -la build/
 cd ..
 
 # Install backend dependencies
