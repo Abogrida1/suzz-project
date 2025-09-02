@@ -4,7 +4,7 @@ services:
     name: secure-chat-backend
     env: node
     plan: free
-    buildCommand: cd backend && npm install --production && cd ../frontend && npm install && npm run build
+    buildCommand: cd backend && npm install --production && cd ../frontend && npm install && npm run build && cd ..
     startCommand: chmod +x start.sh && ./start.sh
     envVars:
       - key: NODE_ENV
