@@ -86,7 +86,49 @@ This will start both the backend server (port 5000) and frontend development ser
 
 ## 🌐 Deployment
 
-### Option 1: Docker Compose (Recommended for VPS/Dedicated Server)
+### Option 1: Railway (Recommended)
+
+1. **Backend Deployment:**
+   - Go to [Railway](https://railway.app)
+   - Connect your GitHub repository
+   - Create a new project from GitHub repo
+   - Railway will auto-detect Node.js and use the `railway.json` config
+   - Add environment variables:
+     ```
+     NODE_ENV=production
+     MONGODB_URI=your-mongodb-connection-string
+     JWT_SECRET=your-super-secret-jwt-key
+     CLIENT_URL=https://your-frontend-url.railway.app
+     ```
+   - Deploy automatically
+
+2. **Frontend Deployment:**
+   - Create a new Railway project for frontend
+   - Set the root directory to `frontend`
+   - Add environment variables:
+     ```
+     REACT_APP_SERVER_URL=https://your-backend-url.railway.app
+     ```
+   - Deploy
+
+### Option 2: Render
+
+1. **Backend Deployment:**
+   - Go to [Render](https://render.com)
+   - Connect your GitHub repository
+   - Create a new Web Service
+   - Use the `render.yaml` configuration file
+   - Add environment variables (same as Railway)
+   - Deploy
+
+2. **Frontend Deployment:**
+   - Create a new Static Site on Render
+   - Connect your GitHub repository
+   - Set build command: `cd frontend && npm install && npm run build`
+   - Set publish directory: `frontend/build`
+   - Add environment variables (same as Railway)
+
+### Option 3: Docker Compose (Recommended for VPS/Dedicated Server)
 
 1. Clone the repository:
 ```bash
