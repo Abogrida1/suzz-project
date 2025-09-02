@@ -4,7 +4,7 @@ services:
     name: secure-chat-backend
     env: node
     plan: free
-    buildCommand: cd backend && npm install --production && cd ../frontend && npm install && npm run build && cd ..
+    buildCommand: cd backend && npm install --production
     startCommand: chmod +x start.sh && ./start.sh
     envVars:
       - key: NODE_ENV
@@ -16,13 +16,13 @@ services:
       - key: JWT_SECRET
         value: secure-chat-app-super-secret-jwt-key-2024-production
       - key: CLIENT_URL
-        value: https://suzz-project-3.onrender.com
+        value: https://suzz-project-5.onrender.com
       - key: UPLOAD_PATH
         value: ./uploads
       - key: MAX_FILE_SIZE
         value: 5242880
       - key: CORS_ORIGIN
-        value: https://suzz-project-3.onrender.com
+        value: https://suzz-project-5.onrender.com
 
   # Frontend Service
   - type: web
@@ -33,6 +33,6 @@ services:
     staticPublishPath: frontend/build
     envVars:
       - key: REACT_APP_SERVER_URL
-        value: https://suzz-project-3.onrender.com
+        value: https://suzz-project-5.onrender.com
       - key: REACT_APP_APP_NAME
         value: Secure Chat App
