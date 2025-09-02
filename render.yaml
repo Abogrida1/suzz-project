@@ -2,10 +2,9 @@ services:
   # Backend Service
   - type: web
     name: secure-chat-backend
-    env: node
+    env: docker
     plan: free
-    buildCommand: npm install && cd backend && npm install --production && cd ../frontend && npm install && npm run build
-    startCommand: cd backend && npm start
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: NODE_ENV
         value: production
