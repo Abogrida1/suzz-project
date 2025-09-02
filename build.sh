@@ -18,9 +18,9 @@ npm install
 # Install and build frontend FIRST
 echo "Installing frontend dependencies and building..."
 cd frontend
-npm install
+npm install --legacy-peer-deps
 echo "Building frontend with environment variables..."
-npm run build
+npx react-scripts build
 echo "Frontend build completed successfully!"
 cd ..
 
