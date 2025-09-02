@@ -100,6 +100,12 @@ export const SocketProvider = ({ children }) => {
         });
       });
 
+      // Handle errors
+      newSocket.on('error', (error) => {
+        console.error('Socket error:', error);
+        toast.error(error.message || 'An error occurred');
+      });
+
       // Handle new messages
       newSocket.on('message_received', (message) => {
         // This will be handled by individual chat components
@@ -168,8 +174,11 @@ export const SocketProvider = ({ children }) => {
   };
 
   const sendMessage = (messageData) => {
-    if (socket) {
+    if (socket && connected) {
       socket.emit('send_message', messageData);
+    } else {
+      console.error('Socket not connected');
+      toast.error('Connection lost. Please refresh the page.');
     }
   };
 

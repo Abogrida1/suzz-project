@@ -106,10 +106,17 @@ const setupSocketHandlers = (io) => {
     // Handle sending messages
     socket.on('send_message', async (data) => {
       try {
+        console.log('Received message:', data);
         const { content, type = 'text', chatType, recipients, attachment, replyTo } = data;
 
         if (!content && !attachment) {
+          console.log('No content or attachment provided');
           return socket.emit('error', { message: 'Message content required' });
+        }
+
+        if (!chatType) {
+          console.log('No chat type provided');
+          return socket.emit('error', { message: 'Chat type required' });
         }
 
         // Prevent sending messages to yourself in private chat
@@ -170,11 +177,15 @@ const setupSocketHandlers = (io) => {
           }
         }
 
+        console.log('Message sent successfully:', message._id);
         socket.emit('message_sent', message);
 
       } catch (error) {
         console.error('Send message error:', error);
-        socket.emit('error', { message: 'Failed to send message' });
+        socket.emit('error', { 
+          message: 'Failed to send message',
+          error: error.message 
+        });
       }
     });
 
