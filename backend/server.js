@@ -85,6 +85,19 @@ app.get('/app', (req, res) => {
 // Serve frontend static files
 app.use('/static', express.static(path.join(__dirname, '../frontend/build/static')));
 
+// Serve all frontend routes
+app.get('/chat', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

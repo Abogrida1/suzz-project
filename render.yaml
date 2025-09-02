@@ -31,6 +31,6 @@ services:
     staticPublishPath: frontend/build
     envVars:
       - key: REACT_APP_SERVER_URL
-        sync: false
+        value: https://secure-chat-backend.onrender.com
       - key: REACT_APP_APP_NAME
         value: Secure Chat App
