@@ -56,21 +56,6 @@ const MessageBubble = ({
     setShowActions(!showActions);
   };
 
-  const handleReply = () => {
-    // TODO: Implement reply functionality
-    console.log('Reply to message:', message._id);
-  };
-
-  const handleEdit = () => {
-    // TODO: Implement edit functionality
-    console.log('Edit message:', message._id);
-  };
-
-  const handleDelete = () => {
-    // TODO: Implement delete functionality
-    console.log('Delete message:', message._id);
-  };
-
   const renderMessageContent = () => {
     if (message.type === 'image' && message.attachment) {
       return (
