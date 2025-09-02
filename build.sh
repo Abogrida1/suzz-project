@@ -14,6 +14,7 @@ echo "Building frontend..."
 cd frontend
 export REACT_APP_SERVER_URL=https://suzz-project-5.onrender.com
 export REACT_APP_APP_NAME="Secure Chat App"
+export PUBLIC_URL=.
 npm install
 npm run build
 cd ..
