@@ -28,6 +28,7 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   const { logout } = useAuth();
 
   // Debug: Log user on every render
+  console.log('Navigation render - user:', user);
   console.log('Navigation render - user email:', user?.email);
 
   // Check if user is admin - SIMPLIFIED VERSION

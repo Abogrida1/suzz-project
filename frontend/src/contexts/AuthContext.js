@@ -82,6 +82,7 @@ export const AuthProvider = ({ children }) => {
       if (state.token) {
         try {
           const response = await api.get('/api/auth/me');
+          console.log('Auth check response:', response.data);
           dispatch({
             type: 'AUTH_SUCCESS',
             payload: {
