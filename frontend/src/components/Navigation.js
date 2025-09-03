@@ -38,7 +38,7 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
     const checkAdminStatus = async () => {
       if (user) {
         // Check if user is the creator account (by email or username)
-        if (user.email === 'madoabogrida05@gmail.com' || user.username === 'batta') {
+        if (user.email === 'madoabogrida05@gmail.com' || user.username === 'batta' || user.username === 'mado') {
           console.log('✅ Creator account detected - setting admin to true');
           console.log('User details:', { email: user.email, username: user.username });
           setIsAdmin(true);
@@ -86,15 +86,14 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   ];
 
   // Add admin link only for admin users
-  // Also check if user is batta even if user object is not available
-  const isBattaUser = user?.username === 'batta' || user?.email === 'madoabogrida05@gmail.com';
+  // Check if user is batta or the creator account
+  const isBattaUser = user?.username === 'batta' || user?.username === 'mado';
+  const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
   
-  // TEMPORARY: Force admin link for batta user
-  const forceAdminForBatta = true; // Change this to false later
-  
-  if (isAdmin || isBattaUser || forceAdminForBatta) {
-    console.log('✅ Adding admin link - user is admin or batta');
-    console.log('Reason: isAdmin =', isAdmin, ', isBattaUser =', isBattaUser, ', forceAdminForBatta =', forceAdminForBatta);
+  if (isAdmin || isBattaUser || isCreatorEmail) {
+    console.log('✅ Adding admin link - user is admin or batta or creator');
+    console.log('Reason: isAdmin =', isAdmin, ', isBattaUser =', isBattaUser, ', isCreatorEmail =', isCreatorEmail);
+    console.log('User details:', { username: user?.username, email: user?.email });
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
   } else {
     console.log('❌ NOT adding admin link - user is not admin');

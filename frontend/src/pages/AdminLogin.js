@@ -23,8 +23,9 @@ const AdminLogin = () => {
     const checkAdminAuthorization = async () => {
       if (user) {
         // Check if user is the creator account (by email or username)
-        if (user.email === 'madoabogrida05@gmail.com' || user.username === 'batta') {
+        if (user.email === 'madoabogrida05@gmail.com' || user.username === 'batta' || user.username === 'mado') {
           console.log('✅ Creator account detected in AdminLogin - setting authorized to true');
+          console.log('User details:', { email: user.email, username: user.username });
           setIsAuthorized(true);
           setCheckingAuth(false);
           return;
@@ -56,7 +57,7 @@ const AdminLogin = () => {
         } catch (error) {
           console.error('Error checking admin authorization:', error);
           // Fallback: check if current user email matches admin email
-          const isSpecificAdmin = user?.email === 'madoabogrida05@gmail.com' || user?.username === 'batta';
+          const isSpecificAdmin = user?.email === 'madoabogrida05@gmail.com' || user?.username === 'batta' || user?.username === 'mado';
           setIsAuthorized(isSpecificAdmin);
           
           if (!isSpecificAdmin) {
