@@ -99,6 +99,7 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
     user.username.toLowerCase() === 'mado'
   );
   
+  // Only show admin link for specific users or users with admin role
   if (isAdmin || isCreatorUsername || isCreatorEmail) {
     console.log('✅ Adding admin link - user is admin or creator');
     console.log('Reason: isAdmin =', isAdmin, ', isCreatorUsername =', isCreatorUsername, ', isCreatorEmail =', isCreatorEmail);
