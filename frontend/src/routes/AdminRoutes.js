@@ -8,7 +8,7 @@ const AdminRoutes = () => {
   return (
     <Routes>
       <Route 
-        path="/admin-login" 
+        path="/" 
         element={
           <ProtectedRoute>
             <AdminLogin />
@@ -16,7 +16,7 @@ const AdminRoutes = () => {
         } 
       />
       <Route 
-        path="/admin" 
+        path="/*" 
         element={
           <ProtectedRoute>
             <AdminPage />
