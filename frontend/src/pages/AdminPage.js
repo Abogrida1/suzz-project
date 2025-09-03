@@ -60,10 +60,14 @@ const AdminPage = () => {
         try {
           const response = await api.get('/api/auth/me');
           const userData = response.data;
-          const hasAdminRole = userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role);
-          setIsAuthorized(hasAdminRole);
           
-          if (!hasAdminRole) {
+          // Check for admin role or if user is the specific admin email
+          const hasAdminRole = userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role);
+          const isSpecificAdmin = userData.email === 'madoabogrida05@gmail.com';
+          
+          setIsAuthorized(hasAdminRole || isSpecificAdmin);
+          
+          if (!hasAdminRole && !isSpecificAdmin) {
             toast.error('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
             setTimeout(() => navigate('/'), 2000);
             return;

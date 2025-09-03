@@ -35,7 +35,19 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           // Check if user has admin role or permissions
           const response = await api.get('/api/auth/me');
           const userData = response.data;
-          setIsAdmin(userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role));
+          
+          // Check for admin role or if user is the specific admin email
+          const hasAdminRole = userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role);
+          const isSpecificAdmin = userData.email === 'madoabogrida05@gmail.com';
+          
+          setIsAdmin(hasAdminRole || isSpecificAdmin);
+          
+          console.log('Admin check:', {
+            userData,
+            hasAdminRole,
+            isSpecificAdmin,
+            isAdmin: hasAdminRole || isSpecificAdmin
+          });
         } catch (error) {
           console.error('Error checking admin status:', error);
           setIsAdmin(false);
@@ -57,6 +69,9 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   if (isAdmin) {
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
   }
+  
+  // Debug: Log admin status
+  console.log('Navigation - isAdmin:', isAdmin, 'user:', user?.email);
 
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') return true;
