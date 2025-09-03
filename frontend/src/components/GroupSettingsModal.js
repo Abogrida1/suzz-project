@@ -256,19 +256,20 @@ const GroupSettingsModal = ({ group, isOpen, onClose, onGroupUpdate }) => {
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 dark:border-gray-700">
+          <div className="group-settings-tabs md:flex md:border-b md:border-gray-200 md:dark:border-gray-700">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-6 py-3 text-sm font-medium transition-colors ${
+                className={`group-settings-tab flex items-center space-x-2 px-4 md:px-6 py-3 text-sm font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
-                <span>{tab.label}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
               </button>
             ))}
           </div>

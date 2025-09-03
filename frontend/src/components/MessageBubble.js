@@ -246,7 +246,7 @@ const MessageBubble = ({
 
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} group`}>
-      <div className={`flex max-w-xs lg:max-w-md ${isOwn ? 'flex-row-reverse' : 'flex-row'} items-end space-x-2`}>
+      <div className={`flex max-w-xs lg:max-w-md message-bubble-mobile ${isOwn ? 'flex-row-reverse' : 'flex-row'} items-end space-x-2`}>
         {/* Avatar */}
         {showAvatar && !isOwn && (
           <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -321,19 +321,19 @@ const MessageBubble = ({
 
           {/* Reactions */}
           {reactions.length > 0 && (
-            <div className="flex flex-wrap gap-1 mt-2">
+            <div className="emoji-reactions-container message-reactions-mobile">
               {reactions.map((reaction, index) => (
                 <div
                   key={index}
-                  className={`group relative flex items-center space-x-1 rounded-full px-2 py-1 text-xs cursor-pointer transition-all duration-200 hover:scale-105 ${
+                  className={`emoji-reaction-item group relative cursor-pointer transition-all duration-200 hover:scale-105 ${
                     reaction.user.toString() === user._id.toString()
                       ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700' 
                       : 'bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500'
                   }`}
                   onClick={() => handleReaction(reaction.emoji)}
                 >
-                  {getReactionIcon(reaction.emoji)}
-                  <span className="text-gray-600 dark:text-gray-300 font-medium">
+                  <span className="text-sm">{getReactionIcon(reaction.emoji)}</span>
+                  <span className="text-gray-600 dark:text-gray-300 font-medium text-xs">
                     {reaction.user.toString() === user._id.toString() ? 'You' : '1'}
                   </span>
                   
@@ -401,7 +401,7 @@ const MessageBubble = ({
                   <button
                     key={emoji}
                     onClick={() => handleReaction(emoji)}
-                    className={`p-2 rounded-full transition-all duration-200 text-2xl hover:scale-125 active:scale-95 ${
+                    className={`emoji-reaction-button rounded-full transition-all duration-200 text-lg md:text-2xl hover:scale-125 active:scale-95 ${
                       hasReacted 
                         ? 'bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700' 
                         : 'hover:bg-gray-100 dark:hover:bg-gray-700'

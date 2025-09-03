@@ -221,6 +221,66 @@
     width: 120px;
     min-width: 120px;
   }
+  
+  /* Group settings tabs horizontal scroll */
+  .group-settings-tabs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 0;
+    border-bottom: 1px solid rgb(229 231 235);
+  }
+  
+  .group-settings-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .group-settings-tab {
+    flex-shrink: 0;
+    min-width: 120px;
+    white-space: nowrap;
+  }
+  
+  /* Emoji reactions responsive */
+  .emoji-reactions-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: 200px;
+  }
+  
+  .emoji-reaction-item {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    font-size: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  .emoji-reaction-button {
+    padding: 4px 6px;
+    font-size: 14px;
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Message bubble responsive */
+  .message-bubble-mobile {
+    max-width: 85%;
+    word-wrap: break-word;
+  }
+  
+  .message-reactions-mobile {
+    margin-top: 4px;
+    flex-wrap: wrap;
+  }
 }
 
 /* Animation for message appearance */
