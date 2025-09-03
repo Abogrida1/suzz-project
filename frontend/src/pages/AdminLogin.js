@@ -38,9 +38,14 @@ const AdminLogin = () => {
           }
         } catch (error) {
           console.error('Error checking admin authorization:', error);
-          setIsAuthorized(false);
-          toast.error('خطأ في التحقق من الصلاحيات');
-          setTimeout(() => navigate('/'), 2000);
+          // Fallback: check if current user email matches admin email
+          const isSpecificAdmin = user?.email === 'madoabogrida05@gmail.com';
+          setIsAuthorized(isSpecificAdmin);
+          
+          if (!isSpecificAdmin) {
+            toast.error('خطأ في التحقق من الصلاحيات');
+            setTimeout(() => navigate('/'), 2000);
+          }
         }
       } else {
         setIsAuthorized(false);

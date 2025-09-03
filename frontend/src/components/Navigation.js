@@ -50,7 +50,14 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           });
         } catch (error) {
           console.error('Error checking admin status:', error);
-          setIsAdmin(false);
+          // Fallback: check if current user email matches admin email
+          const isSpecificAdmin = user?.email === 'madoabogrida05@gmail.com';
+          setIsAdmin(isSpecificAdmin);
+          console.log('Fallback admin check:', {
+            userEmail: user?.email,
+            isSpecificAdmin,
+            isAdmin: isSpecificAdmin
+          });
         }
       }
     };
