@@ -16,6 +16,14 @@ const AdminRoutes = () => {
         } 
       />
       <Route 
+        path="/admin" 
+        element={
+          <ProtectedRoute>
+            <AdminPage />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
         path="/*" 
         element={
           <ProtectedRoute>

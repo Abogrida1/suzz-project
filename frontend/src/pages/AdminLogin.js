@@ -122,6 +122,11 @@ const AdminLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    console.log('AdminLogin - handleSubmit called with credentials:', {
+      username: adminCredentials.username,
+      password: adminCredentials.password ? '***' : 'empty'
+    });
+    
     if (!adminCredentials.username || !adminCredentials.password) {
       toast.error('يرجى إدخال جميع البيانات');
       return;
@@ -133,6 +138,7 @@ const AdminLogin = () => {
       // Store admin credentials in localStorage for API calls
       localStorage.setItem('adminCredentials', JSON.stringify(adminCredentials));
       
+      console.log('AdminLogin - credentials stored, navigating to /admin');
       // Navigate to admin page
       navigate('/admin');
       toast.success('تم تسجيل الدخول بنجاح');

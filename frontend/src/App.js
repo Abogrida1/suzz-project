@@ -86,6 +86,7 @@ function App() {
                 />
                 {/* Admin routes - only accessible to authorized users */}
                 <Route path="/admin-login" element={<AdminRoutes />} />
+                <Route path="/admin" element={<AdminRoutes />} />
                 <Route path="/admin/*" element={<AdminRoutes />} />
                 
                 {/* Catch all route - redirect to home */}
