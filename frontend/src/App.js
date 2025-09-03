@@ -16,6 +16,7 @@ import MobileChatsPage from './pages/MobileChatsPage';
 import CreateGroupPage from './pages/CreateGroupPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
+import AdminPage from './pages/AdminPage';
 
 import './App.css';
 
@@ -80,6 +81,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SettingsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <ProtectedRoute>
+                      <AdminPage />
                     </ProtectedRoute>
                   } 
                 />

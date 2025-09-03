@@ -12,7 +12,8 @@ import {
   FaHome,
   FaBell,
   FaSearch,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaShieldAlt
 } from 'react-icons/fa';
 
 const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
@@ -30,6 +31,11 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
     { path: '/account', icon: FaUser, label: 'Account', mobile: true },
     { path: '/settings', icon: FaCog, label: 'Settings', mobile: true },
   ];
+
+  // Add admin link if user is super admin
+  if (user?.email === 'madoabogrida05@gmail.com') {
+    navItems.push({ path: '/admin', icon: FaShieldAlt, label: 'Admin', mobile: false });
+  }
 
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') return true;
