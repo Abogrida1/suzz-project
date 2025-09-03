@@ -19,7 +19,7 @@ import {
   FaSearch,
   FaFilter,
   FaDownload,
-  FaRefresh
+  FaRedo
 } from 'react-icons/fa';
 
 const AdminPage = () => {
@@ -266,7 +266,7 @@ const AdminPage = () => {
                   onClick={loadStats}
                   className="flex items-center space-x-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <FaRefresh className="w-4 h-4" />
+                  <FaRedo className="w-4 h-4" />
                   <span>Refresh</span>
                 </button>
               </div>
@@ -393,7 +393,7 @@ const AdminPage = () => {
                   onClick={loadUsers}
                   className="flex items-center space-x-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <FaRefresh className="w-4 h-4" />
+                  <FaRedo className="w-4 h-4" />
                   <span>Refresh</span>
                 </button>
               </div>
@@ -475,7 +475,7 @@ const AdminPage = () => {
                     onClick={loadMessages}
                     className="flex items-center space-x-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    <FaRefresh className="w-4 h-4" />
+                    <FaRedo className="w-4 h-4" />
                     <span>Refresh</span>
                   </button>
                 </div>
@@ -548,7 +548,7 @@ const AdminPage = () => {
                   onClick={loadGroups}
                   className="flex items-center space-x-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  <FaRefresh className="w-4 h-4" />
+                  <FaRedo className="w-4 h-4" />
                   <span>Refresh</span>
                 </button>
               </div>
