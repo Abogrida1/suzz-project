@@ -48,6 +48,51 @@ const userSchema = new mongoose.Schema({
     maxlength: 200,
     default: ''
   },
+  // Admin system
+  role: {
+    type: String,
+    enum: ['user', 'moderator', 'admin', 'super_admin'],
+    default: 'user'
+  },
+  adminPermissions: {
+    canManageUsers: {
+      type: Boolean,
+      default: false
+    },
+    canManageMessages: {
+      type: Boolean,
+      default: false
+    },
+    canManageGroups: {
+      type: Boolean,
+      default: false
+    },
+    canViewAnalytics: {
+      type: Boolean,
+      default: false
+    },
+    canManageAdmins: {
+      type: Boolean,
+      default: false
+    },
+    canDeleteGlobalMessages: {
+      type: Boolean,
+      default: false
+    },
+    canBanUsers: {
+      type: Boolean,
+      default: false
+    }
+  },
+  addedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  addedAt: {
+    type: Date,
+    default: null
+  },
   friends: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
@@ -92,6 +137,50 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ username: 1 });
 userSchema.index({ email: 1 });
 userSchema.index({ isOnline: 1 });
+userSchema.index({ role: 1 });
+
+// Admin permission methods
+userSchema.methods.isAdmin = function() {
+  return ['admin', 'super_admin'].includes(this.role);
+};
+
+userSchema.methods.isSuperAdmin = function() {
+  return this.role === 'super_admin';
+};
+
+userSchema.methods.hasPermission = function(permission) {
+  if (this.isSuperAdmin()) return true;
+  if (!this.isAdmin()) return false;
+  return this.adminPermissions[permission] === true;
+};
+
+userSchema.methods.canManageUsers = function() {
+  return this.hasPermission('canManageUsers');
+};
+
+userSchema.methods.canManageMessages = function() {
+  return this.hasPermission('canManageMessages');
+};
+
+userSchema.methods.canManageGroups = function() {
+  return this.hasPermission('canManageGroups');
+};
+
+userSchema.methods.canViewAnalytics = function() {
+  return this.hasPermission('canViewAnalytics');
+};
+
+userSchema.methods.canManageAdmins = function() {
+  return this.hasPermission('canManageAdmins');
+};
+
+userSchema.methods.canDeleteGlobalMessages = function() {
+  return this.hasPermission('canDeleteGlobalMessages');
+};
+
+userSchema.methods.canBanUsers = function() {
+  return this.hasPermission('canBanUsers');
+};
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {

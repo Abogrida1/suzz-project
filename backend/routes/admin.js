@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Message = require('../models/Message');
 const Group = require('../models/Group');
-const { adminAuth } = require('../middleware/adminAuth');
+const { adminAuth, requireAdminPermission } = require('../middleware/adminAuth');
 
 // Test route
 router.get('/test', (req, res) => {
@@ -11,7 +11,7 @@ router.get('/test', (req, res) => {
 });
 
 // Get all users
-router.post('/users', adminAuth, async (req, res) => {
+router.post('/users', adminAuth, requireAdminPermission('canManageUsers'), async (req, res) => {
   try {
     const users = await User.find({}, 'username displayName email createdAt lastSeen')
       .sort({ createdAt: -1 });
@@ -24,7 +24,7 @@ router.post('/users', adminAuth, async (req, res) => {
 });
 
 // Delete user
-router.delete('/users/:userId', adminAuth, async (req, res) => {
+router.delete('/users/:userId', adminAuth, requireAdminPermission('canManageUsers'), async (req, res) => {
   try {
     const { userId } = req.params;
     
@@ -57,7 +57,7 @@ router.delete('/users/:userId', adminAuth, async (req, res) => {
 });
 
 // Get all messages
-router.post('/messages', adminAuth, async (req, res) => {
+router.post('/messages', adminAuth, requireAdminPermission('canManageMessages'), async (req, res) => {
   try {
     const { chatType, limit = 100, page = 1 } = req.query;
     
@@ -88,7 +88,7 @@ router.post('/messages', adminAuth, async (req, res) => {
 });
 
 // Delete all global messages
-router.delete('/messages/global', adminAuth, async (req, res) => {
+router.delete('/messages/global', adminAuth, requireAdminPermission('canDeleteGlobalMessages'), async (req, res) => {
   try {
     const result = await Message.deleteMany({ chatType: 'global' });
     
@@ -103,7 +103,7 @@ router.delete('/messages/global', adminAuth, async (req, res) => {
 });
 
 // Delete specific message
-router.delete('/messages/:messageId', adminAuth, async (req, res) => {
+router.delete('/messages/:messageId', adminAuth, requireAdminPermission('canManageMessages'), async (req, res) => {
   try {
     const { messageId } = req.params;
     
@@ -121,7 +121,7 @@ router.delete('/messages/:messageId', adminAuth, async (req, res) => {
 });
 
 // Get all groups
-router.post('/groups', adminAuth, async (req, res) => {
+router.post('/groups', adminAuth, requireAdminPermission('canManageGroups'), async (req, res) => {
   try {
     const groups = await Group.find({})
       .populate('admin', 'username displayName')
@@ -136,7 +136,7 @@ router.post('/groups', adminAuth, async (req, res) => {
 });
 
 // Delete group
-router.delete('/groups/:groupId', adminAuth, async (req, res) => {
+router.delete('/groups/:groupId', adminAuth, requireAdminPermission('canManageGroups'), async (req, res) => {
   try {
     const { groupId } = req.params;
     
@@ -154,7 +154,7 @@ router.delete('/groups/:groupId', adminAuth, async (req, res) => {
 });
 
 // Get system stats
-router.post('/stats', adminAuth, async (req, res) => {
+router.post('/stats', adminAuth, requireAdminPermission('canViewAnalytics'), async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalMessages = await Message.countDocuments();

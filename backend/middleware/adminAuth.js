@@ -14,11 +14,40 @@ const adminAuth = (req, res, next) => {
   // Get admin credentials from request body
   const { username, password } = req.body;
   
-  // Check admin credentials
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+  // Check admin credentials OR if user is already an admin
+  if ((username === ADMIN_USERNAME && password === ADMIN_PASSWORD) || req.user.isAdmin()) {
     next();
   } else {
     res.status(403).json({ message: 'Invalid admin credentials' });
+  }
+};
+
+// Middleware to check specific admin permissions
+const requireAdminPermission = (permission) => {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    // Check if user has the required permission
+    if (req.user.hasPermission && req.user.hasPermission(permission)) {
+      next();
+    } else {
+      res.status(403).json({ message: `Permission required: ${permission}` });
+    }
+  };
+};
+
+// Middleware to check if user can manage admins
+const canManageAdmins = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Authentication required' });
+  }
+
+  if (req.user.canManageAdmins && req.user.canManageAdmins()) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Admin management permission required' });
   }
 };
 
@@ -30,4 +59,9 @@ const simpleAdminAuth = (req, res, next) => {
   next();
 };
 
-module.exports = { adminAuth, simpleAdminAuth };
+module.exports = { 
+  adminAuth, 
+  simpleAdminAuth, 
+  requireAdminPermission, 
+  canManageAdmins 
+};

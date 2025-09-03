@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
+import AdminManagement from '../components/AdminManagement';
 import api from '../config/axios';
 import toast from 'react-hot-toast';
 import { 
@@ -20,7 +21,8 @@ import {
   FaSearch,
   FaFilter,
   FaDownload,
-  FaRedo
+  FaRedo,
+  FaUserCog
 } from 'react-icons/fa';
 
 const AdminPage = () => {
@@ -217,7 +219,8 @@ const AdminPage = () => {
     { id: 'stats', label: 'Statistics', icon: FaChartBar },
     { id: 'users', label: 'Users', icon: FaUsers },
     { id: 'messages', label: 'Messages', icon: FaComments },
-    { id: 'groups', label: 'Groups', icon: FaUserFriends }
+    { id: 'groups', label: 'Groups', icon: FaUserFriends },
+    { id: 'admins', label: 'Admin Management', icon: FaUserCog }
   ];
   
   return (
@@ -549,6 +552,10 @@ const AdminPage = () => {
                 ))}
               </div>
             </div>
+          )}
+          
+          {activeTab === 'admins' && (
+            <AdminManagement adminCredentials={adminCredentials} />
           )}
           
           {activeTab === 'groups' && (
