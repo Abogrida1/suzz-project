@@ -37,11 +37,30 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           const userData = response.data;
           
           // Check for admin role or if user is the specific admin email
+          console.log('Raw userData from API:', JSON.stringify(userData, null, 2));
+          console.log('userData.role:', userData.role);
+          console.log('userData.email:', userData.email);
+          
           const hasAdminRole = userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role);
           const isSpecificAdmin = userData.email === 'madoabogrida05@gmail.com';
           
+          console.log('hasAdminRole calculation:', hasAdminRole);
+          console.log('isSpecificAdmin calculation:', isSpecificAdmin);
+          
           const finalAdminStatus = hasAdminRole || isSpecificAdmin;
-          setIsAdmin(finalAdminStatus);
+          
+          // Additional fallback: check current user email directly
+          const currentUserEmail = user?.email;
+          const isCurrentUserAdmin = currentUserEmail === 'madoabogrida05@gmail.com';
+          
+          console.log('currentUserEmail:', currentUserEmail);
+          console.log('isCurrentUserAdmin:', isCurrentUserAdmin);
+          
+          const finalResult = finalAdminStatus || isCurrentUserAdmin;
+          setIsAdmin(finalResult);
+          
+          console.log('finalAdminStatus:', finalAdminStatus);
+          console.log('finalResult (with fallback):', finalResult);
           
           console.log('Admin check:', {
             userData: userData,
