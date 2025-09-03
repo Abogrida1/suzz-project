@@ -30,6 +30,8 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   // Debug: Log user on every render
   console.log('Navigation render - user:', user);
   console.log('Navigation render - user email:', user?.email);
+  console.log('Navigation render - user username:', user?.username);
+  console.log('Navigation render - user type:', typeof user);
 
   // Check if user is admin - SIMPLIFIED VERSION
   useEffect(() => {
@@ -87,9 +89,12 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   // Also check if user is batta even if user object is not available
   const isBattaUser = user?.username === 'batta' || user?.email === 'madoabogrida05@gmail.com';
   
-  if (isAdmin || isBattaUser) {
+  // TEMPORARY: Force admin link for batta user
+  const forceAdminForBatta = true; // Change this to false later
+  
+  if (isAdmin || isBattaUser || forceAdminForBatta) {
     console.log('✅ Adding admin link - user is admin or batta');
-    console.log('Reason: isAdmin =', isAdmin, ', isBattaUser =', isBattaUser);
+    console.log('Reason: isAdmin =', isAdmin, ', isBattaUser =', isBattaUser, ', forceAdminForBatta =', forceAdminForBatta);
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
   } else {
     console.log('❌ NOT adding admin link - user is not admin');
