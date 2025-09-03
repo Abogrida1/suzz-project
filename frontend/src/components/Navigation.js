@@ -28,106 +28,39 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   const { logout } = useAuth();
 
   // Debug: Log user on every render
-  console.log('Navigation render - user:', user);
-  console.log('Navigation render - user.email:', user?.email);
+  console.log('Navigation render - user email:', user?.email);
 
-  // Check if user is admin
+  // Check if user is admin - SIMPLIFIED VERSION
   useEffect(() => {
     const checkAdminStatus = async () => {
-      console.log('=== ADMIN CHECK START ===');
-      console.log('user object:', user);
-      console.log('user.email:', user?.email);
-      console.log('user type:', typeof user);
-      
       if (user) {
-        console.log('User exists, checking email...');
-        console.log('user.email === "madoabogrida05@gmail.com":', user.email === 'madoabogrida05@gmail.com');
-        
-        // Immediate check for creator account
+        // Check if user is the creator account
         if (user.email === 'madoabogrida05@gmail.com') {
-          console.log('✅ Creator account detected - setting admin to true immediately');
+          console.log('✅ Creator account detected - setting admin to true');
           setIsAdmin(true);
           return;
-        } else {
-          console.log('❌ Not creator account, proceeding with API check...');
-          console.log('Expected: madoabogrida05@gmail.com');
-          console.log('Actual:', user.email);
-          console.log('Match:', user.email === 'madoabogrida05@gmail.com');
         }
+        
+        // Check if user has admin role in database
         try {
-          // Check if user has admin role or permissions
           const response = await api.get('/api/auth/me');
           const userData = response.data;
-          
-          // Check for admin role or if user is the specific admin email
-          console.log('Raw userData from API:', JSON.stringify(userData, null, 2));
-          console.log('userData.role:', userData.role);
-          console.log('userData.email:', userData.email);
-          
-          // Check if userData has nested structure
           const actualUser = userData.user || userData;
-          console.log('actualUser:', actualUser);
-          console.log('actualUser.role:', actualUser.role);
-          console.log('actualUser.email:', actualUser.email);
           
           const hasAdminRole = actualUser.role && ['admin', 'super_admin', 'moderator'].includes(actualUser.role);
-          const isSpecificAdmin = actualUser.email === 'madoabogrida05@gmail.com';
           
-          console.log('hasAdminRole calculation:', hasAdminRole);
-          console.log('isSpecificAdmin calculation:', isSpecificAdmin);
-          
-          const finalAdminStatus = hasAdminRole || isSpecificAdmin;
-          
-          // Additional fallback: check current user email directly
-          const currentUserEmail = user?.email;
-          const isCurrentUserAdmin = currentUserEmail === 'madoabogrida05@gmail.com';
-          
-          console.log('currentUserEmail:', currentUserEmail);
-          console.log('isCurrentUserAdmin:', isCurrentUserAdmin);
-          
-          // Force admin status for the creator account
-          const finalResult = finalAdminStatus || isCurrentUserAdmin || currentUserEmail === 'madoabogrida05@gmail.com';
-          
-          // Ultimate fallback: if we can't find email anywhere, check if user object has the right email
-          const ultimateFallback = user?.email === 'madoabogrida05@gmail.com';
-          const ultimateResult = finalResult || ultimateFallback;
-          
-          console.log('ultimateFallback:', ultimateFallback);
-          console.log('ultimateResult:', ultimateResult);
-          
-          setIsAdmin(ultimateResult);
-          
-          console.log('finalAdminStatus:', finalAdminStatus);
-          console.log('finalResult (with fallback):', finalResult);
-          
-          console.log('Admin check:', {
-            userData: userData,
-            actualUser: actualUser,
-            userEmail: actualUser.email,
-            userRole: actualUser.role,
-            hasAdminRole: hasAdminRole,
-            isSpecificAdmin: isSpecificAdmin,
-            finalIsAdmin: finalAdminStatus
+          console.log('User role check:', {
+            email: actualUser.email,
+            role: actualUser.role,
+            hasAdminRole: hasAdminRole
           });
           
-          console.log('Navigation - isAdmin state set to:', finalAdminStatus);
+          setIsAdmin(hasAdminRole);
         } catch (error) {
           console.error('Error checking admin status:', error);
-          // Fallback: check if current user email matches admin email
-          const isSpecificAdmin = user?.email === 'madoabogrida05@gmail.com';
-          console.log('Catch block - user email:', user?.email);
-          console.log('Catch block - isSpecificAdmin:', isSpecificAdmin);
-          setIsAdmin(isSpecificAdmin);
-          console.log('Fallback admin check:', {
-            userEmail: user?.email,
-            isSpecificAdmin,
-            isAdmin: isSpecificAdmin
-          });
-          
-          console.log('Navigation - Fallback isAdmin state set to:', isSpecificAdmin);
+          setIsAdmin(false);
         }
       } else {
-        console.log('❌ No user found - setting admin to false');
         setIsAdmin(false);
       }
     };
@@ -147,22 +80,12 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
     { path: '/settings', icon: FaCog, label: 'Settings', mobile: true },
   ];
 
-  // Add admin link only for admin users - completely hidden from regular users
-  // Force admin link for creator account regardless of isAdmin state
-  const isCreatorAccount = user?.email === 'madoabogrida05@gmail.com';
-  
-  console.log('=== ADMIN LINK CHECK ===');
-  console.log('user?.email:', user?.email);
-  console.log('isCreatorAccount:', isCreatorAccount);
-  console.log('isAdmin:', isAdmin);
-  console.log('Final condition (isAdmin || isCreatorAccount):', isAdmin || isCreatorAccount);
-  
-  if (isAdmin || isCreatorAccount) {
-    console.log('✅ Navigation - Adding admin link to navItems');
-    console.log('Reason: isAdmin =', isAdmin, ', isCreatorAccount =', isCreatorAccount);
+  // Add admin link only for admin users
+  if (isAdmin) {
+    console.log('✅ Adding admin link - user is admin');
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
   } else {
-    console.log('❌ Navigation - NOT adding admin link, isAdmin is:', isAdmin, ', isCreatorAccount is:', isCreatorAccount);
+    console.log('❌ NOT adding admin link - user is not admin');
   }
   
   // Debug: Log admin status
