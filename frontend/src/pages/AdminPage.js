@@ -57,8 +57,14 @@ const AdminPage = () => {
   useEffect(() => {
     const checkAdminAuthorization = async () => {
       if (user) {
-        // Check if user is the creator account (by email or username)
-        if (user.email === 'madoabogrida05@gmail.com' || user.username === 'batta' || user.username === 'mado') {
+        // Check if user is the creator account (by email or username) - case insensitive
+        const isCreatorEmail = user.email === 'madoabogrida05@gmail.com';
+        const isCreatorUsername = user.username && (
+          user.username.toLowerCase() === 'batta' || 
+          user.username.toLowerCase() === 'mado'
+        );
+        
+        if (isCreatorEmail || isCreatorUsername) {
           console.log('✅ Creator account detected in AdminPage - setting authorized to true');
           console.log('User details:', { email: user.email, username: user.username });
           setIsAuthorized(true);
@@ -92,8 +98,13 @@ const AdminPage = () => {
           }
         } catch (error) {
           console.error('Error checking admin authorization:', error);
-          // Fallback: check if current user email matches admin email
-          const isSpecificAdmin = user?.email === 'madoabogrida05@gmail.com' || user?.username === 'batta' || user?.username === 'mado';
+          // Fallback: check if current user email matches admin email - case insensitive
+          const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
+          const isCreatorUsername = user?.username && (
+            user.username.toLowerCase() === 'batta' || 
+            user.username.toLowerCase() === 'mado'
+          );
+          const isSpecificAdmin = isCreatorEmail || isCreatorUsername;
           setIsAuthorized(isSpecificAdmin);
           
           if (!isSpecificAdmin) {

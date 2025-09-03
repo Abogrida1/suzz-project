@@ -37,8 +37,14 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (user) {
-        // Check if user is the creator account (by email or username)
-        if (user.email === 'madoabogrida05@gmail.com' || user.username === 'batta' || user.username === 'mado') {
+        // Check if user is the creator account (by email or username) - case insensitive
+        const isCreatorEmail = user.email === 'madoabogrida05@gmail.com';
+        const isCreatorUsername = user.username && (
+          user.username.toLowerCase() === 'batta' || 
+          user.username.toLowerCase() === 'mado'
+        );
+        
+        if (isCreatorEmail || isCreatorUsername) {
           console.log('✅ Creator account detected - setting admin to true');
           console.log('User details:', { email: user.email, username: user.username });
           setIsAdmin(true);
@@ -86,13 +92,16 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   ];
 
   // Add admin link only for admin users
-  // Check if user is batta or the creator account
-  const isBattaUser = user?.username === 'batta' || user?.username === 'mado';
+  // Check if user is batta or the creator account - case insensitive
   const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
+  const isCreatorUsername = user?.username && (
+    user.username.toLowerCase() === 'batta' || 
+    user.username.toLowerCase() === 'mado'
+  );
   
-  if (isAdmin || isBattaUser || isCreatorEmail) {
-    console.log('✅ Adding admin link - user is admin or batta or creator');
-    console.log('Reason: isAdmin =', isAdmin, ', isBattaUser =', isBattaUser, ', isCreatorEmail =', isCreatorEmail);
+  if (isAdmin || isCreatorUsername || isCreatorEmail) {
+    console.log('✅ Adding admin link - user is admin or creator');
+    console.log('Reason: isAdmin =', isAdmin, ', isCreatorUsername =', isCreatorUsername, ', isCreatorEmail =', isCreatorEmail);
     console.log('User details:', { username: user?.username, email: user?.email });
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
   } else {
