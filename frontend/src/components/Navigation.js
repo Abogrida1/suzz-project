@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import api from '../config/axios';
 import { 
   FaComments, 
   FaUser, 
@@ -21,9 +22,29 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user) {
+        try {
+          // Check if user has admin role or permissions
+          const response = await api.get('/api/auth/me');
+          const userData = response.data;
+          setIsAdmin(userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role));
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        }
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   const navItems = [
     { path: '/', icon: FaHome, label: 'Home', mobile: true },
@@ -32,8 +53,10 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
     { path: '/settings', icon: FaCog, label: 'Settings', mobile: true },
   ];
 
-  // Add admin link for all users (protected by backend)
-  navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
+  // Add admin link only for admin users
+  if (isAdmin) {
+    navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
+  }
 
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') return true;

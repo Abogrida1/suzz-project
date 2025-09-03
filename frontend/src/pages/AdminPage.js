@@ -31,6 +31,8 @@ const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('stats');
   const [loading, setLoading] = useState(false);
   const [adminCredentials, setAdminCredentials] = useState(null);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   
   // Stats data
   const [stats, setStats] = useState(null);
@@ -50,6 +52,40 @@ const AdminPage = () => {
   const [groups, setGroups] = useState([]);
   
   // Check admin credentials on component mount
+  // Check admin authorization
+  useEffect(() => {
+    const checkAdminAuthorization = async () => {
+      if (user) {
+        try {
+          const response = await api.get('/api/auth/me');
+          const userData = response.data;
+          const hasAdminRole = userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role);
+          setIsAuthorized(hasAdminRole);
+          
+          if (!hasAdminRole) {
+            toast.error('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
+            setTimeout(() => navigate('/'), 2000);
+            return;
+          }
+        } catch (error) {
+          console.error('Error checking admin authorization:', error);
+          setIsAuthorized(false);
+          toast.error('خطأ في التحقق من الصلاحيات');
+          setTimeout(() => navigate('/'), 2000);
+          return;
+        }
+      } else {
+        setIsAuthorized(false);
+        toast.error('يجب تسجيل الدخول أولاً');
+        setTimeout(() => navigate('/login'), 2000);
+        return;
+      }
+      setCheckingAuth(false);
+    };
+
+    checkAdminAuthorization();
+  }, [user, navigate]);
+
   useEffect(() => {
     const storedCredentials = localStorage.getItem('adminCredentials');
     if (!storedCredentials) {
@@ -222,6 +258,58 @@ const AdminPage = () => {
     { id: 'groups', label: 'Groups', icon: FaUserFriends },
     { id: 'admins', label: 'Admin Management', icon: FaUserCog }
   ];
+  
+  // Show loading screen while checking authorization
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md text-center"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full mb-4">
+            <FaShieldAlt className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            جاري التحقق من الصلاحيات...
+          </h1>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // If user is not authorized, show error message
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md text-center"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full mb-4">
+            <FaExclamationTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            غير مصرح لك
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            ليس لديك صلاحية للوصول إلى لوحة الإدارة. يجب أن تكون مديراً أو مشرفاً للوصول إلى هذه الصفحة.
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors duration-300"
+          >
+            العودة للصفحة الرئيسية
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mobile-page">

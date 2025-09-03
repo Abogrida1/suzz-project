@@ -46,9 +46,11 @@ const AdminManagement = ({ adminCredentials }) => {
   });
 
   useEffect(() => {
-    loadAdmins();
-    loadTemplates();
-  }, []);
+    if (adminCredentials) {
+      loadAdmins();
+      loadTemplates();
+    }
+  }, [adminCredentials]);
 
   const loadAdmins = async () => {
     setLoading(true);
@@ -65,9 +67,7 @@ const AdminManagement = ({ adminCredentials }) => {
 
   const loadTemplates = async () => {
     try {
-      const response = await api.get('/api/admin-management/admin-templates', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
+      const response = await api.post('/api/admin-management/admin-templates', adminCredentials);
       setTemplates(response.data.templates);
     } catch (error) {
       console.error('Error loading templates:', error);

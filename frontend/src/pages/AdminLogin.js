@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { FaShieldAlt, FaEye, FaEyeSlash, FaLock, FaUser } from 'react-icons/fa';
+import { FaShieldAlt, FaEye, FaEyeSlash, FaLock, FaUser, FaExclamationTriangle } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import api from '../config/axios';
 
 const AdminLogin = () => {
   const [adminCredentials, setAdminCredentials] = useState({
@@ -12,8 +13,41 @@ const AdminLogin = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Check if user is authorized to access admin panel
+  useEffect(() => {
+    const checkAdminAuthorization = async () => {
+      if (user) {
+        try {
+          const response = await api.get('/api/auth/me');
+          const userData = response.data;
+          const hasAdminRole = userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role);
+          setIsAuthorized(hasAdminRole);
+          
+          if (!hasAdminRole) {
+            toast.error('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
+            setTimeout(() => navigate('/'), 2000);
+          }
+        } catch (error) {
+          console.error('Error checking admin authorization:', error);
+          setIsAuthorized(false);
+          toast.error('خطأ في التحقق من الصلاحيات');
+          setTimeout(() => navigate('/'), 2000);
+        }
+      } else {
+        setIsAuthorized(false);
+        toast.error('يجب تسجيل الدخول أولاً');
+        setTimeout(() => navigate('/login'), 2000);
+      }
+      setCheckingAuth(false);
+    };
+
+    checkAdminAuthorization();
+  }, [user, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -47,6 +81,58 @@ const AdminLogin = () => {
       setLoading(false);
     }
   };
+
+  // Show loading screen while checking authorization
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md text-center"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full mb-4">
+            <FaShieldAlt className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            جاري التحقق من الصلاحيات...
+          </h1>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // If user is not authorized, show error message
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md text-center"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full mb-4">
+            <FaExclamationTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            غير مصرح لك
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            ليس لديك صلاحية للوصول إلى لوحة الإدارة. يجب أن تكون مديراً أو مشرفاً للوصول إلى هذه الصفحة.
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="w-full bg-red-600 text-white py-3 px-4 rounded-lg hover:bg-red-700 transition-colors duration-300"
+          >
+            العودة للصفحة الرئيسية
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
 
   // If user is not logged in, redirect to login
   if (!user) {
