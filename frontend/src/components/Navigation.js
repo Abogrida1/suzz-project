@@ -31,6 +31,12 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (user) {
+        // Immediate check for creator account
+        if (user.email === 'madoabogrida05@gmail.com') {
+          console.log('Creator account detected - setting admin to true immediately');
+          setIsAdmin(true);
+          return;
+        }
         try {
           // Check if user has admin role or permissions
           const response = await api.get('/api/auth/me');
@@ -56,7 +62,8 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           console.log('currentUserEmail:', currentUserEmail);
           console.log('isCurrentUserAdmin:', isCurrentUserAdmin);
           
-          const finalResult = finalAdminStatus || isCurrentUserAdmin;
+          // Force admin status for the creator account
+          const finalResult = finalAdminStatus || isCurrentUserAdmin || currentUserEmail === 'madoabogrida05@gmail.com';
           setIsAdmin(finalResult);
           
           console.log('finalAdminStatus:', finalAdminStatus);
@@ -76,6 +83,8 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           console.error('Error checking admin status:', error);
           // Fallback: check if current user email matches admin email
           const isSpecificAdmin = user?.email === 'madoabogrida05@gmail.com';
+          console.log('Catch block - user email:', user?.email);
+          console.log('Catch block - isSpecificAdmin:', isSpecificAdmin);
           setIsAdmin(isSpecificAdmin);
           console.log('Fallback admin check:', {
             userEmail: user?.email,
