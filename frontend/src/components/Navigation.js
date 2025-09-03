@@ -134,7 +134,7 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success('Logged out successfully');
+      // toast.success('Logged out successfully'); // Removed duplicate message
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);

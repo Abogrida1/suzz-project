@@ -21,12 +21,21 @@ const AdminLogin = () => {
   // Check if user is authorized to access admin panel
   useEffect(() => {
     const checkAdminAuthorization = async () => {
+      console.log('AdminLogin - checking authorization for user:', user);
+      
       if (user) {
         // Check if user is the creator account (by email or username) - case insensitive
         const isCreatorEmail = user.email === 'madoabogrida05@gmail.com';
         const isCreatorUsername = user.username && (
           user.username.toLowerCase() === 'batta'
         );
+        
+        console.log('AdminLogin - creator check:', {
+          email: user.email,
+          username: user.username,
+          isCreatorEmail,
+          isCreatorUsername
+        });
         
         if (isCreatorEmail || isCreatorUsername) {
           console.log('✅ Creator account detected in AdminLogin - setting authorized to true');
@@ -75,6 +84,23 @@ const AdminLogin = () => {
           }
         }
       } else {
+        console.log('AdminLogin - no user found, checking localStorage for admin credentials');
+        // Check if admin credentials are stored in localStorage
+        const storedCredentials = localStorage.getItem('adminCredentials');
+        if (storedCredentials) {
+          try {
+            const credentials = JSON.parse(storedCredentials);
+            if (credentials.username === 'madoabogrida05@gmail.com' && credentials.password === 'batta1') {
+              console.log('✅ Admin credentials found in localStorage - setting authorized to true');
+              setIsAuthorized(true);
+              setCheckingAuth(false);
+              return;
+            }
+          } catch (error) {
+            console.error('Error parsing stored credentials:', error);
+          }
+        }
+        
         setIsAuthorized(false);
         toast.error('يجب تسجيل الدخول أولاً');
         setTimeout(() => navigate('/login'), 2000);
