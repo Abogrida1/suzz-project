@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import api from '../config/axios';
 import toast from 'react-hot-toast';
@@ -24,8 +25,10 @@ import {
 
 const AdminPage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('stats');
   const [loading, setLoading] = useState(false);
+  const [adminCredentials, setAdminCredentials] = useState(null);
   
   // Stats data
   const [stats, setStats] = useState(null);
@@ -44,19 +47,33 @@ const AdminPage = () => {
   // Groups data
   const [groups, setGroups] = useState([]);
   
-  // Check if user is super admin
-  const isSuperAdmin = user?.email === 'madoabogrida05@gmail.com';
+  // Check admin credentials on component mount
+  useEffect(() => {
+    const storedCredentials = localStorage.getItem('adminCredentials');
+    if (!storedCredentials) {
+      navigate('/admin-login');
+      return;
+    }
+    
+    try {
+      const credentials = JSON.parse(storedCredentials);
+      setAdminCredentials(credentials);
+    } catch (error) {
+      console.error('Error parsing admin credentials:', error);
+      navigate('/admin-login');
+    }
+  }, [navigate]);
   
   useEffect(() => {
-    if (isSuperAdmin) {
+    if (adminCredentials) {
       loadStats();
     }
-  }, [isSuperAdmin]);
+  }, [adminCredentials]);
   
   const loadStats = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/admin/stats');
+      const response = await api.post('/api/admin/stats', adminCredentials);
       setStats(response.data.stats);
       setRecentUsers(response.data.recentUsers);
       setRecentMessages(response.data.recentMessages);
@@ -71,7 +88,7 @@ const AdminPage = () => {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/admin/users');
+      const response = await api.post('/api/admin/users', adminCredentials);
       setUsers(response.data.users);
     } catch (error) {
       console.error('Error loading users:', error);
@@ -84,7 +101,7 @@ const AdminPage = () => {
   const loadMessages = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/api/admin/messages?chatType=${chatTypeFilter}`);
+      const response = await api.post(`/api/admin/messages?chatType=${chatTypeFilter}`, adminCredentials);
       setMessages(response.data.messages);
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -97,7 +114,7 @@ const AdminPage = () => {
   const loadGroups = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/admin/groups');
+      const response = await api.post('/api/admin/groups', adminCredentials);
       setGroups(response.data.groups);
     } catch (error) {
       console.error('Error loading groups:', error);
@@ -113,7 +130,7 @@ const AdminPage = () => {
     }
     
     try {
-      await api.delete(`/api/admin/users/${userId}`);
+      await api.delete(`/api/admin/users/${userId}`, { data: adminCredentials });
       toast.success('User deleted successfully');
       loadUsers();
       loadStats();
@@ -129,7 +146,7 @@ const AdminPage = () => {
     }
     
     try {
-      await api.delete(`/api/admin/messages/${messageId}`);
+      await api.delete(`/api/admin/messages/${messageId}`, { data: adminCredentials });
       toast.success('Message deleted successfully');
       loadMessages();
       loadStats();
@@ -145,7 +162,7 @@ const AdminPage = () => {
     }
     
     try {
-      const response = await api.delete('/api/admin/messages/global');
+      const response = await api.delete('/api/admin/messages/global', { data: adminCredentials });
       toast.success(`Deleted ${response.data.deletedCount} global messages`);
       loadMessages();
       loadStats();
@@ -161,7 +178,7 @@ const AdminPage = () => {
     }
     
     try {
-      await api.delete(`/api/admin/groups/${groupId}`);
+      await api.delete(`/api/admin/groups/${groupId}`, { data: adminCredentials });
       toast.success('Group deleted successfully');
       loadGroups();
       loadStats();
@@ -184,17 +201,13 @@ const AdminPage = () => {
     message.sender?.displayName?.toLowerCase().includes(messageSearch.toLowerCase())
   );
   
-  if (!isSuperAdmin) {
+  // Show loading if admin credentials are not loaded yet
+  if (!adminCredentials) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <FaExclamationTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            Access Denied
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            You don't have permission to access this page.
-          </p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading admin panel...</p>
         </div>
       </div>
     );

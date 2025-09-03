@@ -17,6 +17,7 @@ import CreateGroupPage from './pages/CreateGroupPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
 import AdminPage from './pages/AdminPage';
+import AdminLogin from './pages/AdminLogin';
 
 import './App.css';
 
@@ -81,6 +82,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <SettingsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin-login" 
+                  element={
+                    <ProtectedRoute>
+                      <AdminLogin />
                     </ProtectedRoute>
                   } 
                 />

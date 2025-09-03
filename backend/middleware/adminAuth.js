@@ -1,29 +1,33 @@
 const { authenticateToken } = require('./auth');
 
-// Super admin credentials
-const SUPER_ADMIN_EMAIL = 'madoabogrida05@gmail.com';
-const SUPER_ADMIN_PASSWORD = 'batta1';
+// Admin credentials for access
+const ADMIN_USERNAME = 'madoabogrida05@gmail.com';
+const ADMIN_PASSWORD = 'batta1';
 
-// Middleware to check if user is super admin
-const authenticateSuperAdmin = async (req, res, next) => {
-  try {
-    // First authenticate the token
-    await new Promise((resolve, reject) => {
-      authenticateToken(req, res, (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+// Middleware to check admin access with separate credentials
+const adminAuth = (req, res, next) => {
+  // Check if user is authenticated
+  if (!req.user) {
+    return res.status(401).json({ message: 'Authentication required' });
+  }
 
-    // Check if user is super admin
-    if (req.user.email === SUPER_ADMIN_EMAIL) {
-      next();
-    } else {
-      res.status(403).json({ message: 'Access denied. Super admin privileges required.' });
-    }
-  } catch (error) {
-    res.status(401).json({ message: 'Authentication required' });
+  // Get admin credentials from request body
+  const { username, password } = req.body;
+  
+  // Check admin credentials
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Invalid admin credentials' });
   }
 };
 
-module.exports = { authenticateSuperAdmin };
+// Simple admin auth for any authenticated user (fallback)
+const simpleAdminAuth = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Authentication required' });
+  }
+  next();
+};
+
+module.exports = { adminAuth, simpleAdminAuth };

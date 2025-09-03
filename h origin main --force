@@ -1,0 +1,5 @@
+[33m3e1567a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix FaRefresh import error - replace with FaRedo
+[33mcc20fbe[m Add Super Admin Panel with full system control: user management, message deletion, group management, and system statistics
+[33m17c1a9e[m Fix group settings tabs horizontal scroll and improve emoji reactions responsive design for mobile
+[33m7114879[m Complete chat app with all features: member permissions, emoji reactions, reply system, mobile responsive, and invite functionality
+[33m15e8d81[m Transform app to modern multi-page structure with navigation, animations, and enhanced features

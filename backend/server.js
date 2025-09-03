@@ -123,7 +123,7 @@ app.use('/api/users', authenticateToken, checkDatabaseConnection, userRoutes);
 app.use('/api/messages', authenticateToken, checkDatabaseConnection, messageRoutes);
 app.use('/api/upload', authenticateToken, checkDatabaseConnection, uploadRoutes);
 app.use('/api/groups', authenticateToken, checkDatabaseConnection, require('./routes/groups'));
-app.use('/api/admin', checkDatabaseConnection, require('./routes/admin'));
+app.use('/api/admin', authenticateToken, checkDatabaseConnection, require('./routes/admin'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

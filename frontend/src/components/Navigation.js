@@ -32,10 +32,8 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
     { path: '/settings', icon: FaCog, label: 'Settings', mobile: true },
   ];
 
-  // Add admin link if user is super admin
-  if (user?.email === 'madoabogrida05@gmail.com') {
-    navItems.push({ path: '/admin', icon: FaShieldAlt, label: 'Admin', mobile: false });
-  }
+  // Add admin link for all users (protected by backend)
+  navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
 
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') return true;
