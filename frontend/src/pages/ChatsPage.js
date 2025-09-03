@@ -41,7 +41,7 @@ const ChatsPage = () => {
   };
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900 flex flex-col chat-container">
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 flex flex-col chat-container mobile-page">
       <Navigation user={user} hideBottomMenu={true} />
       
 
@@ -107,20 +107,29 @@ const ChatsPage = () => {
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar - WhatsApp Style */}
-        {!isMobile && showSidebar && (
+        {showSidebar && (
           <motion.div
             initial={{ opacity: 0, x: -300 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -300 }}
             transition={{ duration: 0.3 }}
-            className="w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col min-h-0"
+            className={`${isMobile ? 'fixed inset-0 z-50 bg-black bg-opacity-50' : 'relative'} flex`}
           >
-            <Sidebar
-              activeChat={activeChat}
-              selectedUser={selectedUser}
-              onChatSelect={handleChatSelect}
-              isMobile={isMobile}
-            />
+            <div className={`${isMobile ? 'w-80 h-full' : 'w-80'} bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col min-h-0 shadow-lg`}>
+              <Sidebar
+                activeChat={activeChat}
+                selectedUser={selectedUser}
+                onChatSelect={handleChatSelect}
+                onClose={() => setShowSidebar(false)}
+                isMobile={isMobile}
+              />
+            </div>
+            {isMobile && (
+              <div 
+                className="flex-1" 
+                onClick={() => setShowSidebar(false)}
+              />
+            )}
           </motion.div>
         )}
 

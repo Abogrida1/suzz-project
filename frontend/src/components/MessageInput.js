@@ -160,13 +160,13 @@ const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder,
           <button
             type="button"
             disabled={uploading}
-            className="p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+            className="p-2 md:p-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50 button-mobile"
             title="Attach file"
           >
             {uploading ? (
-              <div className="spinner w-5 h-5"></div>
+              <div className="spinner w-4 h-4 md:w-5 md:h-5"></div>
             ) : (
-              <FaPaperclip className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <FaPaperclip className="h-4 w-4 md:h-5 md:w-5 text-gray-600 dark:text-gray-400" />
             )}
           </button>
         </div>
@@ -179,19 +179,19 @@ const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder,
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
-            className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 resize-none max-h-32"
+            className="w-full px-3 md:px-4 py-2 md:py-3 pr-10 md:pr-12 border border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 resize-none max-h-24 md:max-h-32 text-base md:text-sm"
             rows={1}
-            style={{ minHeight: '48px' }}
+            style={{ minHeight: '40px' }}
           />
           
           {/* Emoji picker button */}
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="absolute right-8 md:right-12 top-1/2 transform -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             title="Add emoji"
           >
-            <FaSmile className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            <FaSmile className="h-4 w-4 md:h-5 md:w-5 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
 
@@ -199,22 +199,22 @@ const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder,
         <button
           type="submit"
           disabled={!message.trim()}
-          className="p-3 rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2.5 md:p-3 rounded-full bg-primary-500 hover:bg-primary-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed button-mobile"
           title="Send message"
         >
-          <FaPaperPlane className="h-5 w-5" />
+          <FaPaperPlane className="h-4 w-4 md:h-5 md:w-5" />
         </button>
       </form>
 
       {/* Emoji picker */}
       {showEmojiPicker && (
         <div className="absolute bottom-full right-0 mb-2 z-10">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 modal-mobile">
             <EmojiPicker
               onEmojiClick={handleEmojiClick}
               theme="auto"
-              width={300}
-              height={350}
+              width={window.innerWidth < 768 ? 280 : 300}
+              height={window.innerWidth < 768 ? 300 : 350}
             />
           </div>
         </div>

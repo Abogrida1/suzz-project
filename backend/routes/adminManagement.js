@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { adminAuth, canManageAdmins } = require('../middleware/adminAuth');
+const { adminAuth, canManageAdmins, requireAdminPermission } = require('../middleware/adminAuth');
 
 // Get all admins
-router.post('/admins', adminAuth, canManageAdmins, async (req, res) => {
+router.post('/admins', adminAuth, requireAdminPermission('canManageAdmins'), async (req, res) => {
   try {
     const admins = await User.find({ 
       role: { $in: ['admin', 'super_admin', 'moderator'] } 
@@ -20,7 +20,7 @@ router.post('/admins', adminAuth, canManageAdmins, async (req, res) => {
 });
 
 // Add new admin
-router.post('/admins/add', adminAuth, canManageAdmins, async (req, res) => {
+router.post('/admins/add', adminAuth, requireAdminPermission('canManageAdmins'), async (req, res) => {
   try {
     const { 
       username, 
@@ -78,7 +78,7 @@ router.post('/admins/add', adminAuth, canManageAdmins, async (req, res) => {
 });
 
 // Update admin permissions
-router.put('/admins/:adminId/permissions', adminAuth, canManageAdmins, async (req, res) => {
+router.put('/admins/:adminId/permissions', adminAuth, requireAdminPermission('canManageAdmins'), async (req, res) => {
   try {
     const { adminId } = req.params;
     const { permissions, role } = req.body;
@@ -130,7 +130,7 @@ router.put('/admins/:adminId/permissions', adminAuth, canManageAdmins, async (re
 });
 
 // Remove admin
-router.delete('/admins/:adminId', adminAuth, canManageAdmins, async (req, res) => {
+router.delete('/admins/:adminId', adminAuth, requireAdminPermission('canManageAdmins'), async (req, res) => {
   try {
     const { adminId } = req.params;
 
@@ -168,7 +168,7 @@ router.delete('/admins/:adminId', adminAuth, canManageAdmins, async (req, res) =
 });
 
 // Get admin permission templates
-router.get('/admin-templates', adminAuth, canManageAdmins, async (req, res) => {
+router.post('/admin-templates', adminAuth, requireAdminPermission('canManageAdmins'), async (req, res) => {
   try {
     const templates = {
       moderator: {

@@ -52,9 +52,9 @@ const Chat = () => {
   };
 
   return (
-    <div className={`${isMobile ? 'h-screen h-dvh' : 'h-screen'} flex flex-col bg-gray-50 dark:bg-gray-900`}>
+    <div className={`${isMobile ? 'h-screen h-dvh' : 'h-screen'} flex flex-col bg-gray-50 dark:bg-gray-900 mobile-chat-page`}>
       {/* Header */}
-      <header className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'} flex items-center justify-between flex-shrink-0`}>
+      <header className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'} flex items-center justify-between flex-shrink-0 sticky top-0 z-40`}>
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -116,14 +116,22 @@ const Chat = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
         {sidebarOpen && (
-          <div className={`${isMobile ? 'absolute inset-0 z-50' : 'relative'} w-80 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col`}>
-            <Sidebar
-              activeChat={activeChat}
-              selectedUser={selectedUser}
-              onChatSelect={handleChatSelect}
-              onClose={() => setSidebarOpen(false)}
-              isMobile={isMobile}
-            />
+          <div className={`${isMobile ? 'fixed inset-0 z-50 bg-black bg-opacity-50' : 'relative'} flex`}>
+            <div className={`${isMobile ? 'w-80 h-full' : 'w-80'} bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shadow-lg`}>
+              <Sidebar
+                activeChat={activeChat}
+                selectedUser={selectedUser}
+                onChatSelect={handleChatSelect}
+                onClose={() => setSidebarOpen(false)}
+                isMobile={isMobile}
+              />
+            </div>
+            {isMobile && (
+              <div 
+                className="flex-1" 
+                onClick={() => setSidebarOpen(false)}
+              />
+            )}
           </div>
         )}
 
@@ -139,12 +147,20 @@ const Chat = () => {
 
         {/* User Profile Sidebar */}
         {showProfile && (
-          <div className="w-80 bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col">
-            <UserProfile
-              user={user}
-              onClose={() => setShowProfile(false)}
-              onLogout={handleLogout}
-            />
+          <div className={`${isMobile ? 'fixed inset-0 z-50 bg-black bg-opacity-50' : 'relative'} flex`}>
+            <div className={`${isMobile ? 'w-80 h-full ml-auto' : 'w-80'} bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 flex flex-col shadow-lg`}>
+              <UserProfile
+                user={user}
+                onClose={() => setShowProfile(false)}
+                onLogout={handleLogout}
+              />
+            </div>
+            {isMobile && (
+              <div 
+                className="flex-1" 
+                onClick={() => setShowProfile(false)}
+              />
+            )}
           </div>
         )}
       </div>
