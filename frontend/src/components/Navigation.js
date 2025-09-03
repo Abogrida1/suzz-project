@@ -53,7 +53,7 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
     { path: '/settings', icon: FaCog, label: 'Settings', mobile: true },
   ];
 
-  // Add admin link only for admin users
+  // Add admin link only for admin users - completely hidden from regular users
   if (isAdmin) {
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
   }

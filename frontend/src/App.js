@@ -16,8 +16,7 @@ import MobileChatsPage from './pages/MobileChatsPage';
 import CreateGroupPage from './pages/CreateGroupPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
-import AdminPage from './pages/AdminPage';
-import AdminLogin from './pages/AdminLogin';
+import AdminRoutes from './routes/AdminRoutes';
 
 import './App.css';
 
@@ -85,22 +84,9 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
-                <Route 
-                  path="/admin-login" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminLogin />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin" 
-                  element={
-                    <ProtectedRoute>
-                      <AdminPage />
-                    </ProtectedRoute>
-                  } 
-                />
+                {/* Admin routes - only accessible to authorized users */}
+                <Route path="/admin-login/*" element={<AdminRoutes />} />
+                <Route path="/admin/*" element={<AdminRoutes />} />
 
               </Routes>
                             <Toaster
