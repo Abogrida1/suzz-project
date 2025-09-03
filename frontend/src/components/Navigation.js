@@ -27,6 +27,10 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
+  // Debug: Log user on every render
+  console.log('Navigation render - user:', user);
+  console.log('Navigation render - user.email:', user?.email);
+
   // Check if user is admin
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -129,11 +133,15 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   ];
 
   // Add admin link only for admin users - completely hidden from regular users
-  if (isAdmin) {
+  // Force admin link for creator account regardless of isAdmin state
+  const isCreatorAccount = user?.email === 'madoabogrida05@gmail.com';
+  
+  if (isAdmin || isCreatorAccount) {
     console.log('Navigation - Adding admin link to navItems');
+    console.log('Reason: isAdmin =', isAdmin, ', isCreatorAccount =', isCreatorAccount);
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
   } else {
-    console.log('Navigation - NOT adding admin link, isAdmin is:', isAdmin);
+    console.log('Navigation - NOT adding admin link, isAdmin is:', isAdmin, ', isCreatorAccount is:', isCreatorAccount);
   }
   
   // Debug: Log admin status
