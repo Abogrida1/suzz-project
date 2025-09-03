@@ -22,7 +22,8 @@ import {
   FaFilter,
   FaDownload,
   FaRedo,
-  FaUserCog
+  FaUserCog,
+  FaShieldAlt
 } from 'react-icons/fa';
 
 const AdminPage = () => {
