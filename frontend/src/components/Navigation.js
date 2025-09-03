@@ -151,9 +151,12 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   // Force admin link for creator account regardless of isAdmin state
   const isCreatorAccount = user?.email === 'madoabogrida05@gmail.com';
   
-  if (isAdmin || isCreatorAccount) {
+  // TEMPORARY: Force admin link for testing
+  const forceAdmin = true; // Change this to false later
+  
+  if (isAdmin || isCreatorAccount || forceAdmin) {
     console.log('Navigation - Adding admin link to navItems');
-    console.log('Reason: isAdmin =', isAdmin, ', isCreatorAccount =', isCreatorAccount);
+    console.log('Reason: isAdmin =', isAdmin, ', isCreatorAccount =', isCreatorAccount, ', forceAdmin =', forceAdmin);
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
   } else {
     console.log('Navigation - NOT adding admin link, isAdmin is:', isAdmin, ', isCreatorAccount is:', isCreatorAccount);
