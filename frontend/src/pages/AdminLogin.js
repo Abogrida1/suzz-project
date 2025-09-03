@@ -22,13 +22,30 @@ const AdminLogin = () => {
   useEffect(() => {
     const checkAdminAuthorization = async () => {
       if (user) {
+        // Check if user is the creator account (by email or username)
+        if (user.email === 'madoabogrida05@gmail.com' || user.username === 'batta') {
+          console.log('✅ Creator account detected in AdminLogin - setting authorized to true');
+          setIsAuthorized(true);
+          setCheckingAuth(false);
+          return;
+        }
+        
         try {
           const response = await api.get('/api/auth/me');
           const userData = response.data;
+          const actualUser = userData.user || userData;
           
           // Check for admin role or if user is the specific admin email
-          const hasAdminRole = userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role);
-          const isSpecificAdmin = userData.email === 'madoabogrida05@gmail.com';
+          const hasAdminRole = actualUser.role && ['admin', 'super_admin', 'moderator'].includes(actualUser.role);
+          const isSpecificAdmin = actualUser.email === 'madoabogrida05@gmail.com' || actualUser.username === 'batta';
+          
+          console.log('AdminLogin authorization check:', {
+            email: actualUser.email,
+            username: actualUser.username,
+            role: actualUser.role,
+            hasAdminRole,
+            isSpecificAdmin
+          });
           
           setIsAuthorized(hasAdminRole || isSpecificAdmin);
           
@@ -39,7 +56,7 @@ const AdminLogin = () => {
         } catch (error) {
           console.error('Error checking admin authorization:', error);
           // Fallback: check if current user email matches admin email
-          const isSpecificAdmin = user?.email === 'madoabogrida05@gmail.com';
+          const isSpecificAdmin = user?.email === 'madoabogrida05@gmail.com' || user?.username === 'batta';
           setIsAuthorized(isSpecificAdmin);
           
           if (!isSpecificAdmin) {
