@@ -35,9 +35,10 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (user) {
-        // Check if user is the creator account
-        if (user.email === 'madoabogrida05@gmail.com') {
+        // Check if user is the creator account (by email or username)
+        if (user.email === 'madoabogrida05@gmail.com' || user.username === 'batta') {
           console.log('✅ Creator account detected - setting admin to true');
+          console.log('User details:', { email: user.email, username: user.username });
           setIsAdmin(true);
           return;
         }
@@ -52,6 +53,7 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           
           console.log('User role check:', {
             email: actualUser.email,
+            username: actualUser.username,
             role: actualUser.role,
             hasAdminRole: hasAdminRole
           });
@@ -82,11 +84,16 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   ];
 
   // Add admin link only for admin users
-  if (isAdmin) {
-    console.log('✅ Adding admin link - user is admin');
+  // Also check if user is batta even if user object is not available
+  const isBattaUser = user?.username === 'batta' || user?.email === 'madoabogrida05@gmail.com';
+  
+  if (isAdmin || isBattaUser) {
+    console.log('✅ Adding admin link - user is admin or batta');
+    console.log('Reason: isAdmin =', isAdmin, ', isBattaUser =', isBattaUser);
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
   } else {
     console.log('❌ NOT adding admin link - user is not admin');
+    console.log('User details:', { username: user?.username, email: user?.email });
   }
   
   // Debug: Log admin status
