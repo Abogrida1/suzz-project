@@ -12,7 +12,7 @@ import {
   FaChartBar,
   FaGlobe,
   FaUserFriends,
-  FaMessage,
+  FaEnvelope,
   FaExclamationTriangle,
   FaCheck,
   FaTimes,
@@ -315,7 +315,7 @@ const AdminPage = () => {
                   
                   <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-lg">
                     <div className="flex items-center space-x-2">
-                      <FaMessage className="w-5 h-5 text-indigo-600" />
+                      <FaEnvelope className="w-5 h-5 text-indigo-600" />
                       <span className="text-sm font-medium text-indigo-800 dark:text-indigo-200">Private</span>
                     </div>
                     <p className="text-2xl font-bold text-indigo-900 dark:text-indigo-100 mt-1">
