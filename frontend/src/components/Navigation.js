@@ -30,12 +30,25 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   // Check if user is admin
   useEffect(() => {
     const checkAdminStatus = async () => {
+      console.log('=== ADMIN CHECK START ===');
+      console.log('user object:', user);
+      console.log('user.email:', user?.email);
+      console.log('user type:', typeof user);
+      
       if (user) {
+        console.log('User exists, checking email...');
+        console.log('user.email === "madoabogrida05@gmail.com":', user.email === 'madoabogrida05@gmail.com');
+        
         // Immediate check for creator account
         if (user.email === 'madoabogrida05@gmail.com') {
-          console.log('Creator account detected - setting admin to true immediately');
+          console.log('✅ Creator account detected - setting admin to true immediately');
           setIsAdmin(true);
           return;
+        } else {
+          console.log('❌ Not creator account, proceeding with API check...');
+          console.log('Expected: madoabogrida05@gmail.com');
+          console.log('Actual:', user.email);
+          console.log('Match:', user.email === 'madoabogrida05@gmail.com');
         }
         try {
           // Check if user has admin role or permissions
@@ -94,6 +107,9 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           
           console.log('Navigation - Fallback isAdmin state set to:', isSpecificAdmin);
         }
+      } else {
+        console.log('❌ No user found - setting admin to false');
+        setIsAdmin(false);
       }
     };
 
