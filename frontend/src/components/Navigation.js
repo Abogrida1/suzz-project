@@ -40,14 +40,19 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           const hasAdminRole = userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role);
           const isSpecificAdmin = userData.email === 'madoabogrida05@gmail.com';
           
-          setIsAdmin(hasAdminRole || isSpecificAdmin);
+          const finalAdminStatus = hasAdminRole || isSpecificAdmin;
+          setIsAdmin(finalAdminStatus);
           
           console.log('Admin check:', {
-            userData,
-            hasAdminRole,
-            isSpecificAdmin,
-            isAdmin: hasAdminRole || isSpecificAdmin
+            userData: userData,
+            userEmail: userData.email,
+            userRole: userData.role,
+            hasAdminRole: hasAdminRole,
+            isSpecificAdmin: isSpecificAdmin,
+            finalIsAdmin: finalAdminStatus
           });
+          
+          console.log('Navigation - isAdmin state set to:', finalAdminStatus);
         } catch (error) {
           console.error('Error checking admin status:', error);
           // Fallback: check if current user email matches admin email
@@ -58,12 +63,19 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
             isSpecificAdmin,
             isAdmin: isSpecificAdmin
           });
+          
+          console.log('Navigation - Fallback isAdmin state set to:', isSpecificAdmin);
         }
       }
     };
 
     checkAdminStatus();
   }, [user]);
+
+  // Debug: Log isAdmin state changes
+  useEffect(() => {
+    console.log('Navigation - isAdmin state changed to:', isAdmin);
+  }, [isAdmin]);
 
   const navItems = [
     { path: '/', icon: FaHome, label: 'Home', mobile: true },
@@ -74,7 +86,10 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
 
   // Add admin link only for admin users - completely hidden from regular users
   if (isAdmin) {
+    console.log('Navigation - Adding admin link to navItems');
     navItems.push({ path: '/admin-login', icon: FaShieldAlt, label: 'Admin', mobile: false });
+  } else {
+    console.log('Navigation - NOT adding admin link, isAdmin is:', isAdmin);
   }
   
   // Debug: Log admin status
