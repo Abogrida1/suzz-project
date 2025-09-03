@@ -10,6 +10,7 @@ export const SocketProvider = ({ children }) => {
   const [connected, setConnected] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState({});
+  const [messageStatuses, setMessageStatuses] = useState({});
   const { user, token, isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -112,6 +113,47 @@ export const SocketProvider = ({ children }) => {
         });
       });
 
+      // Handle message delivery updates
+      newSocket.on('message_delivery_update', (data) => {
+        setMessageStatuses(prev => ({
+          ...prev,
+          [data.messageId]: {
+            ...prev[data.messageId],
+            [data.userId]: data.status
+          }
+        }));
+      });
+
+      // Handle message read updates
+      newSocket.on('message_read_update', (data) => {
+        setMessageStatuses(prev => ({
+          ...prev,
+          [data.messageId]: {
+            ...prev[data.messageId],
+            [data.userId]: data.status
+          }
+        }));
+      });
+
+      // Handle message reactions
+      newSocket.on('reaction_added', (data) => {
+        console.log('Reaction added:', data);
+        // Emit custom event for message components to listen to
+        window.dispatchEvent(new CustomEvent('reaction_added', { detail: data }));
+      });
+
+      newSocket.on('reaction_removed', (data) => {
+        console.log('Reaction removed:', data);
+        // Emit custom event for message components to listen to
+        window.dispatchEvent(new CustomEvent('reaction_removed', { detail: data }));
+      });
+
+      newSocket.on('reaction_updated', (data) => {
+        console.log('Reaction updated:', data);
+        // Emit custom event for message components to listen to
+        window.dispatchEvent(new CustomEvent('reaction_updated', { detail: data }));
+      });
+
       // Handle errors
       newSocket.on('error', (error) => {
         console.error('Socket error:', error);
@@ -120,8 +162,8 @@ export const SocketProvider = ({ children }) => {
 
       // Handle new messages
       newSocket.on('message_received', (message) => {
-        // This will be handled by individual chat components
-        // We can emit a custom event here if needed
+        console.log('New message received:', message);
+        // Emit custom event for message handling
         window.dispatchEvent(new CustomEvent('newMessage', { detail: message }));
       });
 
@@ -163,7 +205,9 @@ export const SocketProvider = ({ children }) => {
       setSocket(newSocket);
 
       return () => {
-        newSocket.close();
+        if (newSocket) {
+          newSocket.disconnect();
+        }
         setSocket(null);
         setConnected(false);
         setOnlineUsers([]);
@@ -197,22 +241,21 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
+  const joinGroupChat = (groupId) => {
+    if (socket) {
+      socket.emit('join_group', { groupId });
+    }
+  };
+
+  const leaveGroupChat = (groupId) => {
+    if (socket) {
+      socket.emit('leave_group', { groupId });
+    }
+  };
+
   const sendMessage = (messageData) => {
     if (socket && connected) {
-      // Create optimistic message
-      const optimisticMessage = {
-        ...messageData,
-        _id: `temp_${Date.now()}`,
-        sender: user._id,
-        createdAt: new Date().toISOString(),
-        status: 'sending',
-        isOptimistic: true
-      };
-
-      // Emit optimistic message event
-      socket.emit('optimistic_message', optimisticMessage);
-      
-      // Send actual message
+      // Send actual message directly without optimistic message
       socket.emit('send_message', messageData);
     } else {
       console.error('Socket not connected');
@@ -238,6 +281,30 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
+  const confirmMessageDelivery = (messageId) => {
+    if (socket && connected) {
+      socket.emit('message_delivered', { messageId });
+    }
+  };
+
+  const confirmMessageRead = (messageId) => {
+    if (socket && connected) {
+      socket.emit('message_read', { messageId });
+    }
+  };
+
+  const addReaction = (messageId, emoji) => {
+    if (socket && connected) {
+      socket.emit('add_reaction', { messageId, emoji });
+    }
+  };
+
+  const removeReaction = (messageId, emoji) => {
+    if (socket && connected) {
+      socket.emit('remove_reaction', { messageId, emoji });
+    }
+  };
+
   const updateStatus = (status) => {
     if (socket) {
       socket.emit('update_status', { status });
@@ -249,14 +316,21 @@ export const SocketProvider = ({ children }) => {
     connected,
     onlineUsers,
     typingUsers,
+    messageStatuses,
     joinGlobalChat,
     leaveGlobalChat,
     joinPrivateChat,
     leavePrivateChat,
+    joinGroupChat,
+    leaveGroupChat,
     sendMessage,
     startTyping,
     stopTyping,
     markMessageRead,
+    confirmMessageDelivery,
+    confirmMessageRead,
+    addReaction,
+    removeReaction,
     updateStatus
   };
 

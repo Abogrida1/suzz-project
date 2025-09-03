@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 import { formatDistanceToNow } from 'date-fns';
@@ -11,7 +11,9 @@ const MessageList = ({
   messagesEndRef,
   onDeleteMessage,
   onEditMessage,
-  onReplyToMessage
+  onReplyToMessage,
+  activeChat = null,
+  isMobile = false
 }) => {
   const messagesContainerRef = useRef(null);
 
@@ -67,6 +69,7 @@ const MessageList = ({
           onDelete={onDeleteMessage}
           onEdit={onEditMessage}
           onReply={onReplyToMessage}
+          showSenderName={!isLastMessage}
         />
       );
     });
@@ -109,7 +112,13 @@ const MessageList = ({
   return (
     <div 
       ref={messagesContainerRef}
-      className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4"
+      className={`flex-1 overflow-y-auto custom-scrollbar chat-messages-container ${isMobile ? 'p-3' : 'p-4'} space-y-2 min-h-0`}
+      style={{ 
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgb(156 163 175) rgb(243 244 246)',
+        height: '100%',
+        maxHeight: '100%'
+      }}
     >
       {dates.map((date, dateIndex) => (
         <div key={date}>
@@ -143,6 +152,7 @@ const MessageList = ({
                   onDelete={onDeleteMessage}
                   onEdit={onEditMessage}
                   onReply={onReplyToMessage}
+                  showSenderName={!isGrouped}
                 />
               );
             })}
@@ -152,8 +162,8 @@ const MessageList = ({
 
       {/* Typing indicators */}
       {typingUsers.length > 0 && (
-        <div className="flex justify-start">
-          <TypingIndicator users={typingUsers} />
+        <div className={`flex justify-start ${isMobile ? 'mb-3 px-2' : 'mb-4 px-4'}`}>
+          <TypingIndicator users={typingUsers} isMobile={isMobile} />
         </div>
       )}
 
@@ -163,4 +173,4 @@ const MessageList = ({
   );
 };
 
-export default MessageList;
+export default memo(MessageList);

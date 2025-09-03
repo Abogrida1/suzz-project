@@ -65,7 +65,7 @@ const authReducer = (state, action) => {
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Set up token in localStorage
+  // Set up token in localStorage and sync across tabs
   useEffect(() => {
     if (state.token) {
       localStorage.setItem('token', state.token);
@@ -73,6 +73,8 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem('token');
     }
   }, [state.token]);
+
+  // Each tab is independent - no cross-tab synchronization
 
   // Check if user is logged in on app start
   useEffect(() => {
@@ -88,6 +90,7 @@ export const AuthProvider = ({ children }) => {
             }
           });
         } catch (error) {
+          console.error('Auth check error:', error);
           localStorage.removeItem('token');
           dispatch({ type: 'AUTH_FAILURE', payload: 'Session expired' });
         }
@@ -97,17 +100,20 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
-  }, []);
+  }, [state.token]);
 
   const login = async (email, password) => {
+    console.log('Login attempt:', { email, password: '***' });
     dispatch({ type: 'AUTH_START' });
     
     try {
+      console.log('Making API request to:', api.defaults.baseURL + '/api/auth/login');
       const response = await api.post('/api/auth/login', {
         email,
         password
       });
 
+      console.log('Login response:', response.data);
       const { token, user } = response.data;
       
       localStorage.setItem('token', token);
@@ -120,6 +126,8 @@ export const AuthProvider = ({ children }) => {
       toast.success('Login successful!');
       return { success: true };
     } catch (error) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response?.data);
       const message = error.response?.data?.message || 'Login failed';
       dispatch({ type: 'AUTH_FAILURE', payload: message });
       toast.error(message);
@@ -131,6 +139,7 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: 'AUTH_START' });
     
     try {
+      console.log('Registration attempt:', userData);
       const response = await api.post('/api/auth/register', userData);
 
       const { token, user } = response.data;
@@ -145,6 +154,8 @@ export const AuthProvider = ({ children }) => {
       toast.success('Registration successful!');
       return { success: true };
     } catch (error) {
+      console.error('Registration error:', error);
+      console.error('Error response:', error.response?.data);
       const message = error.response?.data?.message || 'Registration failed';
       dispatch({ type: 'AUTH_FAILURE', payload: message });
       toast.error(message);
@@ -159,7 +170,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('token');
-      // Token will be removed by axios interceptor
+      // Dispatch logout action
       dispatch({ type: 'LOGOUT' });
       toast.success('Logged out successfully');
     }

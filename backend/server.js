@@ -120,8 +120,9 @@ const checkDatabaseConnection = (req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', authenticateToken, checkDatabaseConnection, userRoutes);
-app.use('/api/messages', checkDatabaseConnection, messageRoutes);
+app.use('/api/messages', authenticateToken, checkDatabaseConnection, messageRoutes);
 app.use('/api/upload', authenticateToken, checkDatabaseConnection, uploadRoutes);
+app.use('/api/groups', authenticateToken, checkDatabaseConnection, require('./routes/groups'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -195,6 +196,10 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+app.get('/settings', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
 });
 

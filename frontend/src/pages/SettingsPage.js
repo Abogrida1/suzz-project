@@ -1,392 +1,662 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import Navigation from '../components/Navigation';
+import api from '../config/axios';
+import toast from 'react-hot-toast';
 import { 
-  FaMoon, 
-  FaSun, 
+  FaUser, 
   FaBell, 
   FaShieldAlt, 
+  FaPalette, 
   FaLanguage, 
-  FaVolumeUp,
-  FaVolumeMute,
+  FaSignOutAlt,
+  FaSave,
+  FaCamera,
   FaEye,
   FaEyeSlash,
-  FaDownload,
-  FaTrash,
-  FaKey,
-  FaUserShield,
   FaGlobe,
-  FaPalette
+  FaMoon,
+  FaSun,
+  FaVolumeUp,
+  FaVolumeMute,
+  FaDesktop,
+  FaMobile
 } from 'react-icons/fa';
 
 const SettingsPage = () => {
-  const { user, logout } = useAuth();
-  const [settings, setSettings] = useState({
+  const { user, updateUser, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  
+  const [activeTab, setActiveTab] = useState('profile');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // Profile settings
+  const [profileData, setProfileData] = useState({
+    displayName: '',
+    username: '',
+    email: '',
+    bio: '',
+    avatar: null
+  });
+  
+  // Security settings
+  const [securityData, setSecurityData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  
+  // Notification settings
+  const [notifications, setNotifications] = useState({
+    messageNotifications: true,
+    soundNotifications: true,
+    emailNotifications: false,
+    pushNotifications: true
+  });
+  
+  // Privacy settings
+  const [privacy, setPrivacy] = useState({
+    showOnlineStatus: true,
+    showLastSeen: true,
+    allowDirectMessages: true,
+    profileVisibility: 'public'
+  });
+  
+  // Appearance settings
+  const [appearance, setAppearance] = useState({
     theme: 'light',
-    notifications: {
-      messages: true,
-      mentions: true,
-      sounds: true,
-      email: false
-    },
-    privacy: {
-      showOnlineStatus: true,
-      showLastSeen: true,
-      allowFriendRequests: true,
-      allowGroupInvites: true
-    },
-    appearance: {
-      fontSize: 'medium',
-      compactMode: false,
-      showAvatars: true,
-      showTimestamps: true
-    },
+    fontSize: 'medium',
     language: 'en',
-    autoDownload: true
+    compactMode: false
   });
 
-  const handleSettingChange = (category, key, value) => {
-    setSettings(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category],
-        [key]: value
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        displayName: user.displayName || '',
+        username: user.username || '',
+        email: user.email || '',
+        bio: user.bio || '',
+        avatar: user.avatar || null
+      });
+    }
+  }, [user]);
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('displayName', profileData.displayName);
+      formData.append('username', profileData.username);
+      formData.append('bio', profileData.bio);
+      
+      if (profileData.avatar) {
+        formData.append('avatar', profileData.avatar);
       }
-    }));
-  };
-
-  const handleLogout = () => {
-    logout();
-  };
-
-  const handleDeleteAccount = () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-      // Implement account deletion
-      console.log('Delete account');
+      
+      const response = await api.put('/api/users/profile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      updateUser(response.data.user);
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      console.error('Profile update error:', error);
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const exportData = () => {
-    // Implement data export
-    console.log('Export data');
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    
+    if (securityData.newPassword !== securityData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      await api.put('/api/users/password', {
+        currentPassword: securityData.currentPassword,
+        newPassword: securityData.newPassword
+      });
+      
+      setSecurityData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      
+      toast.success('Password changed successfully!');
+    } catch (error) {
+      console.error('Password change error:', error);
+      toast.error(error.response?.data?.message || 'Failed to change password');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const SettingItem = ({ icon: Icon, title, description, children }) => (
-    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-      <div className="flex items-center space-x-3">
-        <Icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-        <div>
-          <h4 className="font-medium text-gray-900 dark:text-white">{title}</h4>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
-        </div>
-      </div>
-      {children}
-    </div>
-  );
+  const handleNotificationUpdate = async () => {
+    try {
+      await api.put('/api/users/notifications', notifications);
+      toast.success('Notification settings updated!');
+    } catch (error) {
+      console.error('Notification update error:', error);
+      toast.error('Failed to update notification settings');
+    }
+  };
 
-  const Toggle = ({ enabled, onChange }) => (
-    <button
-      onClick={() => onChange(!enabled)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-        enabled ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-600'
-      }`}
-    >
-      <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-          enabled ? 'translate-x-6' : 'translate-x-1'
-        }`}
-      />
-    </button>
-  );
+  const handlePrivacyUpdate = async () => {
+    try {
+      await api.put('/api/users/privacy', privacy);
+      toast.success('Privacy settings updated!');
+    } catch (error) {
+      console.error('Privacy update error:', error);
+      toast.error('Failed to update privacy settings');
+    }
+  };
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileData(prev => ({ ...prev, avatar: file }));
+    }
+  };
+
+  const tabs = [
+    { id: 'profile', label: 'Profile', icon: FaUser },
+    { id: 'security', label: 'Security', icon: FaShieldAlt },
+    { id: 'notifications', label: 'Notifications', icon: FaBell },
+    { id: 'privacy', label: 'Privacy', icon: FaGlobe },
+    { id: 'appearance', label: 'Appearance', icon: FaPalette }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 mobile-page">
       <Navigation user={user} />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
+      
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             Settings
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Customize your SecureChat experience
+            Manage your account settings and preferences
           </p>
-        </motion.div>
+        </div>
 
-        <div className="space-y-6">
-          {/* Appearance */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6"
-          >
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-              <FaPalette className="w-5 h-5 mr-2" />
-              Appearance
-            </h2>
-
-            <div className="space-y-4">
-              <SettingItem
-                icon={settings.theme === 'dark' ? FaMoon : FaSun}
-                title="Theme"
-                description="Choose your preferred theme"
-              >
-                <select
-                  value={settings.theme}
-                  onChange={(e) => setSettings(prev => ({ ...prev, theme: e.target.value }))}
-                  className="px-3 py-1 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-                >
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                  <option value="auto">Auto</option>
-                </select>
-              </SettingItem>
-
-              <SettingItem
-                icon={FaEye}
-                title="Font Size"
-                description="Adjust the text size"
-              >
-                <select
-                  value={settings.appearance.fontSize}
-                  onChange={(e) => handleSettingChange('appearance', 'fontSize', e.target.value)}
-                  className="px-3 py-1 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-                >
-                  <option value="small">Small</option>
-                  <option value="medium">Medium</option>
-                  <option value="large">Large</option>
-                </select>
-              </SettingItem>
-
-              <SettingItem
-                icon={FaEye}
-                title="Compact Mode"
-                description="Reduce spacing for more content"
-              >
-                <Toggle
-                  enabled={settings.appearance.compactMode}
-                  onChange={(value) => handleSettingChange('appearance', 'compactMode', value)}
-                />
-              </SettingItem>
-
-              <SettingItem
-                icon={FaEye}
-                title="Show Avatars"
-                description="Display user avatars in messages"
-              >
-                <Toggle
-                  enabled={settings.appearance.showAvatars}
-                  onChange={(value) => handleSettingChange('appearance', 'showAvatars', value)}
-                />
-              </SettingItem>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+              <nav className="space-y-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeTab === tab.id
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
+                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <tab.icon className="mr-3 h-4 w-4" />
+                    {tab.label}
+                  </button>
+                ))}
+              </nav>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Notifications */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6"
-          >
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-              <FaBell className="w-5 h-5 mr-2" />
-              Notifications
-            </h2>
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+              
+              {/* Profile Tab */}
+              {activeTab === 'profile' && (
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                    Profile Information
+                  </h2>
+                  
+                  <form onSubmit={handleProfileUpdate} className="space-y-6">
+                    {/* Avatar */}
+                    <div className="flex items-center space-x-6">
+                      <div className="relative">
+                        <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+                          {profileData.avatar ? (
+                            <img
+                              src={typeof profileData.avatar === 'string' 
+                                ? profileData.avatar 
+                                : URL.createObjectURL(profileData.avatar)
+                              }
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <FaUser className="w-8 h-8 text-gray-400" />
+                          )}
+                        </div>
+                        <label className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-1 cursor-pointer hover:bg-blue-600">
+                          <FaCamera className="w-3 h-3" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarChange}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                          Profile Picture
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Click the camera icon to change your avatar
+                        </p>
+                      </div>
+                    </div>
 
-            <div className="space-y-4">
-              <SettingItem
-                icon={FaBell}
-                title="Message Notifications"
-                description="Get notified about new messages"
-              >
-                <Toggle
-                  enabled={settings.notifications.messages}
-                  onChange={(value) => handleSettingChange('notifications', 'messages', value)}
-                />
-              </SettingItem>
+                    {/* Display Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Display Name
+                      </label>
+                      <input
+                        type="text"
+                        value={profileData.displayName}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, displayName: e.target.value }))}
+                        className="input-field"
+                        placeholder="Enter your display name"
+                      />
+                    </div>
 
-              <SettingItem
-                icon={FaBell}
-                title="Mention Notifications"
-                description="Get notified when someone mentions you"
-              >
-                <Toggle
-                  enabled={settings.notifications.mentions}
-                  onChange={(value) => handleSettingChange('notifications', 'mentions', value)}
-                />
-              </SettingItem>
+                    {/* Username */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Username
+                      </label>
+                      <input
+                        type="text"
+                        value={profileData.username}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, username: e.target.value }))}
+                        className="input-field"
+                        placeholder="Enter your username"
+                      />
+                    </div>
 
-              <SettingItem
-                icon={settings.notifications.sounds ? FaVolumeUp : FaVolumeMute}
-                title="Sound Notifications"
-                description="Play sounds for notifications"
-              >
-                <Toggle
-                  enabled={settings.notifications.sounds}
-                  onChange={(value) => handleSettingChange('notifications', 'sounds', value)}
-                />
-              </SettingItem>
+                    {/* Email */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={profileData.email}
+                        disabled
+                        className="input-field bg-gray-100 dark:bg-gray-700"
+                        placeholder="Email cannot be changed"
+                      />
+                    </div>
 
-              <SettingItem
-                icon={FaBell}
-                title="Email Notifications"
-                description="Receive notifications via email"
-              >
-                <Toggle
-                  enabled={settings.notifications.email}
-                  onChange={(value) => handleSettingChange('notifications', 'email', value)}
-                />
-              </SettingItem>
+                    {/* Bio */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Bio
+                      </label>
+                      <textarea
+                        value={profileData.bio}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+                        className="input-field h-24 resize-none"
+                        placeholder="Tell us about yourself"
+                        maxLength={160}
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {profileData.bio.length}/160 characters
+                      </p>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    >
+                      <FaSave className="mr-2" />
+                      {loading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* Security Tab */}
+              {activeTab === 'security' && (
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                    Security Settings
+                  </h2>
+                  
+                  <form onSubmit={handlePasswordChange} className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Current Password
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={securityData.currentPassword}
+                          onChange={(e) => setSecurityData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                          className="input-field pr-10"
+                          placeholder="Enter current password"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        New Password
+                      </label>
+                      <input
+                        type="password"
+                        value={securityData.newPassword}
+                        onChange={(e) => setSecurityData(prev => ({ ...prev, newPassword: e.target.value }))}
+                        className="input-field"
+                        placeholder="Enter new password"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Confirm New Password
+                      </label>
+                      <input
+                        type="password"
+                        value={securityData.confirmPassword}
+                        onChange={(e) => setSecurityData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        className="input-field"
+                        placeholder="Confirm new password"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {loading ? 'Changing...' : 'Change Password'}
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {/* Notifications Tab */}
+              {activeTab === 'notifications' && (
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                    Notification Settings
+                  </h2>
+                  
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                          Message Notifications
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Get notified when you receive new messages
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={notifications.messageNotifications}
+                          onChange={(e) => setNotifications(prev => ({ ...prev, messageNotifications: e.target.checked }))}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                          Sound Notifications
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Play sound when receiving notifications
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={notifications.soundNotifications}
+                          onChange={(e) => setNotifications(prev => ({ ...prev, soundNotifications: e.target.checked }))}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                          Email Notifications
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Receive notifications via email
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={notifications.emailNotifications}
+                          onChange={(e) => setNotifications(prev => ({ ...prev, emailNotifications: e.target.checked }))}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <button
+                      onClick={handleNotificationUpdate}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Save Notification Settings
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Privacy Tab */}
+              {activeTab === 'privacy' && (
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                    Privacy Settings
+                  </h2>
+                  
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                          Show Online Status
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Let others see when you're online
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={privacy.showOnlineStatus}
+                          onChange={(e) => setPrivacy(prev => ({ ...prev, showOnlineStatus: e.target.checked }))}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                          Show Last Seen
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Show when you were last active
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={privacy.showLastSeen}
+                          onChange={(e) => setPrivacy(prev => ({ ...prev, showLastSeen: e.target.checked }))}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                          Allow Direct Messages
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Let others send you direct messages
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={privacy.allowDirectMessages}
+                          onChange={(e) => setPrivacy(prev => ({ ...prev, allowDirectMessages: e.target.checked }))}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Profile Visibility
+                      </label>
+                      <select
+                        value={privacy.profileVisibility}
+                        onChange={(e) => setPrivacy(prev => ({ ...prev, profileVisibility: e.target.value }))}
+                        className="input-field"
+                      >
+                        <option value="public">Public</option>
+                        <option value="friends">Friends Only</option>
+                        <option value="private">Private</option>
+                      </select>
+                    </div>
+
+                    <button
+                      onClick={handlePrivacyUpdate}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                    >
+                      Save Privacy Settings
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Appearance Tab */}
+              {activeTab === 'appearance' && (
+                <div>
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                    Appearance Settings
+                  </h2>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Theme
+                      </label>
+                      <div className="flex space-x-4">
+                        <button
+                          onClick={() => toggleTheme()}
+                          className={`flex items-center px-4 py-2 rounded-lg border-2 transition-colors ${
+                            theme === 'light'
+                              ? 'border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-400 dark:bg-blue-900 dark:text-blue-300'
+                              : 'border-gray-300 text-gray-700 dark:border-gray-600 dark:text-gray-300'
+                          }`}
+                        >
+                          {theme === 'light' ? <FaSun className="mr-2" /> : <FaMoon className="mr-2" />}
+                          {theme === 'light' ? 'Light' : 'Dark'} Mode
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Font Size
+                      </label>
+                      <select
+                        value={appearance.fontSize}
+                        onChange={(e) => setAppearance(prev => ({ ...prev, fontSize: e.target.value }))}
+                        className="input-field"
+                      >
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Language
+                      </label>
+                      <select
+                        value={appearance.language}
+                        onChange={(e) => setAppearance(prev => ({ ...prev, language: e.target.value }))}
+                        className="input-field"
+                      >
+                        <option value="en">English</option>
+                        <option value="ar">العربية</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+                          Compact Mode
+                        </h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Use less space for messages and interface
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={appearance.compactMode}
+                          onChange={(e) => setAppearance(prev => ({ ...prev, compactMode: e.target.checked }))}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          </motion.div>
-
-          {/* Privacy */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6"
-          >
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-              <FaShieldAlt className="w-5 h-5 mr-2" />
-              Privacy & Security
-            </h2>
-
-            <div className="space-y-4">
-              <SettingItem
-                icon={FaEye}
-                title="Show Online Status"
-                description="Let others see when you're online"
-              >
-                <Toggle
-                  enabled={settings.privacy.showOnlineStatus}
-                  onChange={(value) => handleSettingChange('privacy', 'showOnlineStatus', value)}
-                />
-              </SettingItem>
-
-              <SettingItem
-                icon={FaEye}
-                title="Show Last Seen"
-                description="Let others see when you were last active"
-              >
-                <Toggle
-                  enabled={settings.privacy.showLastSeen}
-                  onChange={(value) => handleSettingChange('privacy', 'showLastSeen', value)}
-                />
-              </SettingItem>
-
-              <SettingItem
-                icon={FaUserShield}
-                title="Allow Friend Requests"
-                description="Let others send you friend requests"
-              >
-                <Toggle
-                  enabled={settings.privacy.allowFriendRequests}
-                  onChange={(value) => handleSettingChange('privacy', 'allowFriendRequests', value)}
-                />
-              </SettingItem>
-
-              <SettingItem
-                icon={FaUserShield}
-                title="Allow Group Invites"
-                description="Let others invite you to groups"
-              >
-                <Toggle
-                  enabled={settings.privacy.allowGroupInvites}
-                  onChange={(value) => handleSettingChange('privacy', 'allowGroupInvites', value)}
-                />
-              </SettingItem>
-            </div>
-          </motion.div>
-
-          {/* General */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6"
-          >
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-              <FaLanguage className="w-5 h-5 mr-2" />
-              General
-            </h2>
-
-            <div className="space-y-4">
-              <SettingItem
-                icon={FaLanguage}
-                title="Language"
-                description="Choose your preferred language"
-              >
-                <select
-                  value={settings.language}
-                  onChange={(e) => setSettings(prev => ({ ...prev, language: e.target.value }))}
-                  className="px-3 py-1 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-                >
-                  <option value="en">English</option>
-                  <option value="ar">العربية</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                </select>
-              </SettingItem>
-
-              <SettingItem
-                icon={FaDownload}
-                title="Auto Download"
-                description="Automatically download media files"
-              >
-                <Toggle
-                  enabled={settings.autoDownload}
-                  onChange={(value) => setSettings(prev => ({ ...prev, autoDownload: value }))}
-                />
-              </SettingItem>
-            </div>
-          </motion.div>
-
-          {/* Account Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6"
-          >
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-              <FaKey className="w-5 h-5 mr-2" />
-              Account Actions
-            </h2>
-
-            <div className="space-y-4">
-              <button
-                onClick={exportData}
-                className="w-full flex items-center justify-center space-x-2 p-4 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
-              >
-                <FaDownload className="w-5 h-5" />
-                <span>Export My Data</span>
-              </button>
-
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center justify-center space-x-2 p-4 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors"
-              >
-                <FaKey className="w-5 h-5" />
-                <span>Sign Out</span>
-              </button>
-
-              <button
-                onClick={handleDeleteAccount}
-                className="w-full flex items-center justify-center space-x-2 p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-              >
-                <FaTrash className="w-5 h-5" />
-                <span>Delete Account</span>
-              </button>
-            </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

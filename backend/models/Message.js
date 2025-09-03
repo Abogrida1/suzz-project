@@ -45,9 +45,22 @@ const messageSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['sent', 'delivered', 'seen'],
-    default: 'sent'
+    enum: ['sending', 'sent', 'delivered', 'seen'],
+    default: 'sending'
   },
+  deliveryStatus: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    status: {
+      type: String,
+      enum: ['sent', 'delivered', 'seen'],
+      default: 'sent'
+    },
+    deliveredAt: Date,
+    seenAt: Date
+  }],
   readBy: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -59,8 +72,15 @@ const messageSchema = new mongoose.Schema({
     }
   }],
   replyTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Message'
+    message: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Message'
+    },
+    content: String,
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }
   },
   edited: {
     type: Boolean,
@@ -75,6 +95,27 @@ const messageSchema = new mongoose.Schema({
   },
   deletedAt: {
     type: Date
+  },
+  // Message reactions
+  reactions: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    emoji: String,
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  // Message forwarding
+  forwarded: {
+    type: Boolean,
+    default: false
+  },
+  originalSender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }
 }, {
   timestamps: true
@@ -85,6 +126,10 @@ messageSchema.index({ chatType: 1, createdAt: -1 });
 messageSchema.index({ recipients: 1, createdAt: -1 });
 messageSchema.index({ privateChatWith: 1, createdAt: -1 });
 messageSchema.index({ sender: 1, createdAt: -1 });
+messageSchema.index({ groupId: 1, createdAt: -1 });
+messageSchema.index({ 'replyTo.sender': 1 });
+messageSchema.index({ 'replyTo.sender': 1, createdAt: -1 }); // Compound index for reply queries
+messageSchema.index({ deleted: 1, createdAt: -1 });
 
 // Virtual for message age
 messageSchema.virtual('age').get(function() {
@@ -97,16 +142,76 @@ messageSchema.methods.markAsRead = function(userId) {
   
   if (!existingRead) {
     this.readBy.push({ user: userId, readAt: new Date() });
-    this.status = 'seen';
+    
+    // Update delivery status
+    const deliveryStatus = this.deliveryStatus.find(ds => ds.user.toString() === userId.toString());
+    if (deliveryStatus) {
+      deliveryStatus.status = 'seen';
+      deliveryStatus.seenAt = new Date();
+    }
+    
     return this.save();
   }
   
   return Promise.resolve(this);
 };
 
+// Method to mark as delivered
+messageSchema.methods.markAsDelivered = function(userId) {
+  const deliveryStatus = this.deliveryStatus.find(ds => ds.user.toString() === userId.toString());
+  
+  if (!deliveryStatus) {
+    this.deliveryStatus.push({
+      user: userId,
+      status: 'delivered',
+      deliveredAt: new Date()
+    });
+  } else if (deliveryStatus.status === 'sent') {
+    deliveryStatus.status = 'delivered';
+    deliveryStatus.deliveredAt = new Date();
+  }
+  
+  return this.save();
+};
+
 // Method to check if message is read by user
 messageSchema.methods.isReadBy = function(userId) {
   return this.readBy.some(read => read.user.toString() === userId.toString());
+};
+
+// Method to get delivery status for user
+messageSchema.methods.getDeliveryStatus = function(userId) {
+  const deliveryStatus = this.deliveryStatus.find(ds => ds.user.toString() === userId.toString());
+  return deliveryStatus ? deliveryStatus.status : 'sent';
+};
+
+// Method to add reaction
+messageSchema.methods.addReaction = function(userId, emoji) {
+  const existingReaction = this.reactions.find(r => r.user.toString() === userId.toString());
+  
+  if (existingReaction) {
+    // Replace existing reaction with new emoji
+    existingReaction.emoji = emoji;
+  } else {
+    // Add new reaction
+    this.reactions.push({ user: userId, emoji });
+  }
+  
+  return this.save();
+};
+
+// Method to remove reaction
+messageSchema.methods.removeReaction = function(userId, emoji) {
+  if (emoji) {
+    // Remove specific emoji reaction
+    this.reactions = this.reactions.filter(r => 
+      !(r.user.toString() === userId.toString() && r.emoji === emoji)
+    );
+  } else {
+    // Remove all reactions from user
+    this.reactions = this.reactions.filter(r => r.user.toString() !== userId.toString());
+  }
+  return this.save();
 };
 
 // Static method to get messages for a chat
@@ -126,8 +231,10 @@ messageSchema.statics.getChatMessages = function(chatType, participants, limit =
   }
   
   return this.find(query)
-    .populate('sender', 'username displayName avatar')
-    .populate('replyTo')
+    .populate([
+      { path: 'sender', select: 'username displayName avatar' },
+      { path: 'replyTo.sender', select: 'username displayName avatar' }
+    ])
     .sort({ createdAt: -1 })
     .limit(limit)
     .skip(skip);

@@ -1,17 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
+import { useCall } from '../contexts/CallContext';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
+import TypingIndicator from './TypingIndicator';
+import GroupSettingsModal from './GroupSettingsModal';
 import ChatHeader from './ChatHeader';
 import api from '../config/axios';
 import toast from 'react-hot-toast';
-import { FaArrowLeft } from 'react-icons/fa';
+import { FaArrowLeft, FaCog } from 'react-icons/fa';
 
 const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
+  const [showGroupSettings, setShowGroupSettings] = useState(false);
+  const [currentGroup, setCurrentGroup] = useState(null);
+  const [replyTo, setReplyTo] = useState(null);
   const messagesEndRef = useRef(null);
 
   const { user } = useAuth();
@@ -21,11 +27,14 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     leaveGlobalChat, 
     joinPrivateChat, 
     leavePrivateChat,
+    joinGroupChat,
+    leaveGroupChat,
     sendMessage,
     startTyping,
     stopTyping,
     typingUsers: socketTypingUsers
   } = useSocket();
+  const { initiateCall } = useCall();
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -36,6 +45,34 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     scrollToBottom();
   }, [messages]);
 
+  // Mark all messages as read when chat is opened
+  useEffect(() => {
+    if (messages.length > 0) {
+      const unreadMessages = messages.filter(msg => 
+        msg.sender._id !== user._id && 
+        (!msg.readBy || !msg.readBy.some(read => read.user === user._id))
+      );
+      
+      if (unreadMessages.length > 0) {
+        const messageIds = unreadMessages.map(msg => msg._id);
+        markMessagesAsRead(messageIds);
+      }
+    }
+  }, [messages, user._id, activeChat, selectedUser]);
+
+  // Mark multiple messages as read
+  const markMessagesAsRead = async (messageIds) => {
+    try {
+      await api.post('/api/messages/read', {
+        messageIds,
+        chatType: activeChat,
+        otherUserId: selectedUser?._id
+      });
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  };
+
   // Handle chat changes
   useEffect(() => {
     if (activeChat === 'global') {
@@ -44,6 +81,9 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     } else if (activeChat === 'private' && selectedUser) {
       joinPrivateChat(selectedUser._id);
       loadPrivateMessages();
+    } else if (activeChat === 'group' && selectedUser) {
+      joinGroupChat(selectedUser._id);
+      loadGroupMessages();
     }
 
     return () => {
@@ -51,6 +91,8 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
         leaveGlobalChat();
       } else if (activeChat === 'private' && selectedUser) {
         leavePrivateChat(selectedUser._id);
+      } else if (activeChat === 'group' && selectedUser) {
+        leaveGroupChat(selectedUser._id);
       }
     };
   }, [activeChat, selectedUser]);
@@ -60,14 +102,27 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     if (!socket) return;
 
     const handleMessageReceived = (message) => {
-      setMessages(prev => [...prev, message]);
+      console.log('Message received in ChatArea:', message);
+      setMessages(prev => {
+        // Check if message already exists to avoid duplicates
+        const exists = prev.find(m => m._id === message._id);
+        if (exists) return prev;
+        return [...prev, message];
+      });
+      
+      // Mark message as read if it's not from current user
+      if (message.sender._id !== user._id) {
+        markMessageAsRead(message._id);
+      }
     };
 
     const handleGlobalMessages = (messages) => {
+      console.log('Global messages received:', messages);
       setMessages(messages);
     };
 
     const handlePrivateMessages = (data) => {
+      console.log('Private messages received:', data);
       if (data.otherUserId === selectedUser?._id) {
         setMessages(data.messages);
       }
@@ -89,11 +144,21 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       setTypingUsers(prev => prev.filter(u => u.userId !== data.userId));
     };
 
+    // Handle custom events from SocketContext
+    const handleNewMessage = (event) => {
+      const message = event.detail;
+      console.log('Custom newMessage event:', message);
+      handleMessageReceived(message);
+    };
+
     socket.on('message_received', handleMessageReceived);
     socket.on('global_messages', handleGlobalMessages);
     socket.on('private_messages', handlePrivateMessages);
     socket.on('user_typing', handleUserTyping);
     socket.on('user_stopped_typing', handleUserStoppedTyping);
+    
+    // Listen for custom events
+    window.addEventListener('newMessage', handleNewMessage);
 
     return () => {
       socket.off('message_received', handleMessageReceived);
@@ -101,6 +166,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       socket.off('private_messages', handlePrivateMessages);
       socket.off('user_typing', handleUserTyping);
       socket.off('user_stopped_typing', handleUserStoppedTyping);
+      window.removeEventListener('newMessage', handleNewMessage);
     };
   }, [socket, selectedUser, user]);
 
@@ -108,9 +174,8 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
   const loadGlobalMessages = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/messages/global');
-      const data = await response.json();
-      setMessages(data.messages || []);
+      const response = await api.get('/api/messages/global');
+      setMessages(response.data.messages || []);
     } catch (error) {
       console.error('Error loading global messages:', error);
     } finally {
@@ -123,9 +188,8 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     
     setLoading(true);
     try {
-      const response = await fetch(`/api/messages/private/${selectedUser._id}`);
-      const data = await response.json();
-      setMessages(data.messages || []);
+      const response = await api.get(`/api/messages/private/${selectedUser._id}`);
+      setMessages(response.data.messages || []);
     } catch (error) {
       console.error('Error loading private messages:', error);
     } finally {
@@ -133,19 +197,35 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     }
   };
 
-  // Handle sending messages
-  const handleSendMessage = (content, type = 'text', attachment = null) => {
-    if (!content && !attachment) return;
+  const loadGroupMessages = async () => {
+    if (!selectedUser) return;
+    
+    setLoading(true);
+    try {
+      const response = await api.get(`/api/messages/group/${selectedUser._id}`);
+      setMessages(response.data.messages || []);
+    } catch (error) {
+      console.error('Error loading group messages:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const messageData = {
-      content,
-      type,
+  // Handle sending messages
+  const handleSendMessage = (messageData) => {
+    if (!messageData.content && !messageData.attachment) return;
+
+    const data = {
+      content: messageData.content,
+      type: messageData.type || 'text',
       chatType: activeChat,
-      recipients: activeChat === 'private' ? [selectedUser._id] : [],
-      attachment
+      recipients: activeChat === 'private' ? [selectedUser._id] : 
+                  activeChat === 'group' ? [selectedUser._id] : [],
+      attachment: messageData.attachment,
+      replyTo: messageData.replyTo
     };
 
-    sendMessage(messageData);
+    sendMessage(data);
   };
 
   // Handle typing indicators
@@ -154,6 +234,8 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       startTyping('global', []);
     } else if (activeChat === 'private' && selectedUser) {
       startTyping('private', [selectedUser._id]);
+    } else if (activeChat === 'group' && selectedUser) {
+      startTyping('group', [selectedUser._id]);
     }
   };
 
@@ -162,13 +244,15 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       stopTyping('global', []);
     } else if (activeChat === 'private' && selectedUser) {
       stopTyping('private', [selectedUser._id]);
+    } else if (activeChat === 'group' && selectedUser) {
+      stopTyping('group', [selectedUser._id]);
     }
   };
 
   // Handle message actions
   const handleDeleteMessage = async (message) => {
     try {
-      await api.delete(`/api/messages/${message._id}?userId=${user._id}`);
+      await api.delete(`/api/messages/${message._id}`);
       // Remove message from local state
       setMessages(prev => prev.filter(m => m._id !== message._id));
       toast.success('Message deleted');
@@ -182,7 +266,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     const newContent = prompt('Edit message:', message.content);
     if (newContent && newContent !== message.content) {
       try {
-        await api.put(`/api/messages/${message._id}?userId=${user._id}`, {
+        await api.put(`/api/messages/${message._id}`, {
           content: newContent
         });
         // Update message in local state
@@ -209,12 +293,27 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     }
   };
 
+  // Mark message as read
+  const markMessageAsRead = async (messageId) => {
+    try {
+      await api.post('/api/messages/read', {
+        messageIds: [messageId],
+        chatType: activeChat,
+        otherUserId: selectedUser?._id
+      });
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
+  };
+
   // Get chat title
   const getChatTitle = () => {
     if (activeChat === 'global') {
       return 'Global Chat';
     } else if (activeChat === 'private' && selectedUser) {
       return selectedUser.displayName;
+    } else if (activeChat === 'group' && selectedUser) {
+      return selectedUser.name || 'Group Chat';
     }
     return 'Chat';
   };
@@ -225,48 +324,120 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       return 'Chat with everyone';
     } else if (activeChat === 'private' && selectedUser) {
       return `@${selectedUser.username}`;
+    } else if (activeChat === 'group' && selectedUser) {
+      return `${selectedUser.memberCount || selectedUser.members?.length || 0} members`;
     }
     return '';
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900">
+    <div className={`flex flex-col h-full min-h-0 bg-white dark:bg-gray-900 chat-area`}>
       {/* Chat Header */}
-      <ChatHeader
-        title={getChatTitle()}
-        subtitle={getChatSubtitle()}
-        user={selectedUser}
-        onBack={isMobile ? onBackToSidebar : null}
-        isMobile={isMobile}
-      />
+      <div className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ${isMobile ? 'px-3 py-2' : 'px-4 py-3'} shadow-sm flex-shrink-0`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            {isMobile && (
+              <button
+                onClick={() => window.location.href = '/mobile-chats'}
+                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Back to chats"
+              >
+                <FaArrowLeft className="h-5 w-5" />
+              </button>
+            )}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {getChatTitle()}
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                {getChatSubtitle()}
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            {activeChat === 'private' && selectedUser && (
+              <button 
+                onClick={() => initiateCall(selectedUser, 'voice')}
+                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Voice Call"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </button>
+            )}
+            {activeChat === 'group' && selectedUser && (
+              <button 
+                onClick={() => {
+                  setCurrentGroup(selectedUser);
+                  setShowGroupSettings(true);
+                }}
+                className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                title="Group Settings"
+              >
+                <FaCog className="w-5 h-5" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0 flex flex-col">
         <MessageList
           messages={messages}
           loading={loading}
-          typingUsers={typingUsers}
+          typingUsers={[]} // Remove typing users from MessageList
           currentUser={user}
           messagesEndRef={messagesEndRef}
           onDeleteMessage={handleDeleteMessage}
           onEditMessage={handleEditMessage}
           onReplyToMessage={handleReplyToMessage}
+          activeChat={activeChat}
+          isMobile={isMobile}
         />
       </div>
 
+      {/* Typing Indicator - Fixed at bottom */}
+      {typingUsers.length > 0 && (
+        <div className={`bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 ${isMobile ? 'px-2 py-1' : 'px-4 py-2'} flex-shrink-0`}>
+          <TypingIndicator users={typingUsers} isMobile={isMobile} />
+        </div>
+      )}
+
       {/* Message Input */}
-      <div className="border-t border-gray-200 dark:border-gray-700 p-4">
+      <div className={`bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 ${isMobile ? 'p-3 pb-safe' : 'p-4'} flex-shrink-0`}>
         <MessageInput
           onSendMessage={handleSendMessage}
           onTypingStart={handleTypingStart}
           onTypingStop={handleTypingStop}
+          replyTo={replyTo}
+          onCancelReply={() => setReplyTo(null)}
           placeholder={
             activeChat === 'global' 
               ? 'Type a message to everyone...' 
+              : activeChat === 'group'
+              ? `Type a message to ${selectedUser?.name || 'group'}...`
               : `Type a message to ${selectedUser?.displayName || 'user'}...`
           }
         />
       </div>
+
+      {/* Group Settings Modal */}
+      <GroupSettingsModal
+        group={currentGroup}
+        isOpen={showGroupSettings}
+        onClose={() => setShowGroupSettings(false)}
+        onGroupUpdate={(updatedGroup) => {
+          setCurrentGroup(updatedGroup);
+          // Update the selected user with new group data
+          if (selectedUser && selectedUser._id === updatedGroup._id) {
+            // This will trigger a re-render with updated group data
+            window.location.reload();
+          }
+        }}
+      />
     </div>
   );
 };

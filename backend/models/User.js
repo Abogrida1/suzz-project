@@ -63,6 +63,26 @@ const userSchema = new mongoose.Schema({
   socketId: {
     type: String,
     default: null
+  },
+  settings: {
+    notifications: {
+      messageNotifications: { type: Boolean, default: true },
+      soundNotifications: { type: Boolean, default: true },
+      emailNotifications: { type: Boolean, default: false },
+      pushNotifications: { type: Boolean, default: true }
+    },
+    privacy: {
+      showOnlineStatus: { type: Boolean, default: true },
+      showLastSeen: { type: Boolean, default: true },
+      allowDirectMessages: { type: Boolean, default: true },
+      profileVisibility: { type: String, enum: ['public', 'friends', 'private'], default: 'public' }
+    },
+    appearance: {
+      theme: { type: String, enum: ['light', 'dark'], default: 'light' },
+      fontSize: { type: String, enum: ['small', 'medium', 'large'], default: 'medium' },
+      language: { type: String, default: 'en' },
+      compactMode: { type: Boolean, default: false }
+    }
   }
 }, {
   timestamps: true
@@ -102,6 +122,7 @@ userSchema.methods.getPublicProfile = function() {
     lastSeen: this.lastSeen,
     bio: this.bio,
     isOnline: this.isOnline,
+    settings: this.settings,
     createdAt: this.createdAt
   };
 };

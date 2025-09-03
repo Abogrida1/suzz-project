@@ -1,8 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import Navigation from '../components/Navigation';
+import toast from 'react-hot-toast';
 import { 
   FaComments, 
   FaUsers, 
@@ -11,11 +12,24 @@ import {
   FaArrowRight,
   FaStar,
   FaGlobe,
-  FaMobile
+  FaMobile,
+  FaUser
 } from 'react-icons/fa';
 
 const HomePage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const isMobile = window.innerWidth < 768;
+
+  const handleStartChatting = () => {
+    if (isMobile) {
+      navigate('/mobile-chats');
+    } else {
+      navigate('/chats');
+    }
+    toast.success('Welcome to SecureChat!');
+  };
+
   const features = [
     {
       icon: FaShieldAlt,
@@ -47,7 +61,7 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 mobile-page">
       <Navigation user={user} />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
@@ -77,16 +91,17 @@ const HomePage = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="flex flex-col sm:flex-row gap-4 justify-center"
             >
-              <Link
-                to="/chats"
+              <button
+                onClick={handleStartChatting}
                 className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 <FaComments className="mr-2" />
                 Start Chatting
                 <FaArrowRight className="ml-2" />
-              </Link>
+              </button>
               <Link
                 to="/account"
+                onClick={() => toast.success('Viewing your profile')}
                 className="inline-flex items-center px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold rounded-xl border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 transform hover:scale-105"
               >
                 <FaUser className="mr-2" />
@@ -181,13 +196,20 @@ const HomePage = () => {
             <p className="text-xl text-blue-100 mb-8">
               Join thousands of users who trust SecureChat for their daily conversations
             </p>
-            <Link
-              to="/chats"
+            <button
+              onClick={() => {
+                if (isMobile) {
+                  navigate('/mobile-chats');
+                } else {
+                  navigate('/chats');
+                }
+                toast.success('Launching SecureChat!');
+              }}
               className="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
               <FaRocket className="mr-2" />
               Launch App
-            </Link>
+            </button>
           </motion.div>
         </div>
       </section>

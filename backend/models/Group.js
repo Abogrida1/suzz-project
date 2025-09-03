@@ -9,47 +9,51 @@ const groupSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    maxlength: 500,
-    default: ''
+    trim: true,
+    maxlength: 500
+  },
+  isPrivate: {
+    type: Boolean,
+    default: false
+  },
+  allowInvites: {
+    type: Boolean,
+    default: true
+  },
+  muteNotifications: {
+    type: Boolean,
+    default: false
   },
   avatar: {
     type: String,
     default: null
   },
-  createdBy: {
+  admin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  admins: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
-  }],
   members: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
+    },
+    role: {
+      type: String,
+      enum: ['admin', 'moderator', 'member'],
+      default: 'member'
     },
     joinedAt: {
       type: Date,
       default: Date.now
-    },
-    role: {
-      type: String,
-      enum: ['member', 'admin'],
-      default: 'member'
     }
   }],
-  isPrivate: {
-    type: Boolean,
-    default: false
-  },
-  inviteCode: {
-    type: String,
-    unique: true,
-    sparse: true
-  },
   settings: {
+    isPublic: {
+      type: Boolean,
+      default: false
+    },
     allowMemberInvites: {
       type: Boolean,
       default: true
@@ -58,42 +62,113 @@ const groupSchema = new mongoose.Schema({
       type: Boolean,
       default: true
     },
-    allowMessageEditing: {
-      type: Boolean,
-      default: true
+    memberPermissions: {
+      canInvite: {
+        type: Boolean,
+        default: false
+      },
+      canViewMembers: {
+        type: Boolean,
+        default: true
+      },
+      canLeaveGroup: {
+        type: Boolean,
+        default: true
+      }
     }
   },
-  lastActivity: {
-    type: Date,
-    default: Date.now
+  lastMessage: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Message',
+    default: null
+  },
+  unreadCount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true
 });
 
-// Indexes
-groupSchema.index({ createdBy: 1 });
+// Index for efficient queries
 groupSchema.index({ 'members.user': 1 });
-groupSchema.index({ inviteCode: 1 });
+groupSchema.index({ admin: 1 });
+groupSchema.index({ createdAt: -1 });
 
 // Virtual for member count
 groupSchema.virtual('memberCount').get(function() {
-  return this.members.length;
+  const count = this.members.length;
+  console.log(`Virtual memberCount for group ${this.name}: ${count} members`);
+  return count;
 });
+
+// Method to check if user is member
+groupSchema.methods.isMember = function(userId) {
+  // Convert to string for comparison
+  const userIdStr = userId.toString();
+  const adminIdStr = this.admin.toString();
+  
+  console.log(`isMember check: userId=${userIdStr}, adminId=${adminIdStr}`);
+  
+  // Check if user is admin
+  if (adminIdStr === userIdStr) {
+    console.log('User is admin - returning true');
+    return true;
+  }
+  
+  // Check if user is in members list
+  const isInMembers = this.members.some(member => {
+    const memberIdStr = member.user._id.toString();
+    console.log(`Checking member: ${memberIdStr} === ${userIdStr}?`);
+    return memberIdStr === userIdStr;
+  });
+  
+  console.log(`User is in members list: ${isInMembers}`);
+  return isInMembers;
+};
+
+// Method to check if user is admin
+groupSchema.methods.isAdmin = function(userId) {
+  const userIdStr = userId.toString();
+  const adminIdStr = this.admin.toString();
+  
+  // Check if user is the main admin
+  if (adminIdStr === userIdStr) {
+    return true;
+  }
+  
+  // Check if user is admin in members list
+  return this.members.some(member => 
+    member.user.toString() === userIdStr && 
+    member.role === 'admin'
+  );
+};
+
+// Method to check if user is moderator or admin
+groupSchema.methods.isModerator = function(userId) {
+  const userIdStr = userId.toString();
+  
+  // Check if user is admin (includes main admin)
+  if (this.isAdmin(userId)) {
+    return true;
+  }
+  
+  // Check if user is moderator in members list
+  return this.members.some(member => 
+    member.user.toString() === userIdStr && 
+    member.role === 'moderator'
+  );
+};
 
 // Method to add member
 groupSchema.methods.addMember = function(userId, role = 'member') {
-  const existingMember = this.members.find(member => 
-    member.user.toString() === userId.toString()
-  );
-  
-  if (!existingMember) {
-    this.members.push({ user: userId, role, joinedAt: new Date() });
-    this.lastActivity = new Date();
-    return this.save();
+  if (!this.isMember(userId)) {
+    this.members.push({
+      user: userId,
+      role: role,
+      joinedAt: new Date()
+    });
   }
-  
-  return Promise.resolve(this);
 };
 
 // Method to remove member
@@ -101,52 +176,49 @@ groupSchema.methods.removeMember = function(userId) {
   this.members = this.members.filter(member => 
     member.user.toString() !== userId.toString()
   );
-  this.admins = this.admins.filter(admin => 
-    admin.toString() !== userId.toString()
-  );
-  this.lastActivity = new Date();
-  return this.save();
 };
 
-// Method to promote to admin
-groupSchema.methods.promoteToAdmin = function(userId) {
+// Method to update member role
+groupSchema.methods.updateMemberRole = function(userId, newRole) {
   const member = this.members.find(member => 
     member.user.toString() === userId.toString()
   );
-  
   if (member) {
-    member.role = 'admin';
-    if (!this.admins.includes(userId)) {
-      this.admins.push(userId);
-    }
-    this.lastActivity = new Date();
-    return this.save();
+    member.role = newRole;
+  }
+};
+
+// Method to check member permissions
+groupSchema.methods.canMemberInvite = function(userId) {
+  // Admin and moderators can always invite
+  if (this.isModerator(userId)) {
+    return true;
   }
   
-  return Promise.resolve(this);
+  // Check if member has invite permission
+  return this.settings.memberPermissions.canInvite;
 };
 
-// Method to check if user is member
-groupSchema.methods.isMember = function(userId) {
-  return this.members.some(member => 
-    member.user.toString() === userId.toString()
-  );
-};
-
-// Method to check if user is admin
-groupSchema.methods.isAdmin = function(userId) {
-  return this.admins.some(admin => admin.toString() === userId.toString());
-};
-
-// Method to generate invite code
-groupSchema.methods.generateInviteCode = function() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
+// Method to check if member can view other members
+groupSchema.methods.canMemberViewMembers = function(userId) {
+  // Admin and moderators can always view members
+  if (this.isModerator(userId)) {
+    return true;
   }
-  this.inviteCode = result;
-  return this.save();
+  
+  // Check if member has view members permission
+  return this.settings.memberPermissions.canViewMembers;
+};
+
+// Method to check if member can leave group
+groupSchema.methods.canMemberLeave = function(userId) {
+  // Admin cannot leave (must transfer admin role first)
+  if (this.isAdmin(userId)) {
+    return false;
+  }
+  
+  // Check if member has leave permission
+  return this.settings.memberPermissions.canLeaveGroup;
 };
 
 module.exports = mongoose.model('Group', groupSchema);

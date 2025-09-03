@@ -4,14 +4,19 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { CallProvider } from './contexts/CallContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navigation from './components/Navigation';
+import VoiceCallModal from './components/VoiceCallModal';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import HomePage from './pages/HomePage';
 import ChatsPage from './pages/ChatsPage';
+import MobileChatsPage from './pages/MobileChatsPage';
+import CreateGroupPage from './pages/CreateGroupPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
+
 import './App.css';
 
 function App() {
@@ -19,7 +24,13 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <SocketProvider>
-          <Router>
+          <CallProvider>
+          <Router
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true
+            }}
+          >
             <div className="App">
               <Routes>
                 <Route path="/login" element={<Login />} />
@@ -41,6 +52,22 @@ function App() {
                   } 
                 />
                 <Route 
+                  path="/mobile-chats" 
+                  element={
+                    <ProtectedRoute>
+                      <MobileChatsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/create-group" 
+                  element={
+                    <ProtectedRoute>
+                      <CreateGroupPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
                   path="/account" 
                   element={
                     <ProtectedRoute>
@@ -56,8 +83,9 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
+
               </Routes>
-              <Toaster 
+                            <Toaster
                 position="top-right"
                 toastOptions={{
                   duration: 4000,
@@ -67,8 +95,10 @@ function App() {
                   },
                 }}
               />
+              <VoiceCallModal />
             </div>
           </Router>
+          </CallProvider>
         </SocketProvider>
       </AuthProvider>
     </ThemeProvider>

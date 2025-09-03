@@ -12,11 +12,13 @@ import {
   FaClock
 } from 'react-icons/fa';
 import { formatDistanceToNow } from 'date-fns';
+import toast from 'react-hot-toast';
 
 const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [recentConversations, setRecentConversations] = useState([]);
+  const [userGroups, setUserGroups] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -24,27 +26,81 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
   const { user } = useAuth();
   const { onlineUsers: socketOnlineUsers } = useSocket();
 
-  // Fetch recent conversations
+  // Fetch recent conversations and groups
   useEffect(() => {
-    const fetchRecentConversations = async () => {
+    const fetchData = async () => {
+      if (!user?._id) return;
+      
       try {
-        const response = await api.get(`/api/messages/conversations/recent?userId=${user._id}`);
-        setRecentConversations(response.data.conversations);
+        // Fetch conversations
+        const conversationsResponse = await api.get('/api/messages/conversations/recent');
+        setRecentConversations(conversationsResponse.data.conversations || []);
+        
+        // Fetch user groups
+        const groupsResponse = await api.get('/api/groups/my-groups');
+        setUserGroups(groupsResponse.data.groups || []);
       } catch (error) {
-        console.error('Error fetching conversations:', error);
+        console.error('Error fetching data:', error);
         console.error('Error details:', {
           message: error.message,
           response: error.response?.data,
           status: error.response?.status
         });
         // Don't show error to user, just log it
-        // Set empty conversations as fallback
+        // Set empty data as fallback
         setRecentConversations([]);
+        setUserGroups([]);
       }
     };
 
-    fetchRecentConversations();
-  }, []);
+    fetchData();
+  }, [user?._id]);
+
+  // Listen for new messages to update conversations
+  useEffect(() => {
+    const handleNewMessage = (event) => {
+      const message = event.detail;
+      console.log('New message in Sidebar:', message);
+      
+      // Update recent conversations when new message arrives
+      if (message.chatType === 'private') {
+        setRecentConversations(prev => {
+          const existingIndex = prev.findIndex(conv => 
+            conv.user._id === message.sender._id || 
+            conv.user._id === message.privateChatWith
+          );
+          
+          if (existingIndex >= 0) {
+            // Update existing conversation
+            const updated = [...prev];
+            updated[existingIndex] = {
+              ...updated[existingIndex],
+              lastMessage: message,
+              unreadCount: message.sender._id !== user._id ? 
+                (updated[existingIndex].unreadCount || 0) + 1 : 
+                updated[existingIndex].unreadCount
+            };
+            // Move to top
+            const [moved] = updated.splice(existingIndex, 1);
+            return [moved, ...updated];
+          } else {
+            // Add new conversation
+            const otherUserId = message.sender._id === user._id ? 
+              message.privateChatWith : message.sender._id;
+            
+            return [{
+              user: message.sender,
+              lastMessage: message,
+              unreadCount: message.sender._id !== user._id ? 1 : 0
+            }, ...prev];
+          }
+        });
+      }
+    };
+
+    window.addEventListener('newMessage', handleNewMessage);
+    return () => window.removeEventListener('newMessage', handleNewMessage);
+  }, [user?._id]);
 
   // Update online users from socket
   useEffect(() => {
@@ -96,8 +152,8 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Header */}
+    <div className="flex flex-col h-full bg-white dark:bg-gray-800">
+      {/* Header - WhatsApp Style */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -106,7 +162,7 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
           {isMobile && (
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <FaTimes className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             </button>
@@ -122,7 +178,7 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={() => setShowSearch(true)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
             />
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           </div>
@@ -173,10 +229,10 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
 
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
-        {/* Global Chat */}
+        {/* Global Chat - Hidden on mobile */}
         <button
           onClick={() => onChatSelect('global')}
-          className={`w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 ${
+          className={`hidden md:block w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 ${
             activeChat === 'global' ? 'bg-primary-50 dark:bg-primary-900/20' : ''
           }`}
         >
@@ -195,6 +251,76 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
           </div>
         </button>
+
+        {/* Create Group Button */}
+        <button
+          onClick={() => window.location.href = '/create-group'}
+          className="hidden md:block w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center">
+              <FaPlus className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                Create Group
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Start a group chat
+              </p>
+            </div>
+          </div>
+        </button>
+
+        {/* User Groups */}
+        {userGroups.length > 0 && (
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
+              My Groups
+            </h3>
+            <div className="space-y-1">
+              {userGroups.map((group) => (
+                <button
+                  key={group._id}
+                  onClick={() => onChatSelect('group', group)}
+                  className={`w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors ${
+                    activeChat === 'group' && selectedUser?._id === group._id
+                      ? 'bg-primary-50 dark:bg-primary-900/20'
+                      : ''
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">
+                        {group.name?.charAt(0)?.toUpperCase()}
+                      </span>
+                    </div>
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                          {group.name}
+                        </p>
+                        {group.unreadCount > 0 && (
+                          <span className="bg-primary-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                            {group.unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {group.memberCount || group.members?.length || 0} members
+                        {group.admin?._id === user._id && (
+                          <span className="ml-1 text-yellow-500">👑</span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recent Conversations */}
         <div className="p-4">

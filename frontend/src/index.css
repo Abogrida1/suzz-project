@@ -78,19 +78,149 @@
 
 /* Custom scrollbar for webkit browsers */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
   @apply bg-gray-100 dark:bg-gray-800;
+  border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  @apply bg-gray-400 dark:bg-gray-500 rounded-full;
+  border: 1px solid transparent;
+  background-clip: content-box;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
+  @apply bg-gray-500 dark:bg-gray-400;
+}
+
+/* Force scrollbar to always be visible on desktop */
+@media (min-width: 768px) {
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(156 163 175) rgb(243 244 246);
+    overflow-y: scroll !important;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    display: block !important;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+    border-radius: 4px;
+    display: block !important;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 dark:bg-gray-500 rounded-full;
+    border: 1px solid transparent;
+    background-clip: content-box;
+    display: block !important;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500 dark:bg-gray-400;
+  }
+  
+  /* Ensure scrollbar is always visible */
+  .custom-scrollbar::-webkit-scrollbar-corner {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+}
+
+/* Chat layout fixes for responsive design */
+.chat-container {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+.chat-messages-container {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Ensure proper flex behavior */
+.flex-1 {
+  flex: 1 1 0%;
+  min-height: 0;
+}
+
+/* Fix for chat area responsive */
+@media (min-width: 768px) {
+  .chat-area {
+    height: calc(100vh - 64px); /* Subtract navigation height */
+    max-height: calc(100vh - 64px);
+    overflow: hidden;
+  }
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 767px) {
+  /* Ensure content doesn't get covered by bottom menu */
+  .mobile-content {
+    padding-bottom: 80px; /* Space for bottom menu */
+    min-height: calc(100vh - 80px);
+  }
+  
+  /* Mobile pages with bottom menu */
+  .mobile-page {
+    padding-bottom: 80px;
+    min-height: 100vh;
+  }
+  
+  /* Mobile chat pages */
+  .mobile-chat-page {
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Mobile chats list */
+  .mobile-chats-list {
+    padding-bottom: 80px;
+    min-height: calc(100vh - 80px);
+  }
+  
+  /* Groups horizontal scroll */
+  .groups-horizontal-scroll {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(156 163 175) transparent;
+    gap: 12px;
+    padding: 0 16px;
+    margin: 0 -16px;
+  }
+  
+  .groups-horizontal-scroll::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .groups-horizontal-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .groups-horizontal-scroll::-webkit-scrollbar-thumb {
+    background-color: rgb(156 163 175);
+    border-radius: 2px;
+  }
+  
+  .groups-horizontal-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(107 114 128);
+  }
+  
+  /* Group card in horizontal scroll */
+  .group-card-horizontal {
+    flex-shrink: 0;
+    width: 120px;
+    min-width: 120px;
+  }
 }
 
 /* Animation for message appearance */

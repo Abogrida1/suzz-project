@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Message = require('../models/Message');
+const Group = require('../models/Group');
 
 const setupSocketHandlers = (io) => {
   // Middleware for socket authentication
@@ -103,6 +104,68 @@ const setupSocketHandlers = (io) => {
       console.log(`User ${socket.user.username} left private chat with ${otherUserId}`);
     });
 
+    // Handle joining group chat
+    socket.on('join_group', async (data) => {
+      try {
+        const { groupId } = data;
+        
+        if (!groupId) {
+          return socket.emit('error', { message: 'Group ID required' });
+        }
+
+        // Check if user is member of the group
+        const group = await Group.findById(groupId);
+        if (!group) {
+          return socket.emit('error', { message: 'Group not found' });
+        }
+
+        // Check if user is member (including admin)
+        if (!group.isMember(socket.userId)) {
+          return socket.emit('error', { message: 'You are not a member of this group' });
+        }
+
+        // Leave any existing group chats
+        socket.rooms.forEach(room => {
+          if (room.startsWith('group_')) {
+            socket.leave(room);
+          }
+        });
+
+        // Join the group chat room
+        socket.join(`group_${groupId}`);
+        
+        console.log(`User ${socket.user.username} joined group chat ${groupId}`);
+        
+        // Send recent group messages
+        const messages = await Message.find({
+          groupId: groupId,
+          deleted: false
+        })
+        .populate('sender', 'username displayName avatar')
+        .populate('replyTo')
+        .sort({ createdAt: -1 })
+        .limit(50);
+
+        socket.emit('group_messages', {
+          groupId,
+          messages: messages.reverse()
+        });
+      } catch (error) {
+        console.error('Join group chat error:', error);
+        socket.emit('error', { message: 'Failed to join group chat' });
+      }
+    });
+
+    // Handle leaving group chat
+    socket.on('leave_group', (data) => {
+      const { groupId } = data;
+      
+      if (groupId) {
+        socket.leave(`group_${groupId}`);
+        console.log(`User ${socket.user.username} left group chat ${groupId}`);
+      }
+    });
+
     // Handle sending messages
     socket.on('send_message', async (data) => {
       try {
@@ -131,21 +194,74 @@ const setupSocketHandlers = (io) => {
           chatType,
           recipients: recipients || [],
           attachment,
-          replyTo
+          status: 'sending',
+          deliveryStatus: []
         };
+
+        // Handle reply to message
+        if (replyTo) {
+          const replyMessage = await Message.findById(replyTo);
+          if (replyMessage) {
+            messageData.replyTo = {
+              message: replyTo,
+              content: replyMessage.content,
+              sender: replyMessage.sender
+            };
+          }
+        }
 
         // Handle different chat types
         if (chatType === 'global') {
           messageData.recipients = []; // Global chat doesn't need specific recipients
         } else if (chatType === 'private' && recipients && recipients.length === 1) {
           messageData.privateChatWith = recipients[0];
+        } else if (chatType === 'group' && recipients && recipients.length > 0) {
+          const groupId = recipients[0];
+          
+          // Check if user is member of the group
+          const group = await Group.findById(groupId);
+          if (!group) {
+            return socket.emit('error', { message: 'Group not found' });
+          }
+          
+          if (!group.isMember(socket.userId)) {
+            return socket.emit('error', { message: 'You are not a member of this group' });
+          }
+          
+          messageData.groupId = groupId;
+          messageData.recipients = recipients.slice(1); // Rest are actual recipients
         }
 
         const message = new Message(messageData);
         await message.save();
 
-        // Populate sender info
-        await message.populate('sender', 'username displayName avatar');
+        // Set delivery status for recipients
+        if (chatType === 'private' && recipients && recipients.length === 1) {
+          message.deliveryStatus.push({
+            user: recipients[0],
+            status: 'sent'
+          });
+        } else if (chatType === 'group' && recipients && recipients.length > 0) {
+          const group = await Group.findById(recipients[0]);
+          if (group) {
+            group.members.forEach(member => {
+              if (member.user.toString() !== socket.userId) {
+                message.deliveryStatus.push({
+                  user: member.user,
+                  status: 'sent'
+                });
+              }
+            });
+          }
+        }
+
+        await message.save();
+
+        // Populate sender info in one call for better performance
+        await message.populate([
+          { path: 'sender', select: 'username displayName avatar' },
+          { path: 'replyTo.sender', select: 'username displayName avatar' }
+        ]);
 
         // Emit to appropriate room
         if (chatType === 'global') {
@@ -160,6 +276,29 @@ const setupSocketHandlers = (io) => {
             recipientSocket.emit('new_private_message', {
               message,
               sender: socket.user.getPublicProfile()
+            });
+          }
+        } else if (chatType === 'group') {
+          const groupId = recipients[0];
+          io.to(`group_${groupId}`).emit('message_received', message);
+          
+          // Notify group members who are not in the chat
+          const group = await Group.findById(groupId).populate('members.user');
+          if (group) {
+            group.members.forEach(async (member) => {
+              if (member.user._id.toString() !== socket.userId) {
+                const memberSocket = await findUserSocket(member.user._id);
+                if (memberSocket && !memberSocket.rooms.has(`group_${groupId}`)) {
+                  memberSocket.emit('new_group_message', {
+                    message,
+                    sender: socket.user.getPublicProfile(),
+                    group: {
+                      _id: group._id,
+                      name: group.name
+                    }
+                  });
+                }
+              }
             });
           }
         }
@@ -278,6 +417,354 @@ const setupSocketHandlers = (io) => {
       socket.broadcast.emit('user_offline', {
         userId: socket.userId
       });
+    });
+
+    // Voice Call Handlers
+    socket.on('call_invite', async (data) => {
+      try {
+        const { callId, callType, offer, from, to } = data;
+        
+        // Find recipient's socket
+        const recipientSocket = await findUserSocket(to._id);
+        
+        if (recipientSocket) {
+          recipientSocket.emit('call_incoming', {
+            callId,
+            callType,
+            offer,
+            from: {
+              _id: from._id,
+              username: from.username,
+              displayName: from.displayName,
+              avatar: from.avatar
+            }
+          });
+        } else {
+          // User is offline
+          socket.emit('call_error', {
+            message: 'User is offline',
+            callId
+          });
+        }
+      } catch (error) {
+        console.error('Call invite error:', error);
+        socket.emit('call_error', {
+          message: 'Failed to send call invitation',
+          callId: data.callId
+        });
+      }
+    });
+
+    socket.on('call_accept', async (data) => {
+      try {
+        const { callId, from, to } = data;
+        
+        // Find caller's socket
+        const callerSocket = await findUserSocket(to._id);
+        
+        if (callerSocket) {
+          callerSocket.emit('call_accepted', {
+            callId,
+            from: {
+              _id: from._id,
+              username: from.username,
+              displayName: from.displayName,
+              avatar: from.avatar
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Call accept error:', error);
+      }
+    });
+
+    socket.on('call_reject', async (data) => {
+      try {
+        const { callId, from, to } = data;
+        
+        // Find caller's socket
+        const callerSocket = await findUserSocket(to._id);
+        
+        if (callerSocket) {
+          callerSocket.emit('call_rejected', {
+            callId,
+            from: {
+              _id: from._id,
+              username: from.username,
+              displayName: from.displayName,
+              avatar: from.avatar
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Call reject error:', error);
+      }
+    });
+
+    socket.on('call_end', async (data) => {
+      try {
+        const { callId, from, to } = data;
+        
+        // Find recipient's socket
+        const recipientSocket = await findUserSocket(to._id);
+        
+        if (recipientSocket) {
+          recipientSocket.emit('call_ended', {
+            callId,
+            from: {
+              _id: from._id,
+              username: from.username,
+              displayName: from.displayName,
+              avatar: from.avatar
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Call end error:', error);
+      }
+    });
+
+    socket.on('ice_candidate', async (data) => {
+      try {
+        const { callId, candidate, to } = data;
+        
+        // Find recipient's socket
+        const recipientSocket = await findUserSocket(to._id);
+        
+        if (recipientSocket) {
+          recipientSocket.emit('ice_candidate', {
+            callId,
+            candidate,
+            from: {
+              _id: socket.userId,
+              username: socket.user.username,
+              displayName: socket.user.displayName
+            }
+          });
+        }
+      } catch (error) {
+        console.error('ICE candidate error:', error);
+      }
+    });
+
+    socket.on('offer', async (data) => {
+      try {
+        const { callId, offer, to } = data;
+        
+        // Find recipient's socket
+        const recipientSocket = await findUserSocket(to._id);
+        
+        if (recipientSocket) {
+          recipientSocket.emit('offer', {
+            callId,
+            offer,
+            from: {
+              _id: socket.userId,
+              username: socket.user.username,
+              displayName: socket.user.displayName
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Offer error:', error);
+      }
+    });
+
+    socket.on('answer', async (data) => {
+      try {
+        const { callId, answer, to } = data;
+        
+        // Find caller's socket
+        const callerSocket = await findUserSocket(to._id);
+        
+        if (callerSocket) {
+          callerSocket.emit('answer', {
+            callId,
+            answer,
+            from: {
+              _id: socket.userId,
+              username: socket.user.username,
+              displayName: socket.user.displayName
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Answer error:', error);
+      }
+    });
+
+    // Handle message delivery confirmation
+    socket.on('message_delivered', async (data) => {
+      try {
+        const { messageId } = data;
+        const message = await Message.findById(messageId);
+        
+        if (message) {
+          await message.markAsDelivered(socket.userId);
+          
+          // Notify sender
+          const senderSocket = await findUserSocket(message.sender);
+          if (senderSocket) {
+            senderSocket.emit('message_delivery_update', {
+              messageId,
+              userId: socket.userId,
+              status: 'delivered'
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Message delivery error:', error);
+      }
+    });
+
+    // Handle message read confirmation
+    socket.on('message_read', async (data) => {
+      try {
+        const { messageId } = data;
+        const message = await Message.findById(messageId);
+        
+        if (message) {
+          await message.markAsRead(socket.userId);
+          
+          // Notify sender
+          const senderSocket = await findUserSocket(message.sender);
+          if (senderSocket) {
+            senderSocket.emit('message_read_update', {
+              messageId,
+              userId: socket.userId,
+              status: 'seen'
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Message read error:', error);
+      }
+    });
+
+    // Handle typing indicator
+    socket.on('typing_start', (data) => {
+      const { chatType, recipients } = data;
+      
+      if (chatType === 'private' && recipients && recipients.length === 1) {
+        const roomName = [socket.userId, recipients[0]].sort().join('_');
+        socket.to(`private_${roomName}`).emit('user_typing', {
+          userId: socket.userId,
+          username: socket.user.username,
+          isTyping: true
+        });
+      } else if (chatType === 'group' && recipients && recipients.length > 0) {
+        socket.to(`group_${recipients[0]}`).emit('user_typing', {
+          userId: socket.userId,
+          username: socket.user.username,
+          isTyping: true
+        });
+      }
+    });
+
+    socket.on('typing_stop', (data) => {
+      const { chatType, recipients } = data;
+      
+      if (chatType === 'private' && recipients && recipients.length === 1) {
+        const roomName = [socket.userId, recipients[0]].sort().join('_');
+        socket.to(`private_${roomName}`).emit('user_typing', {
+          userId: socket.userId,
+          username: socket.user.username,
+          isTyping: false
+        });
+      } else if (chatType === 'group' && recipients && recipients.length > 0) {
+        socket.to(`group_${recipients[0]}`).emit('user_typing', {
+          userId: socket.userId,
+          username: socket.user.username,
+          isTyping: false
+        });
+      }
+    });
+
+    // Handle message reactions
+    socket.on('add_reaction', async (data) => {
+      try {
+        const { messageId, emoji } = data;
+        const message = await Message.findById(messageId);
+        
+        if (message) {
+          const user = await User.findById(socket.userId);
+          const existingReaction = message.reactions.find(r => r.user.toString() === socket.userId.toString());
+          const wasReplaced = !!existingReaction;
+          
+          await message.addReaction(socket.userId, emoji);
+          
+          // Emit to all users in the chat
+          const reactionData = {
+            messageId,
+            userId: socket.userId,
+            emoji,
+            userName: user?.displayName || user?.username
+          };
+          
+          if (message.chatType === 'private') {
+            const roomName = [message.sender.toString(), message.privateChatWith.toString()].sort().join('_');
+            io.to(`private_${roomName}`).emit(wasReplaced ? 'reaction_updated' : 'reaction_added', reactionData);
+          } else if (message.chatType === 'group') {
+            io.to(`group_${message.groupId}`).emit(wasReplaced ? 'reaction_updated' : 'reaction_added', reactionData);
+          } else if (message.chatType === 'global') {
+            io.emit(wasReplaced ? 'reaction_updated' : 'reaction_added', reactionData);
+          }
+        }
+      } catch (error) {
+        console.error('Add reaction error:', error);
+      }
+    });
+
+    socket.on('remove_reaction', async (data) => {
+      try {
+        const { messageId, emoji } = data;
+        const message = await Message.findById(messageId);
+        
+        if (message) {
+          const user = await User.findById(socket.userId);
+          await message.removeReaction(socket.userId, emoji);
+          
+          // Emit to all users in the chat
+          const reactionData = {
+            messageId,
+            userId: socket.userId,
+            emoji,
+            userName: user?.displayName || user?.username
+          };
+          
+          if (message.chatType === 'private') {
+            const roomName = [message.sender.toString(), message.privateChatWith.toString()].sort().join('_');
+            io.to(`private_${roomName}`).emit('reaction_removed', reactionData);
+          } else if (message.chatType === 'group') {
+            io.to(`group_${message.groupId}`).emit('reaction_removed', reactionData);
+          } else if (message.chatType === 'global') {
+            io.emit('reaction_removed', reactionData);
+          }
+        }
+      } catch (error) {
+        console.error('Remove reaction error:', error);
+      }
+    });
+
+    socket.on('disconnect', async () => {
+      try {
+        console.log(`User ${socket.user.username} disconnected`);
+        
+        // Update user's online status
+        await User.findByIdAndUpdate(socket.userId, {
+          socketId: null,
+          isOnline: false,
+          lastSeen: new Date()
+        });
+
+        // Notify others that user is offline
+        socket.broadcast.emit('user_offline', {
+          userId: socket.userId,
+          username: socket.user.username
+        });
+      } catch (error) {
+        console.error('Disconnect error:', error);
+      }
     });
   });
 

@@ -40,6 +40,11 @@ router.get('/search', async (req, res) => {
       return res.json({ users: [] });
     }
 
+    // If no authenticated user, return empty results
+    if (!req.user || !req.user._id) {
+      return res.json({ users: [] });
+    }
+
     const users = await User.find({
       $and: [
         { _id: { $ne: req.user._id } }, // Exclude current user
@@ -92,6 +97,16 @@ router.put('/profile', [
     .isLength({ max: 200 })
     .withMessage('Bio must be less than 200 characters')
     .trim(),
+  body('location')
+    .optional()
+    .isLength({ max: 100 })
+    .withMessage('Location must be less than 100 characters')
+    .trim(),
+  body('website')
+    .optional()
+    .isURL()
+    .withMessage('Website must be a valid URL')
+    .trim(),
   body('status')
     .optional()
     .isIn(['online', 'offline', 'away', 'busy'])
@@ -106,11 +121,13 @@ router.put('/profile', [
       });
     }
 
-    const { displayName, bio, status } = req.body;
+    const { displayName, bio, location, website, status } = req.body;
     const updateData = {};
 
     if (displayName !== undefined) updateData.displayName = displayName;
     if (bio !== undefined) updateData.bio = bio;
+    if (location !== undefined) updateData.location = location;
+    if (website !== undefined) updateData.website = website;
     if (status !== undefined) updateData.status = status;
 
     const user = await User.findByIdAndUpdate(
@@ -272,6 +289,122 @@ router.get('/online/list', async (req, res) => {
   } catch (error) {
     console.error('Get online users error:', error);
     res.status(500).json({ message: 'Failed to fetch online users' });
+  }
+});
+
+// Update password
+router.put('/password', [
+  body('currentPassword')
+    .notEmpty()
+    .withMessage('Current password is required'),
+  body('newPassword')
+    .isLength({ min: 6 })
+    .withMessage('New password must be at least 6 characters long')
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ 
+        message: 'Validation failed',
+        errors: errors.array()
+      });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id);
+
+    // Verify current password
+    const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+    if (!isCurrentPasswordValid) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    console.error('Update password error:', error);
+    res.status(500).json({ message: 'Failed to update password' });
+  }
+});
+
+// Update notifications settings
+router.put('/notifications', async (req, res) => {
+  try {
+    const { messageNotifications, soundNotifications, emailNotifications, pushNotifications } = req.body;
+    
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        'settings.notifications.messageNotifications': messageNotifications,
+        'settings.notifications.soundNotifications': soundNotifications,
+        'settings.notifications.emailNotifications': emailNotifications,
+        'settings.notifications.pushNotifications': pushNotifications
+      },
+      { new: true }
+    );
+
+    res.json({ 
+      message: 'Notification settings updated successfully',
+      settings: user.settings
+    });
+  } catch (error) {
+    console.error('Update notifications error:', error);
+    res.status(500).json({ message: 'Failed to update notification settings' });
+  }
+});
+
+// Update privacy settings
+router.put('/privacy', async (req, res) => {
+  try {
+    const { showOnlineStatus, showLastSeen, allowDirectMessages, profileVisibility } = req.body;
+    
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        'settings.privacy.showOnlineStatus': showOnlineStatus,
+        'settings.privacy.showLastSeen': showLastSeen,
+        'settings.privacy.allowDirectMessages': allowDirectMessages,
+        'settings.privacy.profileVisibility': profileVisibility
+      },
+      { new: true }
+    );
+
+    res.json({ 
+      message: 'Privacy settings updated successfully',
+      settings: user.settings
+    });
+  } catch (error) {
+    console.error('Update privacy error:', error);
+    res.status(500).json({ message: 'Failed to update privacy settings' });
+  }
+});
+
+// Update appearance settings
+router.put('/appearance', async (req, res) => {
+  try {
+    const { theme, fontSize, language, compactMode } = req.body;
+    
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        'settings.appearance.theme': theme,
+        'settings.appearance.fontSize': fontSize,
+        'settings.appearance.language': language,
+        'settings.appearance.compactMode': compactMode
+      },
+      { new: true }
+    );
+
+    res.json({ 
+      message: 'Appearance settings updated successfully',
+      settings: user.settings
+    });
+  } catch (error) {
+    console.error('Update appearance error:', error);
+    res.status(500).json({ message: 'Failed to update appearance settings' });
   }
 });
 

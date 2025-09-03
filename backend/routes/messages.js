@@ -48,6 +48,51 @@ router.get('/private/:userId', async (req, res) => {
   }
 });
 
+// Get group chat messages
+router.get('/group/:groupId', async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { limit = 50, skip = 0 } = req.query;
+    
+    console.log(`Getting group messages for group ${groupId}, user ${req.user._id}`);
+    
+    // Check if group exists and user is member
+    const Group = require('../models/Group');
+    const group = await Group.findById(groupId);
+    if (!group) {
+      console.log(`Group ${groupId} not found`);
+      return res.status(404).json({ message: 'Group not found' });
+    }
+    
+    console.log(`Group found: ${group.name}, admin: ${group.admin}, members: ${group.members.length}`);
+    
+    // Check if user is member (including admin)
+    if (!group.isMember(req.user._id)) {
+      console.log(`User ${req.user._id} is not a member of group ${groupId}`);
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    
+    console.log(`User ${req.user._id} is a member of group ${groupId}`);
+    
+    const messages = await Message.find({
+      groupId: groupId,
+      deleted: false
+    })
+    .populate([
+      { path: 'sender', select: 'username displayName avatar' },
+      { path: 'replyTo.sender', select: 'username displayName avatar' }
+    ])
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit))
+    .skip(parseInt(skip));
+    
+    res.json({ messages: messages.reverse() });
+  } catch (error) {
+    console.error('Get group messages error:', error);
+    res.status(500).json({ message: 'Failed to fetch group messages' });
+  }
+});
+
 // Get message by ID
 router.get('/:messageId', async (req, res) => {
   try {
@@ -209,11 +254,8 @@ router.get('/conversations/recent', async (req, res) => {
   try {
     const { limit = 20 } = req.query;
     
-    // Get user ID from query or return empty array
-    const userId = req.query.userId;
-    if (!userId) {
-      return res.json({ conversations: [] });
-    }
+    // Get user ID from authenticated user
+    const userId = req.user._id;
     
     // Get recent private conversations
     const privateMessages = await Message.aggregate([
@@ -309,74 +351,6 @@ router.get('/conversations/recent', async (req, res) => {
   }
 });
 
-// Delete message
-router.delete('/:messageId', async (req, res) => {
-  try {
-    const { messageId } = req.params;
-    const userId = req.query.userId;
-    
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID required' });
-    }
 
-    const message = await Message.findById(messageId);
-    if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
-    }
-
-    // Check if user is the sender
-    if (message.sender.toString() !== userId) {
-      return res.status(403).json({ message: 'Not authorized to delete this message' });
-    }
-
-    // Soft delete
-    message.deleted = true;
-    message.deletedAt = new Date();
-    await message.save();
-
-    res.json({ message: 'Message deleted successfully' });
-  } catch (error) {
-    console.error('Delete message error:', error);
-    res.status(500).json({ message: 'Failed to delete message' });
-  }
-});
-
-// Edit message
-router.put('/:messageId', async (req, res) => {
-  try {
-    const { messageId } = req.params;
-    const { content } = req.body;
-    const userId = req.query.userId;
-    
-    if (!userId) {
-      return res.status(400).json({ message: 'User ID required' });
-    }
-
-    if (!content) {
-      return res.status(400).json({ message: 'Content required' });
-    }
-
-    const message = await Message.findById(messageId);
-    if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
-    }
-
-    // Check if user is the sender
-    if (message.sender.toString() !== userId) {
-      return res.status(403).json({ message: 'Not authorized to edit this message' });
-    }
-
-    // Update message
-    message.content = content;
-    message.edited = true;
-    message.editedAt = new Date();
-    await message.save();
-
-    res.json({ message: 'Message updated successfully', updatedMessage: message });
-  } catch (error) {
-    console.error('Edit message error:', error);
-    res.status(500).json({ message: 'Failed to edit message' });
-  }
-});
 
 module.exports = router;

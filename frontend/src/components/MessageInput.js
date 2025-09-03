@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaPaperPlane, FaImage, FaSmile, FaPaperclip } from 'react-icons/fa';
+import { FaPaperPlane, FaImage, FaSmile, FaPaperclip, FaTimes, FaReply } from 'react-icons/fa';
 import EmojiPicker from 'emoji-picker-react';
 import { useDropzone } from 'react-dropzone';
 import api from '../config/axios';
 import toast from 'react-hot-toast';
 
-const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder }) => {
+const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder, replyTo, onCancelReply }) => {
   const [message, setMessage] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -54,9 +54,15 @@ const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (message.trim()) {
-      onSendMessage(message.trim());
+      onSendMessage({
+        content: message.trim(),
+        replyTo: replyTo?._id
+      });
       setMessage('');
       setShowEmojiPicker(false);
+      if (onCancelReply) {
+        onCancelReply();
+      }
     }
   };
 
@@ -123,7 +129,31 @@ const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder 
 
   return (
     <div className="relative">
-      <form onSubmit={handleSubmit} className="flex items-end space-x-2">
+      {/* Reply preview */}
+      {replyTo && (
+        <div className="bg-gray-50 dark:bg-gray-700 border-l-4 border-blue-500 pl-3 py-2 mb-2 rounded-r-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <FaReply className="h-3 w-3 text-blue-500" />
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                Replying to {replyTo.sender?.displayName || replyTo.sender?.username || replyTo.senderName || 'Unknown'}
+              </span>
+            </div>
+            <button
+              onClick={onCancelReply}
+              className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors"
+              title="Cancel reply"
+            >
+              <FaTimes className="h-3 w-3 text-gray-500" />
+            </button>
+          </div>
+          <p className="text-sm text-gray-700 dark:text-gray-300 truncate mt-1">
+            {replyTo.content}
+          </p>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="flex items-end space-x-2 w-full">
         {/* File upload area */}
         <div {...getRootProps()} className="flex-shrink-0">
           <input {...getInputProps()} />
@@ -142,7 +172,7 @@ const MessageInput = ({ onSendMessage, onTypingStart, onTypingStop, placeholder 
         </div>
 
         {/* Message input */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative min-w-0">
           <textarea
             ref={textareaRef}
             value={message}

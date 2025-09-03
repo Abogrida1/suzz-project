@@ -90,10 +90,132 @@
   }
 }
 
+/* Spinner */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+[data-theme="dark"] .spinner {
+  border: 4px solid #374151;
+  border-top: 4px solid #60a5fa;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Enhanced typing indicator animations */
+@keyframes typingPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.7);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes typingWave {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+.typing-dot {
+  animation: typingPulse 1.2s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+.typing-container {
+  animation: typingWave 1.8s ease-in-out infinite;
+}
+
 /* Responsive design helpers */
 @media (max-width: 768px) {
   .mobile-hidden {
     display: none;
+  }
+  
+  /* Mobile chat layout fixes */
+  .mobile-chat-container {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for mobile */
+    overflow: hidden;
+  }
+  
+  .mobile-chat-area {
+    height: calc(100vh - 60px); /* Subtract navigation height */
+    height: calc(100dvh - 60px);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .mobile-message-input {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    z-index: 10;
+  }
+  
+  [data-theme="dark"] .mobile-message-input {
+    background: #1f2937;
+  }
+  
+  /* Mobile optimizations */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+  
+  /* Improve touch targets */
+  button, input, textarea {
+    min-height: 44px;
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-spacing {
+    padding: 0.75rem;
+  }
+  
+  /* Typing indicator mobile improvements */
+  .typing-indicator-mobile {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0.5rem;
+  }
+  
+  /* Enhanced mobile typing indicator */
+  .mobile-typing-indicator {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+  }
+  
+  [data-theme="dark"] .mobile-typing-indicator {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
   }
 }
 
@@ -118,4 +240,34 @@
 [data-theme="dark"] ::selection {
   background-color: #60a5fa;
   color: #1f2937;
+}
+
+/* Input field styles */
+.input-field {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:focus:ring-blue-400;
+}
+
+/* Primary button styles */
+.bg-primary-500 {
+  background-color: #3b82f6;
+}
+
+.hover\:bg-primary-600:hover {
+  background-color: #2563eb;
+}
+
+.text-primary-600 {
+  color: #2563eb;
+}
+
+.hover\:text-primary-500:hover {
+  color: #3b82f6;
+}
+
+.dark\:text-primary-400 {
+  color: #60a5fa;
+}
+
+.dark\:hover\:text-primary-300:hover {
+  color: #93c5fd;
 }
