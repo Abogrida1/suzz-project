@@ -64,8 +64,14 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           console.log('userData.role:', userData.role);
           console.log('userData.email:', userData.email);
           
-          const hasAdminRole = userData.role && ['admin', 'super_admin', 'moderator'].includes(userData.role);
-          const isSpecificAdmin = userData.email === 'madoabogrida05@gmail.com';
+          // Check if userData has nested structure
+          const actualUser = userData.user || userData;
+          console.log('actualUser:', actualUser);
+          console.log('actualUser.role:', actualUser.role);
+          console.log('actualUser.email:', actualUser.email);
+          
+          const hasAdminRole = actualUser.role && ['admin', 'super_admin', 'moderator'].includes(actualUser.role);
+          const isSpecificAdmin = actualUser.email === 'madoabogrida05@gmail.com';
           
           console.log('hasAdminRole calculation:', hasAdminRole);
           console.log('isSpecificAdmin calculation:', isSpecificAdmin);
@@ -81,15 +87,24 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           
           // Force admin status for the creator account
           const finalResult = finalAdminStatus || isCurrentUserAdmin || currentUserEmail === 'madoabogrida05@gmail.com';
-          setIsAdmin(finalResult);
+          
+          // Ultimate fallback: if we can't find email anywhere, check if user object has the right email
+          const ultimateFallback = user?.email === 'madoabogrida05@gmail.com';
+          const ultimateResult = finalResult || ultimateFallback;
+          
+          console.log('ultimateFallback:', ultimateFallback);
+          console.log('ultimateResult:', ultimateResult);
+          
+          setIsAdmin(ultimateResult);
           
           console.log('finalAdminStatus:', finalAdminStatus);
           console.log('finalResult (with fallback):', finalResult);
           
           console.log('Admin check:', {
             userData: userData,
-            userEmail: userData.email,
-            userRole: userData.role,
+            actualUser: actualUser,
+            userEmail: actualUser.email,
+            userRole: actualUser.role,
             hasAdminRole: hasAdminRole,
             isSpecificAdmin: isSpecificAdmin,
             finalIsAdmin: finalAdminStatus
