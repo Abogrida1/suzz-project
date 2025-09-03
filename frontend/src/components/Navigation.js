@@ -40,8 +40,7 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
         // Check if user is the creator account (by email or username) - case insensitive
         const isCreatorEmail = user.email === 'madoabogrida05@gmail.com';
         const isCreatorUsername = user.username && (
-          user.username.toLowerCase() === 'batta' || 
-          user.username.toLowerCase() === 'mado'
+          user.username.toLowerCase() === 'batta'
         );
         
         if (isCreatorEmail || isCreatorUsername) {
@@ -95,8 +94,7 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   // Check if user is batta or the creator account - case insensitive
   const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
   const isCreatorUsername = user?.username && (
-    user.username.toLowerCase() === 'batta' || 
-    user.username.toLowerCase() === 'mado'
+    user.username.toLowerCase() === 'batta'
   );
   
   // Only show admin link for specific users or users with admin role

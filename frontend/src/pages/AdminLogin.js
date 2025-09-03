@@ -25,8 +25,7 @@ const AdminLogin = () => {
         // Check if user is the creator account (by email or username) - case insensitive
         const isCreatorEmail = user.email === 'madoabogrida05@gmail.com';
         const isCreatorUsername = user.username && (
-          user.username.toLowerCase() === 'batta' || 
-          user.username.toLowerCase() === 'mado'
+          user.username.toLowerCase() === 'batta'
         );
         
         if (isCreatorEmail || isCreatorUsername) {
@@ -65,8 +64,7 @@ const AdminLogin = () => {
           // Fallback: check if current user email matches admin email - case insensitive
           const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
           const isCreatorUsername = user?.username && (
-            user.username.toLowerCase() === 'batta' || 
-            user.username.toLowerCase() === 'mado'
+            user.username.toLowerCase() === 'batta'
           );
           const isSpecificAdmin = isCreatorEmail || isCreatorUsername;
           setIsAuthorized(isSpecificAdmin);
