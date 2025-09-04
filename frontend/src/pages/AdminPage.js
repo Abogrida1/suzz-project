@@ -107,6 +107,8 @@ const AdminPage = () => {
   useEffect(() => {
     if (isAuthorized && !checkingAuth) {
       console.log('AdminPage - authorization granted, loading admin data');
+      // Test API connection first
+      testAdminAPI();
       // Load admin data when authorized
       loadStats();
       loadUsers();
@@ -114,6 +116,17 @@ const AdminPage = () => {
       loadGroups();
     }
   }, [isAuthorized, checkingAuth]);
+
+  // Test admin API connection
+  const testAdminAPI = async () => {
+    try {
+      console.log('Testing admin API connection...');
+      const response = await api.post('/api/admin/test-no-auth', { test: 'connection' });
+      console.log('Admin API test response:', response.data);
+    } catch (error) {
+      console.error('Admin API test failed:', error);
+    }
+  };
 
   useEffect(() => {
     const storedCredentials = localStorage.getItem('adminCredentials');
