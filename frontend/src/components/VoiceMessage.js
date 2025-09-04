@@ -9,7 +9,7 @@ import {
   FaTrash,
   FaCheck,
   FaTimes,
-  FaWaveformLines
+  FaChartLine
 } from 'react-icons/fa';
 
 const VoiceMessage = ({ 
@@ -234,7 +234,7 @@ const VoiceMessage = ({
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <div className="flex-1">
               <div className="flex items-center space-x-2 rtl:space-x-reverse mb-2">
-                <FaWaveformLines className="text-blue-500" />
+                <FaChartLine className="text-blue-500" />
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   {formatTime(recordingTime)}
                 </span>

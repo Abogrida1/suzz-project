@@ -9,7 +9,7 @@ import {
   FaTrash,
   FaCheck,
   FaTimes,
-  FaWaveformLines
+  FaChartLine
 } from 'react-icons/fa';
 
 const VoiceRecorder = ({ onSend, onCancel, className = '' }) => {
@@ -302,7 +302,7 @@ const VoiceRecorder = ({ onSend, onCancel, className = '' }) => {
               
               <div className="flex-1">
                 <div className="flex items-center space-x-2 rtl:space-x-reverse mb-2">
-                  <FaWaveformLines className="text-blue-500" />
+                  <FaChartLine className="text-blue-500" />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {formatTime(recordingTime)}
                   </span>
