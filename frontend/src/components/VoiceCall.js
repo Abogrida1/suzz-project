@@ -30,6 +30,8 @@ const VoiceCall = ({
   const [isAccepted, setIsAccepted] = useState(!isIncoming);
   const [callTime, setCallTime] = useState(callDuration);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isMutedState, setIsMutedState] = useState(isMuted);
+  const [isSpeakerOnState, setIsSpeakerOnState] = useState(isSpeakerOn);
   const intervalRef = useRef(null);
 
   // Timer effect
@@ -71,18 +73,24 @@ const VoiceCall = ({
   };
 
   const handleMuteToggle = () => {
-    if (isMuted) {
-      onUnmute?.();
-    } else {
+    const newMutedState = !isMutedState;
+    setIsMutedState(newMutedState);
+    
+    if (newMutedState) {
       onMute?.();
+    } else {
+      onUnmute?.();
     }
   };
 
   const handleSpeakerToggle = () => {
-    if (isSpeakerOn) {
-      onSpeakerOff?.();
-    } else {
+    const newSpeakerState = !isSpeakerOnState;
+    setIsSpeakerOnState(newSpeakerState);
+    
+    if (newSpeakerState) {
       onSpeakerOn?.();
+    } else {
+      onSpeakerOff?.();
     }
   };
 
@@ -179,23 +187,23 @@ const VoiceCall = ({
                   <button
                     onClick={handleMuteToggle}
                     className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 transform hover:scale-105 ${
-                      isMuted 
+                      isMutedState 
                         ? 'bg-red-500 hover:bg-red-600' 
                         : 'bg-white/20 hover:bg-white/30'
                     }`}
                   >
-                    {isMuted ? <FaMicrophoneSlash size={20} /> : <FaMicrophone size={20} />}
+                    {isMutedState ? <FaMicrophoneSlash size={20} /> : <FaMicrophone size={20} />}
                   </button>
                   
                   <button
                     onClick={handleSpeakerToggle}
                     className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 transform hover:scale-105 ${
-                      isSpeakerOn 
+                      isSpeakerOnState 
                         ? 'bg-blue-500 hover:bg-blue-600' 
                         : 'bg-white/20 hover:bg-white/30'
                     }`}
                   >
-                    {isSpeakerOn ? <FaVolumeUp size={20} /> : <FaVolumeMute size={20} />}
+                    {isSpeakerOnState ? <FaVolumeUp size={20} /> : <FaVolumeMute size={20} />}
                   </button>
                 </div>
 

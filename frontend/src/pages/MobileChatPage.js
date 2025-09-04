@@ -47,6 +47,10 @@ const MobileChatPage = () => {
   const [callData, setCallData] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+  const [localStream, setLocalStream] = useState(null);
+  const [remoteStream, setRemoteStream] = useState(null);
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -293,10 +297,23 @@ const MobileChatPage = () => {
       setIsCallActive(true);
     });
 
-    socket.on('call_initiated', (data) => {
+    socket.on('call_initiated', async (data) => {
       console.log('Call initiated:', data);
       setCallData(data);
       setIsCallActive(true);
+      
+      // Start local stream for outgoing call
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: true,
+          video: false 
+        });
+        setLocalStream(stream);
+        console.log('Local stream started for outgoing call');
+      } catch (error) {
+        console.error('Error getting user media for outgoing call:', error);
+        alert('لا يمكن الوصول للميكروفون');
+      }
     });
 
     socket.on('call_accepted', (data) => {
@@ -311,8 +328,21 @@ const MobileChatPage = () => {
 
     socket.on('call_ended', (data) => {
       console.log('Call ended:', data);
+      
+      // Stop all streams
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        setLocalStream(null);
+      }
+      if (remoteStream) {
+        remoteStream.getTracks().forEach(track => track.stop());
+        setRemoteStream(null);
+      }
+      
       setIsCallActive(false);
       setCallData(null);
+      setIsMuted(false);
+      setIsSpeakerOn(false);
     });
 
     socket.on('call_error', (data) => {
@@ -353,6 +383,14 @@ const MobileChatPage = () => {
       socket.off('call_error');
       socket.off('voice_message');
       socket.off('voice_message_deleted');
+      
+      // Cleanup streams
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+      }
+      if (remoteStream) {
+        remoteStream.getTracks().forEach(track => track.stop());
+      }
     };
   }, [socket, chatId, user]);
 
@@ -465,9 +503,22 @@ const MobileChatPage = () => {
     });
   };
 
-  const acceptCall = () => {
+  const acceptCall = async () => {
     if (socket && callData) {
-      socket.emit('accept_call', { callId: callData.id });
+      try {
+        // Get user media for local stream
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: true,
+          video: false 
+        });
+        setLocalStream(stream);
+        
+        socket.emit('accept_call', { callId: callData.id });
+        console.log('Call accepted and local stream started');
+      } catch (error) {
+        console.error('Error getting user media:', error);
+        alert('لا يمكن الوصول للميكروفون');
+      }
     }
   };
 
@@ -481,6 +532,65 @@ const MobileChatPage = () => {
     if (socket && callData) {
       socket.emit('end_call', { callId: callData.id });
     }
+    
+    // Stop all streams
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      setLocalStream(null);
+    }
+    if (remoteStream) {
+      remoteStream.getTracks().forEach(track => track.stop());
+      setRemoteStream(null);
+    }
+    
+    setIsCallActive(false);
+    setCallData(null);
+    setIsMuted(false);
+    setIsSpeakerOn(false);
+  };
+
+  // Mute/Unmute functions
+  const handleMute = () => {
+    if (localStream) {
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = false;
+      });
+    }
+    setIsMuted(true);
+    console.log('Microphone muted');
+  };
+
+  const handleUnmute = () => {
+    if (localStream) {
+      localStream.getAudioTracks().forEach(track => {
+        track.enabled = true;
+      });
+    }
+    setIsMuted(false);
+    console.log('Microphone unmuted');
+  };
+
+  // Speaker functions
+  const handleSpeakerOn = () => {
+    if (remoteStream) {
+      const audioElement = document.querySelector('#remote-audio');
+      if (audioElement) {
+        audioElement.volume = 1.0;
+      }
+    }
+    setIsSpeakerOn(true);
+    console.log('Speaker turned on');
+  };
+
+  const handleSpeakerOff = () => {
+    if (remoteStream) {
+      const audioElement = document.querySelector('#remote-audio');
+      if (audioElement) {
+        audioElement.volume = 0.0;
+      }
+    }
+    setIsSpeakerOn(false);
+    console.log('Speaker turned off');
   };
 
   // Voice message functions
@@ -969,13 +1079,27 @@ const MobileChatPage = () => {
           onAccept={acceptCall}
           onReject={rejectCall}
           onEnd={endCall}
-          onMute={() => console.log('Mute')}
-          onUnmute={() => console.log('Unmute')}
-          onSpeakerOn={() => console.log('Speaker On')}
-          onSpeakerOff={() => console.log('Speaker Off')}
-          isMuted={false}
-          isSpeakerOn={false}
+          onMute={handleMute}
+          onUnmute={handleUnmute}
+          onSpeakerOn={handleSpeakerOn}
+          onSpeakerOff={handleSpeakerOff}
+          isMuted={isMuted}
+          isSpeakerOn={isSpeakerOn}
           callDuration={0}
+        />
+      )}
+
+      {/* Hidden audio element for remote stream */}
+      {remoteStream && (
+        <audio
+          id="remote-audio"
+          autoPlay
+          playsInline
+          ref={(audio) => {
+            if (audio && remoteStream) {
+              audio.srcObject = remoteStream;
+            }
+          }}
         />
       )}
     </div>

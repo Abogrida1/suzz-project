@@ -929,6 +929,8 @@ const setupSocketHandlers = (io) => {
         socket.emit('call_initiated', callData);
         
         console.log('Call initiated:', callData);
+        console.log('Emitted to recipient:', recipientId);
+        console.log('Emitted to caller:', socket.userId);
         
       } catch (error) {
         console.error('Start call error:', error);
@@ -939,6 +941,8 @@ const setupSocketHandlers = (io) => {
     socket.on('accept_call', async (data) => {
       try {
         const { callId } = data;
+        
+        console.log('Call accepted:', { callId, acceptedBy: socket.userId });
         
         // Emit to all participants
         io.emit('call_accepted', {
