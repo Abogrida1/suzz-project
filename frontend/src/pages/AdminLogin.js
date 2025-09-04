@@ -41,7 +41,9 @@ const AdminLogin = () => {
         setIsAuthorized(true);
         setCheckingAuth(false);
         // Auto-redirect to admin page if already authorized
-        navigate('/admin');
+        setTimeout(() => {
+          navigate('/admin');
+        }, 100);
         return;
       }
       

@@ -131,6 +131,7 @@ const AdminPage = () => {
   useEffect(() => {
     const storedCredentials = localStorage.getItem('adminCredentials');
     if (!storedCredentials) {
+      console.log('AdminPage - no stored credentials, redirecting to admin-login');
       navigate('/admin-login');
       return;
     }
@@ -138,6 +139,7 @@ const AdminPage = () => {
     try {
       const credentials = JSON.parse(storedCredentials);
       setAdminCredentials(credentials);
+      console.log('AdminPage - credentials loaded from localStorage');
     } catch (error) {
       console.error('Error parsing admin credentials:', error);
       navigate('/admin-login');
