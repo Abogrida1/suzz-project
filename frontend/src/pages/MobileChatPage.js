@@ -327,7 +327,9 @@ const MobileChatPage = () => {
 
     // Voice call handlers
     socket.on('incoming_call', (data) => {
-      console.log('Incoming call:', data);
+      console.log('Incoming call received:', data);
+      console.log('Current user ID:', user._id);
+      console.log('Call recipient ID:', data.recipientId);
       setCallData(data);
       setIsCallActive(true);
     });
@@ -606,39 +608,53 @@ const MobileChatPage = () => {
     }
     
     console.log('Starting call with recipientId:', chatInfo.userId);
+    console.log('Current user:', user._id);
+    console.log('Socket connected:', socket.connected);
+    console.log('Socket ID:', socket.id);
+    
     socket.emit('start_call', {
       recipientId: chatInfo.userId,
       callType: 'voice'
     });
+    
+    console.log('Start call event emitted');
   };
 
   const acceptCall = async () => {
+    console.log('Accept call clicked', { socket: !!socket, callData });
+    
     if (socket && callData) {
       try {
+        console.log('Getting user media...');
         // Get user media for local stream
         const stream = await navigator.mediaDevices.getUserMedia({ 
           audio: true,
           video: false 
         });
         setLocalStream(stream);
+        console.log('User media obtained');
         
         // Create peer connection
         const pc = createPeerConnection();
+        console.log('Peer connection created');
         
         // Add local stream to peer connection
         stream.getTracks().forEach(track => {
           pc.addTrack(track, stream);
         });
+        console.log('Local stream added to peer connection');
         
         // Create offer
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
+        console.log('Offer created and set as local description');
         
         // Send offer to caller
         socket.emit('offer', {
           callId: callData.id,
           offer: offer
         });
+        console.log('Offer sent to caller');
         
         // Start call timer
         setCallStartTime(Date.now());

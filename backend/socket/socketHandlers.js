@@ -32,6 +32,10 @@ const setupSocketHandlers = (io) => {
 
       socket.userId = user._id.toString();
       socket.user = user;
+      
+      // Join user to their own room
+      socket.join(user._id.toString());
+      
       console.log('Socket authenticated successfully:', { userId: socket.userId, username: user.username });
       next();
     } catch (error) {
@@ -926,13 +930,15 @@ const setupSocketHandlers = (io) => {
         global.activeCalls = global.activeCalls || {};
         global.activeCalls[callData.id] = callData;
 
-        // Emit to recipient with retry mechanism
+        // Emit to recipient via room (more reliable)
+        io.to(recipientId).emit('incoming_call', callData);
+        console.log('Call sent to recipient via room:', recipientId);
+        
+        // Also try direct socket emission as backup
         const recipientSocket = io.sockets.sockets.get(recipientId);
         if (recipientSocket) {
           recipientSocket.emit('incoming_call', callData);
-          console.log('Call sent to recipient:', recipientId);
-        } else {
-          console.log('Recipient not found:', recipientId);
+          console.log('Call also sent directly to recipient:', recipientId);
         }
         
         // Emit to caller
@@ -961,6 +967,15 @@ const setupSocketHandlers = (io) => {
         // Emit to caller specifically
         const callData = global.activeCalls?.[callId];
         if (callData) {
+          // Emit via room (more reliable)
+          io.to(callData.callerId).emit('call_accepted', {
+            callId,
+            acceptedBy: socket.userId,
+            acceptedAt: new Date()
+          });
+          console.log('Call accepted sent to caller via room:', callData.callerId);
+          
+          // Also try direct socket emission as backup
           const callerSocket = io.sockets.sockets.get(callData.callerId);
           if (callerSocket) {
             callerSocket.emit('call_accepted', {
@@ -968,7 +983,7 @@ const setupSocketHandlers = (io) => {
               acceptedBy: socket.userId,
               acceptedAt: new Date()
             });
-            console.log('Call accepted sent to caller:', callData.callerId);
+            console.log('Call accepted also sent directly to caller:', callData.callerId);
           }
         }
         
@@ -993,6 +1008,15 @@ const setupSocketHandlers = (io) => {
         // Emit to caller specifically
         const callData = global.activeCalls?.[callId];
         if (callData) {
+          // Emit via room (more reliable)
+          io.to(callData.callerId).emit('call_rejected', {
+            callId,
+            rejectedBy: socket.userId,
+            rejectedAt: new Date()
+          });
+          console.log('Call rejected sent to caller via room:', callData.callerId);
+          
+          // Also try direct socket emission as backup
           const callerSocket = io.sockets.sockets.get(callData.callerId);
           if (callerSocket) {
             callerSocket.emit('call_rejected', {
@@ -1000,7 +1024,7 @@ const setupSocketHandlers = (io) => {
               rejectedBy: socket.userId,
               rejectedAt: new Date()
             });
-            console.log('Call rejected sent to caller:', callData.callerId);
+            console.log('Call rejected also sent directly to caller:', callData.callerId);
           }
         }
         
@@ -1026,26 +1050,32 @@ const setupSocketHandlers = (io) => {
         // Emit to all participants
         const callData = global.activeCalls?.[callId];
         if (callData) {
-          // Emit to caller
+          const callEndData = {
+            callId,
+            endedBy: socket.userId,
+            endedAt: new Date(),
+            duration: duration || 0
+          };
+          
+          // Emit to caller via room
+          io.to(callData.callerId).emit('call_ended', callEndData);
+          console.log('Call ended sent to caller via room:', callData.callerId);
+          
+          // Emit to recipient via room
+          io.to(callData.recipientId).emit('call_ended', callEndData);
+          console.log('Call ended sent to recipient via room:', callData.recipientId);
+          
+          // Also try direct socket emission as backup
           const callerSocket = io.sockets.sockets.get(callData.callerId);
           if (callerSocket) {
-            callerSocket.emit('call_ended', {
-              callId,
-              endedBy: socket.userId,
-              endedAt: new Date(),
-              duration: duration || 0
-            });
+            callerSocket.emit('call_ended', callEndData);
+            console.log('Call ended also sent directly to caller:', callData.callerId);
           }
           
-          // Emit to recipient
           const recipientSocket = io.sockets.sockets.get(callData.recipientId);
           if (recipientSocket) {
-            recipientSocket.emit('call_ended', {
-              callId,
-              endedBy: socket.userId,
-              endedAt: new Date(),
-              duration: duration || 0
-            });
+            recipientSocket.emit('call_ended', callEndData);
+            console.log('Call ended also sent directly to recipient:', callData.recipientId);
           }
           
           // Remove from active calls
@@ -1063,9 +1093,15 @@ const setupSocketHandlers = (io) => {
       const { callId, offer } = data;
       const callData = global.activeCalls?.[callId];
       if (callData) {
+        // Emit via room (more reliable)
+        io.to(callData.recipientId).emit('offer', { callId, offer });
+        console.log('Offer sent to recipient via room:', callData.recipientId);
+        
+        // Also try direct socket emission as backup
         const recipientSocket = io.sockets.sockets.get(callData.recipientId);
         if (recipientSocket) {
           recipientSocket.emit('offer', { callId, offer });
+          console.log('Offer also sent directly to recipient:', callData.recipientId);
         }
       }
     });
@@ -1074,9 +1110,15 @@ const setupSocketHandlers = (io) => {
       const { callId, answer } = data;
       const callData = global.activeCalls?.[callId];
       if (callData) {
+        // Emit via room (more reliable)
+        io.to(callData.callerId).emit('answer', { callId, answer });
+        console.log('Answer sent to caller via room:', callData.callerId);
+        
+        // Also try direct socket emission as backup
         const callerSocket = io.sockets.sockets.get(callData.callerId);
         if (callerSocket) {
           callerSocket.emit('answer', { callId, answer });
+          console.log('Answer also sent directly to caller:', callData.callerId);
         }
       }
     });
@@ -1085,11 +1127,17 @@ const setupSocketHandlers = (io) => {
       const { callId, candidate } = data;
       const callData = global.activeCalls?.[callId];
       if (callData) {
-        const targetSocket = io.sockets.sockets.get(
-          socket.userId === callData.callerId ? callData.recipientId : callData.callerId
-        );
+        const targetId = socket.userId === callData.callerId ? callData.recipientId : callData.callerId;
+        
+        // Emit via room (more reliable)
+        io.to(targetId).emit('ice_candidate', { callId, candidate });
+        console.log('ICE candidate sent to target via room:', targetId);
+        
+        // Also try direct socket emission as backup
+        const targetSocket = io.sockets.sockets.get(targetId);
         if (targetSocket) {
           targetSocket.emit('ice_candidate', { callId, candidate });
+          console.log('ICE candidate also sent directly to target:', targetId);
         }
       }
     });
