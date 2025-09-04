@@ -18,9 +18,14 @@ import {
   FaLaugh,
   FaAngry,
   FaReply,
-  FaTrash
+  FaTrash,
+  FaMicrophone,
+  FaStop
 } from 'react-icons/fa';
 import Picker from 'emoji-picker-react';
+import VoiceCall from '../components/VoiceCall';
+import VoiceMessage from '../components/VoiceMessage';
+import VoiceRecorder from '../components/VoiceRecorder';
 import './MobileChatPage.css';
 
 const MobileChatPage = () => {
@@ -38,6 +43,10 @@ const MobileChatPage = () => {
   const [showReactions, setShowReactions] = useState(null);
   const [replyingTo, setReplyingTo] = useState(null);
   const [showMessageMenu, setShowMessageMenu] = useState(null);
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [callData, setCallData] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -242,10 +251,65 @@ const MobileChatPage = () => {
     socket.on('message_sent', handleMessageSent);
     socket.on('user_typing', handleTyping);
 
+    // Voice call handlers
+    socket.on('incoming_call', (data) => {
+      setCallData(data);
+      setIsCallActive(true);
+    });
+
+    socket.on('call_accepted', (data) => {
+      console.log('Call accepted:', data);
+    });
+
+    socket.on('call_rejected', (data) => {
+      console.log('Call rejected:', data);
+      setIsCallActive(false);
+      setCallData(null);
+    });
+
+    socket.on('call_ended', (data) => {
+      console.log('Call ended:', data);
+      setIsCallActive(false);
+      setCallData(null);
+    });
+
+    socket.on('call_error', (data) => {
+      console.error('Call error:', data);
+      alert(data.message);
+    });
+
+    // Voice message handlers
+    socket.on('voice_message', (data) => {
+      setMessages(prev => [...prev, {
+        id: data.id,
+        content: data.content,
+        type: data.type,
+        sender: data.sender.id,
+        senderName: data.sender.name,
+        senderAvatar: data.sender.avatar,
+        audioUrl: data.audioUrl,
+        duration: data.duration,
+        replyTo: data.replyTo,
+        timestamp: new Date(data.timestamp)
+      }]);
+      scrollToBottom();
+    });
+
+    socket.on('voice_message_deleted', (data) => {
+      setMessages(prev => prev.filter(msg => msg.id !== data.messageId));
+    });
+
     return () => {
       socket.off('message_received', handleMessageReceived);
       socket.off('message_sent', handleMessageSent);
       socket.off('user_typing', handleTyping);
+      socket.off('incoming_call');
+      socket.off('call_accepted');
+      socket.off('call_rejected');
+      socket.off('call_ended');
+      socket.off('call_error');
+      socket.off('voice_message');
+      socket.off('voice_message_deleted');
     };
   }, [socket, chatId, user]);
 
@@ -330,6 +394,87 @@ const MobileChatPage = () => {
       console.error('Error deleting message:', error);
     }
     setShowMessageMenu(null);
+  };
+
+  // Voice call functions
+  const startCall = () => {
+    if (socket && chatInfo) {
+      socket.emit('start_call', {
+        recipientId: chatInfo.userId,
+        callType: 'voice'
+      });
+    }
+  };
+
+  const acceptCall = () => {
+    if (socket && callData) {
+      socket.emit('accept_call', { callId: callData.id });
+    }
+  };
+
+  const rejectCall = () => {
+    if (socket && callData) {
+      socket.emit('reject_call', { callId: callData.id });
+    }
+  };
+
+  const endCall = () => {
+    if (socket && callData) {
+      socket.emit('end_call', { callId: callData.id });
+    }
+  };
+
+  // Voice message functions
+  const sendVoiceMessage = async (audioBlob, duration) => {
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob);
+      formData.append('conversationId', chatId);
+      formData.append('duration', duration);
+      if (replyingTo) {
+        formData.append('replyTo', replyingTo.id);
+      }
+
+      const response = await fetch('/api/voice-messages/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setReplyingTo(null);
+        setShowVoiceRecorder(false);
+      } else {
+        throw new Error('Failed to send voice message');
+      }
+    } catch (error) {
+      console.error('Error sending voice message:', error);
+      alert('فشل في إرسال الرسالة الصوتية');
+    }
+  };
+
+  const deleteVoiceMessage = async (messageId) => {
+    try {
+      const response = await fetch(`/api/voice-messages/${messageId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setMessages(prev => prev.filter(msg => msg.id !== messageId));
+      } else {
+        throw new Error('Failed to delete voice message');
+      }
+    } catch (error) {
+      console.error('Error deleting voice message:', error);
+      alert('فشل في حذف الرسالة الصوتية');
+    }
   };
 
   const formatTime = (date) => {
@@ -417,7 +562,11 @@ const MobileChatPage = () => {
             
             {/* Right side - Action buttons */}
             <div className="flex items-center space-x-1 sm:space-x-2 rtl:space-x-reverse flex-shrink-0">
-              <button className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-full transition-all duration-200">
+              <button 
+                onClick={startCall}
+                className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-full transition-all duration-200"
+                title="مكالمة صوتية"
+              >
                 <FaPhone size={16} className="sm:w-4 sm:h-4" />
               </button>
               <button className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-full transition-all duration-200">
@@ -483,7 +632,17 @@ const MobileChatPage = () => {
                           : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-bl-md border border-gray-200 dark:border-gray-700 shadow-md'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                      {message.type === 'voice' ? (
+                        <VoiceMessage
+                          audioUrl={message.audioUrl}
+                          duration={message.duration}
+                          isOwn={message.sender === user._id}
+                          timestamp={message.timestamp}
+                          onDelete={message.sender === user._id ? () => deleteVoiceMessage(message.id) : null}
+                        />
+                      ) : (
+                        <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                      )}
                       
                       {/* Message Actions */}
                       <div className="absolute top-2 left-2 rtl:left-auto rtl:right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -608,6 +767,18 @@ const MobileChatPage = () => {
             <FaSmile size={18} className="sm:w-5 sm:h-5" />
           </button>
           
+          <button 
+            onClick={() => setShowVoiceRecorder(!showVoiceRecorder)}
+            className={`p-2 rounded-full transition-all duration-200 flex-shrink-0 ${
+              showVoiceRecorder 
+                ? 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20' 
+                : 'text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20'
+            }`}
+            title="رسالة صوتية"
+          >
+            <FaMicrophone size={18} className="sm:w-5 sm:h-5" />
+          </button>
+          
           <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-all duration-200 flex-shrink-0">
             <FaImage size={18} className="sm:w-5 sm:h-5" />
           </button>
@@ -719,6 +890,27 @@ const MobileChatPage = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Voice Recorder */}
+      {showVoiceRecorder && (
+        <VoiceRecorder
+          onSend={sendVoiceMessage}
+          onCancel={() => setShowVoiceRecorder(false)}
+          isRecording={isRecording}
+          setIsRecording={setIsRecording}
+        />
+      )}
+
+      {/* Voice Call Modal */}
+      {isCallActive && callData && (
+        <VoiceCall
+          callData={callData}
+          onAccept={acceptCall}
+          onReject={rejectCall}
+          onEnd={endCall}
+          isIncoming={callData.recipientId === user._id}
+        />
+      )}
     </div>
   );
 };

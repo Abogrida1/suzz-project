@@ -54,7 +54,7 @@ const ProfilePictureUpload = ({
       const formData = new FormData();
       formData.append('avatar', fileInputRef.current.files[0]);
 
-      const response = await fetch('/api/users/upload-avatar', {
+      const response = await fetch('/api/upload/avatar', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -92,7 +92,7 @@ const ProfilePictureUpload = ({
 
   const handleRemove = async () => {
     try {
-      const response = await fetch('/api/users/remove-avatar', {
+      const response = await fetch('/api/upload/avatar', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,

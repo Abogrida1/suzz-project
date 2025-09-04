@@ -885,6 +885,197 @@ const setupSocketHandlers = (io) => {
       }
     });
 
+    // Voice Call Handlers
+    socket.on('start_call', async (data) => {
+      try {
+        const { recipientId, callType = 'voice' } = data;
+        
+        if (!recipientId) {
+          socket.emit('call_error', { message: 'Recipient ID is required' });
+          return;
+        }
+
+        if (socket.userId === recipientId) {
+          socket.emit('call_error', { message: 'Cannot call yourself' });
+          return;
+        }
+
+        // Check if recipient exists
+        const recipient = await User.findById(recipientId);
+        if (!recipient) {
+          socket.emit('call_error', { message: 'Recipient not found' });
+          return;
+        }
+
+        // Create call data
+        const callData = {
+          id: `call_${Date.now()}_${socket.userId}`,
+          callerId: socket.userId,
+          recipientId,
+          callerName: socket.user?.displayName || socket.user?.username,
+          callerAvatar: socket.user?.avatar,
+          recipientName: recipient.displayName || recipient.username,
+          recipientAvatar: recipient.avatar,
+          callType,
+          status: 'initiated',
+          startTime: new Date(),
+          duration: 0
+        };
+
+        // Emit to recipient
+        socket.to(recipientId).emit('incoming_call', callData);
+        
+        // Emit to caller
+        socket.emit('call_initiated', callData);
+        
+      } catch (error) {
+        console.error('Start call error:', error);
+        socket.emit('call_error', { message: 'Failed to start call' });
+      }
+    });
+
+    socket.on('accept_call', async (data) => {
+      try {
+        const { callId } = data;
+        
+        // Emit to all participants
+        io.emit('call_accepted', {
+          callId,
+          acceptedBy: socket.userId,
+          acceptedAt: new Date()
+        });
+        
+      } catch (error) {
+        console.error('Accept call error:', error);
+        socket.emit('call_error', { message: 'Failed to accept call' });
+      }
+    });
+
+    socket.on('reject_call', async (data) => {
+      try {
+        const { callId } = data;
+        
+        // Emit to all participants
+        io.emit('call_rejected', {
+          callId,
+          rejectedBy: socket.userId,
+          rejectedAt: new Date()
+        });
+        
+      } catch (error) {
+        console.error('Reject call error:', error);
+        socket.emit('call_error', { message: 'Failed to reject call' });
+      }
+    });
+
+    socket.on('end_call', async (data) => {
+      try {
+        const { callId, duration } = data;
+        
+        // Emit to all participants
+        io.emit('call_ended', {
+          callId,
+          endedBy: socket.userId,
+          endedAt: new Date(),
+          duration: duration || 0
+        });
+        
+      } catch (error) {
+        console.error('End call error:', error);
+        socket.emit('call_error', { message: 'Failed to end call' });
+      }
+    });
+
+    // Voice Message Handlers
+    socket.on('voice_message', async (data) => {
+      try {
+        const { conversationId, audioUrl, duration, replyTo } = data;
+        
+        if (!conversationId || !audioUrl) {
+          socket.emit('voice_message_error', { message: 'Missing required data' });
+          return;
+        }
+
+        // Create voice message
+        const voiceMessage = new Message({
+          content: 'Voice message',
+          type: 'voice',
+          sender: socket.userId,
+          conversationId,
+          audioUrl,
+          duration: parseInt(duration) || 0,
+          replyTo: replyTo || null,
+          timestamp: new Date()
+        });
+
+        await voiceMessage.save();
+
+        // Emit to conversation participants
+        const messageData = {
+          id: voiceMessage._id,
+          content: voiceMessage.content,
+          type: voiceMessage.type,
+          sender: {
+            id: socket.userId,
+            name: socket.user?.displayName || socket.user?.username,
+            avatar: socket.user?.avatar
+          },
+          audioUrl: voiceMessage.audioUrl,
+          duration: voiceMessage.duration,
+          replyTo: voiceMessage.replyTo,
+          timestamp: voiceMessage.timestamp
+        };
+
+        // Determine room based on conversation type
+        if (conversationId.startsWith('private_')) {
+          socket.to(conversationId).emit('voice_message', messageData);
+        } else if (conversationId.startsWith('group_')) {
+          socket.to(conversationId).emit('voice_message', messageData);
+        } else if (conversationId === 'global') {
+          io.emit('voice_message', messageData);
+        }
+        
+      } catch (error) {
+        console.error('Voice message error:', error);
+        socket.emit('voice_message_error', { message: 'Failed to send voice message' });
+      }
+    });
+
+    socket.on('voice_message_deleted', async (data) => {
+      try {
+        const { messageId } = data;
+        
+        const message = await Message.findById(messageId);
+        if (!message) {
+          socket.emit('voice_message_error', { message: 'Message not found' });
+          return;
+        }
+
+        // Check if user is the sender
+        if (message.sender.toString() !== socket.userId) {
+          socket.emit('voice_message_error', { message: 'Access denied' });
+          return;
+        }
+
+        // Delete message
+        await Message.findByIdAndDelete(messageId);
+
+        // Emit deletion event
+        if (message.chatType === 'private') {
+          const roomName = [message.sender.toString(), message.privateChatWith.toString()].sort().join('_');
+          io.to(`private_${roomName}`).emit('voice_message_deleted', { messageId });
+        } else if (message.chatType === 'group') {
+          io.to(`group_${message.groupId}`).emit('voice_message_deleted', { messageId });
+        } else if (message.chatType === 'global') {
+          io.emit('voice_message_deleted', { messageId });
+        }
+        
+      } catch (error) {
+        console.error('Voice message delete error:', error);
+        socket.emit('voice_message_error', { message: 'Failed to delete voice message' });
+      }
+    });
+
   });
 
   // Helper function to find user socket

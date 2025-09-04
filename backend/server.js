@@ -13,6 +13,8 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const messageRoutes = require('./routes/messages');
 const uploadRoutes = require('./routes/upload');
+const callRoutes = require('./routes/calls');
+const voiceMessageRoutes = require('./routes/voiceMessages');
 const { authenticateToken } = require('./middleware/auth');
 const { setupSocketHandlers } = require('./socket/socketHandlers');
 
@@ -126,6 +128,8 @@ app.use('/api/conversations', authenticateToken, checkDatabaseConnection, requir
 app.use('/api/groups', authenticateToken, checkDatabaseConnection, require('./routes/groups'));
 app.use('/api/admin', authenticateToken, checkDatabaseConnection, require('./routes/admin'));
 app.use('/api/admin-management', authenticateToken, checkDatabaseConnection, require('./routes/adminManagement'));
+app.use('/api/calls', callRoutes);
+app.use('/api/voice-messages', voiceMessageRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
