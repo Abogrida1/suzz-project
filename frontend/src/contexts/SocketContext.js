@@ -303,12 +303,6 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
-  const markMessageRead = (messageId) => {
-    if (socket) {
-      socket.emit('mark_message_read', { messageId });
-    }
-  };
-
   const confirmMessageDelivery = (messageId) => {
     if (socket && connected) {
       socket.emit('message_delivered', { messageId });
