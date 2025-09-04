@@ -175,14 +175,31 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
 
     const handleMessageSent = (event) => {
       const message = event.detail;
-      console.log('Message sent event received:', message);
+      console.log('Message sent event received:', message, 'tempId:', message.tempId);
       
-      // Remove optimistic message and add real message
+      // Replace optimistic message with real message using tempId
       setMessages(prev => {
-        // Remove all optimistic messages and add the real one
-        const filtered = prev.filter(m => !m.isOptimistic);
-        console.log('Removing optimistic messages and adding real message:', message._id);
-        return [...filtered, { ...message, status: 'sent' }];
+        const updated = prev.map(m => {
+          // Find optimistic message by tempId
+          if (m.isOptimistic && m._id === message.tempId) {
+            console.log('Replacing optimistic message:', m._id, 'with real message:', message._id);
+            return { ...message, status: 'sent' };
+          }
+          return m;
+        });
+        
+        // Check if we actually replaced any message
+        const hasReplaced = updated.some(m => m._id === message._id);
+        if (!hasReplaced) {
+          // If no optimistic message found, check if real message already exists
+          const messageExists = prev.some(m => m._id === message._id);
+          if (!messageExists) {
+            console.log('No optimistic message found, adding real message:', message._id);
+            return [...prev, { ...message, status: 'sent' }];
+          }
+        }
+        
+        return updated;
       });
     };
 
