@@ -62,8 +62,12 @@ const MobileChatPage = () => {
   const rtcConfig = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
-    ]
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+      { urls: 'stun:stun4.l.google.com:19302' }
+    ],
+    iceCandidatePoolSize: 10
   };
 
   // Create peer connection
@@ -72,39 +76,62 @@ const MobileChatPage = () => {
     
     // Handle remote stream
     pc.ontrack = (event) => {
-      console.log('Remote stream received');
-      console.log('Remote stream tracks:', event.streams[0].getTracks());
+      console.log('🎵 Remote stream received');
+      console.log('🎵 Remote stream tracks:', event.streams[0].getTracks());
       setRemoteStream(event.streams[0]);
       
       // Start call timer when remote stream is received
       if (!callStartTime) {
         setCallStartTime(Date.now());
         setCallDuration(0);
-        console.log('Call timer started - remote stream received');
+        console.log('⏰ Call timer started - remote stream received');
       }
     };
     
     // Handle ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate) {
+        console.log('🔗 ICE candidate generated:', event.candidate);
         socket.emit('ice_candidate', {
           callId: callData?.id,
           candidate: event.candidate
         });
+      } else {
+        console.log('🔗 ICE gathering complete');
       }
     };
     
     // Handle connection state changes
     pc.onconnectionstatechange = () => {
-      console.log('Connection state:', pc.connectionState);
+      console.log('🔌 Connection state:', pc.connectionState);
       if (pc.connectionState === 'connected') {
+        console.log('✅ WebRTC connection established');
         // Start call timer when connection is established
         if (!callStartTime) {
           setCallStartTime(Date.now());
           setCallDuration(0);
-          console.log('Call timer started - connection established');
+          console.log('⏰ Call timer started - connection established');
         }
+      } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
+        console.log('❌ WebRTC connection lost');
+        // End call if connection is lost
+        endCall();
       }
+    };
+    
+    // Handle ICE connection state changes
+    pc.oniceconnectionstatechange = () => {
+      console.log('🧊 ICE connection state:', pc.iceConnectionState);
+      if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+        console.log('✅ ICE connection established');
+      } else if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed') {
+        console.log('❌ ICE connection lost');
+      }
+    };
+    
+    // Handle data channel (for future features)
+    pc.ondatachannel = (event) => {
+      console.log('📡 Data channel received');
     };
     
     setPeerConnection(pc);
@@ -444,44 +471,56 @@ const MobileChatPage = () => {
     // WebRTC handlers
     socket.on('offer', async (data) => {
       try {
+        console.log('📥 Received offer:', data);
         const pc = createPeerConnection();
         await pc.setRemoteDescription(data.offer);
+        console.log('📥 Remote description set');
         
         if (localStream) {
           localStream.getTracks().forEach(track => {
             pc.addTrack(track, localStream);
+            console.log('🎤 Added local track to peer connection:', track.kind);
           });
         }
         
-        const answer = await pc.createAnswer();
+        const answer = await pc.createAnswer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: false
+        });
         await pc.setLocalDescription(answer);
+        console.log('📤 Answer created and set as local description');
         
         socket.emit('answer', {
           callId: data.callId,
           answer: answer
         });
+        console.log('📤 Answer sent to caller');
       } catch (error) {
-        console.error('Error handling offer:', error);
+        console.error('❌ Error handling offer:', error);
       }
     });
 
     socket.on('answer', async (data) => {
       try {
+        console.log('📥 Received answer:', data);
         if (peerConnection) {
           await peerConnection.setRemoteDescription(data.answer);
+          console.log('📥 Answer set as remote description');
         }
       } catch (error) {
-        console.error('Error handling answer:', error);
+        console.error('❌ Error handling answer:', error);
       }
     });
 
     socket.on('ice_candidate', async (data) => {
       try {
+        console.log('📥 Received ICE candidate:', data);
         if (peerConnection) {
           await peerConnection.addIceCandidate(data.candidate);
+          console.log('🔗 ICE candidate added');
         }
       } catch (error) {
-        console.error('Error handling ICE candidate:', error);
+        console.error('❌ Error handling ICE candidate:', error);
       }
     });
 
@@ -530,38 +569,76 @@ const MobileChatPage = () => {
   // Handle remote stream audio setup
   useEffect(() => {
     if (remoteStream) {
-      console.log('Setting up remote audio element...');
+      console.log('🔊 Setting up remote audio element...');
       const audioElement = document.querySelector('#remote-audio');
       if (audioElement) {
         audioElement.srcObject = remoteStream;
         audioElement.volume = isSpeakerOn ? 1.0 : 0.0;
         audioElement.muted = !isSpeakerOn;
-        console.log('Remote audio element configured:', {
+        audioElement.autoplay = true;
+        audioElement.playsInline = true;
+        
+        console.log('🔊 Remote audio element configured:', {
           volume: audioElement.volume,
           muted: audioElement.muted,
           isSpeakerOn,
           srcObject: audioElement.srcObject,
-          readyState: audioElement.readyState
+          readyState: audioElement.readyState,
+          autoplay: audioElement.autoplay
         });
+        
+        // Try to play the audio immediately
+        const playAudio = async () => {
+          try {
+            await audioElement.play();
+            console.log('🔊 Remote audio started playing automatically');
+          } catch (error) {
+            console.error('❌ Error playing remote audio automatically:', error);
+            // Try again after a short delay
+            setTimeout(() => {
+              audioElement.play().then(() => {
+                console.log('🔊 Remote audio started playing after retry');
+              }).catch((retryError) => {
+                console.error('❌ Error playing remote audio after retry:', retryError);
+              });
+            }, 1000);
+          }
+        };
+        
+        playAudio();
         
         // Add event listeners for debugging
         audioElement.addEventListener('loadedmetadata', () => {
-          console.log('Remote audio metadata loaded');
+          console.log('🔊 Remote audio metadata loaded');
         });
         
         audioElement.addEventListener('canplay', () => {
-          console.log('Remote audio can play');
+          console.log('🔊 Remote audio can play');
+          // Try to play again when ready
+          audioElement.play().then(() => {
+            console.log('🔊 Remote audio started playing on canplay');
+          }).catch((error) => {
+            console.error('❌ Error playing remote audio on canplay:', error);
+          });
         });
         
         audioElement.addEventListener('play', () => {
-          console.log('Remote audio started playing');
+          console.log('🔊 Remote audio started playing');
+        });
+        
+        audioElement.addEventListener('pause', () => {
+          console.log('⏸️ Remote audio paused');
         });
         
         audioElement.addEventListener('error', (e) => {
-          console.error('Remote audio error:', e);
+          console.error('❌ Remote audio error:', e);
+        });
+        
+        audioElement.addEventListener('volumechange', () => {
+          console.log('🔊 Remote audio volume changed:', audioElement.volume);
         });
       } else {
-        console.log('Remote audio element not found');
+        console.log('❌ Remote audio element not found');
       }
     }
   }, [remoteStream, isSpeakerOn]);
@@ -650,8 +727,8 @@ const MobileChatPage = () => {
   };
 
   // Voice call functions
-  const startCall = () => {
-    console.log('Start call clicked', { socket: !!socket, chatInfo, userId: chatInfo?.userId });
+  const startCall = async () => {
+    console.log('📞 Start call clicked', { socket: !!socket, chatInfo, userId: chatInfo?.userId });
     
     if (!socket) {
       alert('لا يمكن بدء المكالمة: الاتصال غير متاح');
@@ -668,63 +745,102 @@ const MobileChatPage = () => {
       return;
     }
     
-    console.log('Starting call with recipientId:', chatInfo.userId);
-    console.log('Current user:', user._id);
-    console.log('Socket connected:', socket.connected);
-    console.log('Socket ID:', socket.id);
-    
-    socket.emit('start_call', {
-      recipientId: chatInfo.userId,
-      callType: 'voice'
-    });
-    
-    console.log('Start call event emitted');
+    try {
+      console.log('🎤 Getting user media...');
+      // Get user media for local stream
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 44100
+        },
+        video: false 
+      });
+      setLocalStream(stream);
+      console.log('🎤 User media obtained successfully');
+      
+      // Create peer connection
+      const pc = createPeerConnection();
+      console.log('🔌 Peer connection created');
+      
+      // Add local stream to peer connection
+      stream.getTracks().forEach(track => {
+        pc.addTrack(track, stream);
+        console.log('🎤 Added track to peer connection:', track.kind);
+      });
+      
+      console.log('📞 Starting call with recipientId:', chatInfo.userId);
+      console.log('👤 Current user:', user._id);
+      console.log('🔌 Socket connected:', socket.connected);
+      console.log('🆔 Socket ID:', socket.id);
+      
+      socket.emit('start_call', {
+        recipientId: chatInfo.userId,
+        callType: 'voice'
+      });
+      
+      console.log('📤 Start call event emitted');
+    } catch (error) {
+      console.error('❌ Error starting call:', error);
+      alert('لا يمكن الوصول للميكروفون. تأكد من السماح بالوصول للميكروفون.');
+    }
   };
 
   const acceptCall = async () => {
-    console.log('Accept call clicked', { socket: !!socket, callData });
+    console.log('✅ Accept call clicked', { socket: !!socket, callData });
     
     if (socket && callData) {
       try {
-        console.log('Getting user media...');
+        console.log('🎤 Getting user media...');
         // Get user media for local stream
         const stream = await navigator.mediaDevices.getUserMedia({ 
-          audio: true,
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            sampleRate: 44100
+          },
           video: false 
         });
         setLocalStream(stream);
-        console.log('User media obtained');
+        console.log('🎤 User media obtained successfully');
         
         // Create peer connection
         const pc = createPeerConnection();
-        console.log('Peer connection created');
+        console.log('🔌 Peer connection created');
         
         // Add local stream to peer connection
         stream.getTracks().forEach(track => {
           pc.addTrack(track, stream);
+          console.log('🎤 Added track to peer connection:', track.kind);
         });
-        console.log('Local stream added to peer connection');
         
         // Create offer
-        const offer = await pc.createOffer();
+        const offer = await pc.createOffer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: false
+        });
         await pc.setLocalDescription(offer);
-        console.log('Offer created and set as local description');
+        console.log('📤 Offer created and set as local description');
         
         // Send offer to caller
         socket.emit('offer', {
           callId: callData.id,
           offer: offer
         });
-        console.log('Offer sent to caller');
+        console.log('📤 Offer sent to caller');
         
         socket.emit('accept_call', { callId: callData.id });
-        console.log('Call accepted and local stream started');
+        console.log('✅ Call accepted and local stream started');
         
-        // Start call timer only after WebRTC connection is established
-        // This will be handled in the WebRTC connection success callback
+        // Start call timer only when call is actually accepted
+        setCallStartTime(Date.now());
+        setCallDuration(0);
+        console.log('⏰ Call timer started - call accepted');
       } catch (error) {
-        console.error('Error getting user media:', error);
-        alert('لا يمكن الوصول للميكروفون');
+        console.error('❌ Error accepting call:', error);
+        alert('لا يمكن الوصول للميكروفون. تأكد من السماح بالوصول للميكروفون.');
       }
     }
   };
@@ -763,50 +879,76 @@ const MobileChatPage = () => {
 
   // Mute/Unmute functions
   const handleMute = () => {
+    console.log('🔇 Muting microphone...');
     if (localStream) {
       localStream.getAudioTracks().forEach(track => {
         track.enabled = false;
+        console.log('🔇 Audio track muted:', track.kind);
       });
+    } else {
+      console.log('❌ Local stream not available for muting');
     }
     setIsMuted(true);
-    console.log('Microphone muted');
+    console.log('🔇 Microphone muted');
   };
 
   const handleUnmute = () => {
+    console.log('🎤 Unmuting microphone...');
     if (localStream) {
       localStream.getAudioTracks().forEach(track => {
         track.enabled = true;
+        console.log('🎤 Audio track unmuted:', track.kind);
       });
+    } else {
+      console.log('❌ Local stream not available for unmuting');
     }
     setIsMuted(false);
-    console.log('Microphone unmuted');
+    console.log('🎤 Microphone unmuted');
   };
 
   // Speaker functions
   const handleSpeakerOn = () => {
+    console.log('🔊 Turning speaker on...');
     const audioElement = document.querySelector('#remote-audio');
     if (audioElement) {
       audioElement.volume = 1.0;
       audioElement.muted = false;
-      console.log('Speaker turned on - volume:', audioElement.volume);
+      console.log('🔊 Speaker turned on - volume:', audioElement.volume, 'muted:', audioElement.muted);
+      
+      // Try to play the audio
+      audioElement.play().then(() => {
+        console.log('🔊 Remote audio started playing');
+      }).catch((error) => {
+        console.error('❌ Error playing remote audio:', error);
+        // Try again after a short delay
+        setTimeout(() => {
+          audioElement.play().then(() => {
+            console.log('🔊 Remote audio started playing after retry');
+          }).catch((retryError) => {
+            console.error('❌ Error playing remote audio after retry:', retryError);
+          });
+        }, 500);
+      });
     } else {
-      console.log('Remote audio element not found');
+      console.log('❌ Remote audio element not found');
     }
     setIsSpeakerOn(true);
-    console.log('Speaker turned on');
+    console.log('🔊 Speaker turned on');
   };
 
   const handleSpeakerOff = () => {
+    console.log('🔇 Turning speaker off...');
     const audioElement = document.querySelector('#remote-audio');
     if (audioElement) {
       audioElement.volume = 0.0;
       audioElement.muted = true;
-      console.log('Speaker turned off - volume:', audioElement.volume);
+      audioElement.pause();
+      console.log('🔇 Speaker turned off - volume:', audioElement.volume, 'muted:', audioElement.muted);
     } else {
-      console.log('Remote audio element not found');
+      console.log('❌ Remote audio element not found');
     }
     setIsSpeakerOn(false);
-    console.log('Speaker turned off');
+    console.log('🔇 Speaker turned off');
   };
 
   // Voice message functions
@@ -1315,6 +1457,7 @@ const MobileChatPage = () => {
           ref={(audio) => {
             if (audio && localStream) {
               audio.srcObject = localStream;
+              console.log('Local audio element configured');
             }
           }}
         />
@@ -1328,6 +1471,7 @@ const MobileChatPage = () => {
           ref={(audio) => {
             if (audio && remoteStream) {
               audio.srcObject = remoteStream;
+              console.log('Remote audio element configured');
             }
           }}
         />
