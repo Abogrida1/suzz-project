@@ -10,8 +10,10 @@ import {
   FaArrowUp,
   FaTimes
 } from 'react-icons/fa';
+import { useSocket } from '../../contexts/SocketContext';
+import { useAuth } from '../../contexts/AuthContext';
 
-const ChatInput = ({ onSendMessage, onTyping, placeholder = "Type a message..." }) => {
+const ChatInput = ({ selectedChat, onMessageSent, placeholder = "Type a message..." }) => {
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -19,6 +21,8 @@ const ChatInput = ({ onSendMessage, onTyping, placeholder = "Type a message..." 
   const [isRecording, setIsRecording] = useState(false);
   const textareaRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const { sendMessage, startTyping, stopTyping } = useSocket();
+  const { user } = useAuth();
 
   // Auto-resize textarea
   useEffect(() => {
@@ -30,12 +34,12 @@ const ChatInput = ({ onSendMessage, onTyping, placeholder = "Type a message..." 
 
   // Handle typing detection
   useEffect(() => {
-    if (message.trim() && !isTyping) {
+    if (message.trim() && !isTyping && selectedChat) {
       setIsTyping(true);
-      onTyping?.(true);
-    } else if (!message.trim() && isTyping) {
+      startTyping(selectedChat.id);
+    } else if (!message.trim() && isTyping && selectedChat) {
       setIsTyping(false);
-      onTyping?.(false);
+      stopTyping(selectedChat.id);
     }
 
     // Clear existing timeout
@@ -44,10 +48,10 @@ const ChatInput = ({ onSendMessage, onTyping, placeholder = "Type a message..." 
     }
 
     // Set new timeout to stop typing
-    if (message.trim()) {
+    if (message.trim() && selectedChat) {
       typingTimeoutRef.current = setTimeout(() => {
         setIsTyping(false);
-        onTyping?.(false);
+        stopTyping(selectedChat.id);
       }, 1000);
     }
 
@@ -56,14 +60,27 @@ const ChatInput = ({ onSendMessage, onTyping, placeholder = "Type a message..." 
         clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [message, isTyping, onTyping]);
+  }, [message, isTyping, selectedChat, startTyping, stopTyping]);
 
   const handleSendMessage = () => {
-    if (message.trim()) {
-      onSendMessage(message.trim(), 'text');
+    if (message.trim() && selectedChat) {
+      const messageData = {
+        content: message.trim(),
+        type: 'text',
+        chatType: selectedChat.type,
+        recipients: selectedChat.type === 'private' ? [selectedChat.userId] : 
+                   selectedChat.type === 'group' ? [selectedChat.groupId] : []
+      };
+
+      console.log('Sending message:', messageData);
+      sendMessage(messageData);
       setMessage('');
       setIsTyping(false);
-      onTyping?.(false);
+      stopTyping(selectedChat.id);
+      
+      if (onMessageSent) {
+        onMessageSent(messageData);
+      }
     }
   };
 
@@ -92,6 +109,16 @@ const ChatInput = ({ onSendMessage, onTyping, placeholder = "Type a message..." 
 
   // Common emojis
   const emojis = ['😀', '😂', '😍', '🥰', '😎', '🤔', '😢', '😡', '👍', '👎', '❤️', '🔥', '🎉', '👏', '🙏', '💯'];
+
+  if (!selectedChat) {
+    return (
+      <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
+        <div className="text-center text-gray-500 dark:text-gray-400">
+          Select a chat to start messaging
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4">
@@ -148,7 +175,7 @@ const ChatInput = ({ onSendMessage, onTyping, placeholder = "Type a message..." 
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={placeholder}
+            placeholder={`Message ${selectedChat.name || selectedChat.username}...`}
             className="w-full px-4 py-3 pr-12 border border-gray-200 dark:border-gray-600 rounded-2xl bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none max-h-32"
             rows={1}
           />

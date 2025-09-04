@@ -281,9 +281,9 @@ const setupSocketHandlers = (io) => {
           });
         } else if (chatType === 'group' && recipients && recipients.length > 0) {
           const group = await Group.findById(recipients[0]);
-          if (group) {
+          if (group && group.members && Array.isArray(group.members)) {
             group.members.forEach(member => {
-              if (member.user.toString() !== socket.userId) {
+              if (member.user && member.user.toString() !== socket.userId) {
                 message.deliveryStatus.push({
                   user: member.user,
                   status: 'sent'

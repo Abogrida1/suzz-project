@@ -203,9 +203,8 @@ const ChatWindow = ({ chat, onBackToSidebar, isMobile }) => {
 
       {/* Input */}
       <ChatInput
-        onSendMessage={handleSendMessage}
-        onTyping={handleTyping}
-        placeholder={`Message ${chat.name}...`}
+        selectedChat={chat}
+        onMessageSent={handleSendMessage}
       />
     </div>
   );
