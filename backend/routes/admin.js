@@ -10,6 +10,24 @@ router.get('/test', (req, res) => {
   res.json({ message: 'Admin routes working!' });
 });
 
+// Test route with POST
+router.post('/test', (req, res) => {
+  res.json({ 
+    message: 'Admin POST routes working!',
+    body: req.body,
+    user: req.user ? req.user.email : 'No user'
+  });
+});
+
+// Test route without middleware
+router.post('/test-no-auth', (req, res) => {
+  res.json({ 
+    message: 'Admin routes working without auth!',
+    body: req.body,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Get all users
 router.post('/users', adminAuth, requireAdminPermission('canManageUsers'), async (req, res) => {
   try {

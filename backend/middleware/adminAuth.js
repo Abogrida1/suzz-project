@@ -6,45 +6,75 @@ const ADMIN_PASSWORD = 'batta1';
 
 // Middleware to check admin access with separate credentials
 const adminAuth = (req, res, next) => {
-  // Check if user is authenticated
-  if (!req.user) {
-    return res.status(401).json({ message: 'Authentication required' });
-  }
-
   // Get admin credentials from request body
   const { username, password } = req.body;
   
-  // Check admin credentials OR if user is already an admin OR if user is the specific admin email
-  if ((username === ADMIN_USERNAME && password === ADMIN_PASSWORD) || 
-      req.user.isAdmin() || 
-      req.user.email === ADMIN_USERNAME) {
+  console.log('AdminAuth - checking credentials:', { username, password: password ? '***' : 'empty' });
+  
+  // Check admin credentials first (primary method)
+  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    console.log('AdminAuth - credentials valid');
     next();
-  } else {
-    res.status(403).json({ message: 'Invalid admin credentials' });
+    return;
   }
+  
+  // Check if user is authenticated and is admin (fallback)
+  if (req.user) {
+    console.log('AdminAuth - checking user:', { email: req.user.email, username: req.user.username });
+    
+    if (req.user.isAdmin && req.user.isAdmin()) {
+      console.log('AdminAuth - user is admin');
+      next();
+      return;
+    }
+    
+    if (req.user.email === ADMIN_USERNAME) {
+      console.log('AdminAuth - user is creator email');
+      next();
+      return;
+    }
+  }
+  
+  console.log('AdminAuth - access denied');
+  res.status(403).json({ message: 'Invalid admin credentials' });
 };
 
 // Middleware to check specific admin permissions
 const requireAdminPermission = (permission) => {
   return (req, res, next) => {
+    console.log('RequireAdminPermission - checking permission:', permission);
+    
+    // If admin credentials are valid, grant all permissions
+    const { username, password } = req.body;
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      console.log('RequireAdminPermission - admin credentials valid, granting permission');
+      return next();
+    }
+    
+    // Check if user is authenticated
     if (!req.user) {
+      console.log('RequireAdminPermission - no user found');
       return res.status(401).json({ message: 'Authentication required' });
     }
 
     // Super admin has all permissions
     if (req.user.isSuperAdmin && req.user.isSuperAdmin()) {
+      console.log('RequireAdminPermission - user is super admin');
       return next();
     }
 
     // Check if user is the specific admin email (fallback)
     if (req.user.email === ADMIN_USERNAME) {
+      console.log('RequireAdminPermission - user is creator email');
       return next();
     }
 
     // Check if user has the required permission
     if (req.user.hasPermission && req.user.hasPermission(permission)) {
+      console.log('RequireAdminPermission - user has permission');
       next();
     } else {
+      console.log('RequireAdminPermission - permission denied');
       res.status(403).json({ message: `Permission required: ${permission}` });
     }
   };

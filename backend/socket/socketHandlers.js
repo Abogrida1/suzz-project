@@ -356,21 +356,13 @@ const setupSocketHandlers = (io) => {
 
         console.log('Message sent successfully:', message._id, 'to room:', chatType === 'global' ? 'global_chat' : chatType === 'private' ? `private_${roomName}` : `group_${recipients[0]}`);
         
-        // Send message_sent event to sender only
-        console.log('About to send message_sent event to sender:', socket.user.username, 'message ID:', message._id);
-        socket.emit('message_sent', message);
+        // Send message_sent event to sender only (with tempId for tracking)
+        console.log('About to send message_sent event to sender:', socket.user.username, 'message ID:', message._id, 'tempId:', tempId);
+        socket.emit('message_sent', { 
+          ...message.toObject(), 
+          tempId: tempId // Include tempId for frontend tracking
+        });
         console.log('Sent message_sent event to sender:', socket.user.username, 'message ID:', message._id);
-
-        // Set up delivery status tracking for private messages
-        if (chatType === 'private' && recipients && recipients.length === 1) {
-          // Mark as delivered when recipient comes online
-          message.deliveryStatus.push({
-            user: recipients[0],
-            status: 'delivered',
-            timestamp: new Date()
-          });
-          await message.save();
-        }
 
       } catch (error) {
         console.error('Send message error:', error);

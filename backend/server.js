@@ -136,29 +136,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Root endpoint - serve frontend if available, otherwise show API info
-app.get('/', (req, res) => {
-  const frontendPath = path.join(__dirname, '../frontend/build/index.html');
-  
-  // Check if frontend build exists
-  if (fs.existsSync(frontendPath)) {
-    res.sendFile(frontendPath);
-  } else {
-    res.json({ 
-      message: 'Secure Chat App Backend API',
-      status: 'Running',
-      endpoints: {
-        health: '/api/health',
-        auth: '/api/auth',
-        users: '/api/users',
-        messages: '/api/messages',
-        upload: '/api/upload'
-      },
-      frontend: 'Frontend not built yet. Use /app route or build frontend first.',
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+// Root endpoint moved to the end for proper SPA routing
 
 // Serve frontend build files
 app.get('/app', (req, res) => {
@@ -205,6 +183,80 @@ app.get('/settings', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
 });
 
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+app.get('/admin-login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+// Add routes for all frontend pages
+app.get('/chats', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+app.get('/mobile-chats', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+app.get('/create-group', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+app.get('/account', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+// Add admin routes
+app.get('/admin', (req, res) => {
+  console.log('Admin route hit:', req.path);
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+app.get('/admin-login', (req, res) => {
+  console.log('Admin-login route hit:', req.path);
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+// Add routes for chat pages
+app.get('/chat', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+app.get('/chat/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+// Add routes for admin sub-pages
+app.get('/admin/*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
+// Add route for root path
+app.get('/', (req, res) => {
+  const frontendPath = path.join(__dirname, '../frontend/build/index.html');
+  
+  // Check if frontend build exists
+  if (fs.existsSync(frontendPath)) {
+    res.sendFile(frontendPath);
+  } else {
+    res.json({ 
+      message: 'Secure Chat App Backend API',
+      status: 'Running',
+      endpoints: {
+        health: '/api/health',
+        auth: '/api/auth',
+        users: '/api/users',
+        messages: '/api/messages',
+        upload: '/api/upload'
+      },
+      frontend: 'Frontend not built yet. Use /app route or build frontend first.',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -214,9 +266,28 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Route not found' });
+// Serve all frontend routes (catch-all for SPA) - MUST BE LAST
+app.get('*', (req, res) => {
+  console.log('Catch-all route hit for:', req.path);
+  const frontendPath = path.join(__dirname, '../frontend/build/index.html');
+  
+  // Check if frontend build exists
+  if (fs.existsSync(frontendPath)) {
+    console.log('Serving frontend for:', req.path);
+    res.sendFile(frontendPath);
+  } else {
+    console.log('Frontend build not found for:', req.path);
+    res.status(404).json({ 
+      message: 'Route not found',
+      error: 'Frontend not built',
+      instructions: 'Please build the frontend first'
+    });
+  }
+});
+
+// 404 handler for API routes only (after catch-all)
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ message: 'API route not found' });
 });
 
 // Database connection
