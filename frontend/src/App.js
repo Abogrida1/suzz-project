@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import HomePage from './pages/HomePage';
 import ChatsPage from './pages/ChatsPage';
 import MobileChatsPage from './pages/MobileChatsPage';
+import Chat from './pages/Chat';
 import CreateGroupPage from './pages/CreateGroupPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
@@ -57,6 +58,22 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <MobileChatsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/chat" 
+                  element={
+                    <ProtectedRoute>
+                      <Chat />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/chat/:chatId" 
+                  element={
+                    <ProtectedRoute>
+                      <Chat />
                     </ProtectedRoute>
                   } 
                 />

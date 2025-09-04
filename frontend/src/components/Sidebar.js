@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
+import { useNavigate } from 'react-router-dom';
 import api from '../config/axios';
 import { 
   FaSearch, 
@@ -15,6 +16,7 @@ import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
 
 const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [recentConversations, setRecentConversations] = useState([]);
@@ -254,7 +256,7 @@ const Sidebar = ({ activeChat, selectedUser, onChatSelect, onClose, isMobile }) 
 
         {/* Create Group Button */}
         <button
-          onClick={() => window.location.href = '/create-group'}
+          onClick={() => navigate('/create-group')}
           className="hidden md:block w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700"
         >
           <div className="flex items-center space-x-3">

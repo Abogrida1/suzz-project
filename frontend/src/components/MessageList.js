@@ -20,7 +20,12 @@ const MessageList = ({
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      const container = messagesContainerRef.current;
+      const isNearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 100;
+      
+      if (isNearBottom || messages.length === 0) {
+        container.scrollTop = container.scrollHeight;
+      }
     }
   }, [messages, typingUsers]);
 

@@ -236,8 +236,8 @@ messageSchema.statics.getChatMessages = function(chatType, participants, limit =
       { path: 'replyTo.sender', select: 'username displayName avatar' }
     ])
     .sort({ createdAt: -1 })
-    .limit(limit)
-    .skip(skip);
+    .limit(parseInt(limit))
+    .skip(parseInt(skip));
 };
 
 module.exports = mongoose.model('Message', messageSchema);

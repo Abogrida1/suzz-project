@@ -141,8 +141,10 @@ const setupSocketHandlers = (io) => {
           groupId: groupId,
           deleted: false
         })
-        .populate('sender', 'username displayName avatar')
-        .populate('replyTo')
+        .populate([
+          { path: 'sender', select: 'username displayName avatar' },
+          { path: 'replyTo.sender', select: 'username displayName avatar' }
+        ])
         .sort({ createdAt: -1 })
         .limit(50);
 
@@ -169,7 +171,7 @@ const setupSocketHandlers = (io) => {
     // Handle sending messages
     socket.on('send_message', async (data) => {
       try {
-        console.log('Received message:', data);
+        console.log('Received message from user:', socket.user.username, 'data:', data);
         const { content, type = 'text', chatType, recipients, attachment, replyTo } = data;
 
         if (!content && !attachment) {
@@ -234,6 +236,7 @@ const setupSocketHandlers = (io) => {
 
         const message = new Message(messageData);
         await message.save();
+        console.log('Message saved to database:', message._id, 'status:', message.status);
 
         // Set delivery status for recipients
         if (chatType === 'private' && recipients && recipients.length === 1) {
@@ -262,13 +265,14 @@ const setupSocketHandlers = (io) => {
           { path: 'sender', select: 'username displayName avatar' },
           { path: 'replyTo.sender', select: 'username displayName avatar' }
         ]);
+        console.log('Message populated:', message._id, 'sender:', message.sender?.username);
 
-        // Emit to appropriate room
+        // Emit to appropriate room (excluding sender)
         if (chatType === 'global') {
-          io.to('global_chat').emit('message_received', message);
+          socket.to('global_chat').emit('message_received', message);
         } else if (chatType === 'private') {
           const roomName = [socket.userId, recipients[0]].sort().join('_');
-          io.to(`private_${roomName}`).emit('message_received', message);
+          socket.to(`private_${roomName}`).emit('message_received', message);
           
           // Notify recipient if they're not in the chat
           const recipientSocket = await findUserSocket(recipients[0]);
@@ -280,7 +284,7 @@ const setupSocketHandlers = (io) => {
           }
         } else if (chatType === 'group') {
           const groupId = recipients[0];
-          io.to(`group_${groupId}`).emit('message_received', message);
+          socket.to(`group_${groupId}`).emit('message_received', message);
           
           // Notify group members who are not in the chat
           const group = await Group.findById(groupId).populate('members.user');
@@ -304,20 +308,23 @@ const setupSocketHandlers = (io) => {
         }
 
         // Update message status to delivered for online recipients
+        let roomName = '';
         if (chatType === 'private' && recipients) {
-          const onlineRecipients = recipients.filter(async (recipientId) => {
-            const recipientSocket = await findUserSocket(recipientId);
-            return recipientSocket && recipientSocket.rooms.has(`private_${roomName}`);
-          });
+          roomName = [socket.userId, recipients[0]].sort().join('_');
+          const recipientSocket = await findUserSocket(recipients[0]);
           
-          if (onlineRecipients.length > 0) {
+          if (recipientSocket && recipientSocket.rooms.has(`private_${roomName}`)) {
             message.status = 'delivered';
             await message.save();
           }
         }
 
-        console.log('Message sent successfully:', message._id);
+        console.log('Message sent successfully:', message._id, 'to room:', chatType === 'global' ? 'global_chat' : chatType === 'private' ? `private_${roomName}` : `group_${recipients[0]}`);
+        
+        // Send message_sent event to sender only
+        console.log('About to send message_sent event to sender:', socket.user.username, 'message ID:', message._id);
         socket.emit('message_sent', message);
+        console.log('Sent message_sent event to sender:', socket.user.username, 'message ID:', message._id);
 
       } catch (error) {
         console.error('Send message error:', error);
@@ -404,6 +411,7 @@ const setupSocketHandlers = (io) => {
 
     // Handle disconnection
     socket.on('disconnect', async () => {
+      try {
       console.log(`User ${socket.user.username} disconnected`);
 
       // Update user's online status
@@ -417,6 +425,9 @@ const setupSocketHandlers = (io) => {
       socket.broadcast.emit('user_offline', {
         userId: socket.userId
       });
+      } catch (error) {
+        console.error('Disconnect error:', error);
+      }
     });
 
     // Voice Call Handlers
@@ -746,26 +757,6 @@ const setupSocketHandlers = (io) => {
       }
     });
 
-    socket.on('disconnect', async () => {
-      try {
-        console.log(`User ${socket.user.username} disconnected`);
-        
-        // Update user's online status
-        await User.findByIdAndUpdate(socket.userId, {
-          socketId: null,
-          isOnline: false,
-          lastSeen: new Date()
-        });
-
-        // Notify others that user is offline
-        socket.broadcast.emit('user_offline', {
-          userId: socket.userId,
-          username: socket.user.username
-        });
-      } catch (error) {
-        console.error('Disconnect error:', error);
-      }
-    });
   });
 
   // Helper function to find user socket

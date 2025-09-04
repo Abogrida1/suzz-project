@@ -12,7 +12,10 @@ router.get('/global', async (req, res) => {
     
     const messages = await Message.getChatMessages('global', [], parseInt(limit), parseInt(skip));
     
-    res.json({ messages: messages.reverse() });
+    res.json({ 
+      messages: messages.reverse(),
+      hasMore: messages.length === parseInt(limit)
+    });
   } catch (error) {
     console.error('Get global messages error:', error);
     res.status(500).json({ message: 'Failed to fetch global messages' });
@@ -40,7 +43,8 @@ router.get('/private/:userId', async (req, res) => {
     
     res.json({ 
       messages: messages.reverse(),
-      otherUser: otherUser.getPublicProfile()
+      otherUser: otherUser.getPublicProfile(),
+      hasMore: messages.length === parseInt(limit)
     });
   } catch (error) {
     console.error('Get private messages error:', error);
@@ -86,7 +90,10 @@ router.get('/group/:groupId', async (req, res) => {
     .limit(parseInt(limit))
     .skip(parseInt(skip));
     
-    res.json({ messages: messages.reverse() });
+    res.json({ 
+      messages: messages.reverse(),
+      hasMore: messages.length === parseInt(limit)
+    });
   } catch (error) {
     console.error('Get group messages error:', error);
     res.status(500).json({ message: 'Failed to fetch group messages' });

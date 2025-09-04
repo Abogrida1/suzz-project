@@ -20,91 +20,48 @@ const AdminLogin = () => {
 
   // Check if user is authorized to access admin panel
   useEffect(() => {
-    const checkAdminAuthorization = async () => {
+    const checkAdminAuthorization = () => {
       console.log('AdminLogin - checking authorization for user:', user);
       
-      if (user) {
-        // Check if user is the creator account (by email or username) - case insensitive
-        const isCreatorEmail = user.email === 'madoabogrida05@gmail.com';
-        const isCreatorUsername = user.username && (
-          user.username.toLowerCase() === 'batta'
-        );
-        
-        console.log('AdminLogin - creator check:', {
-          email: user.email,
-          username: user.username,
-          isCreatorEmail,
-          isCreatorUsername
-        });
-        
-        if (isCreatorEmail || isCreatorUsername) {
-          console.log('✅ Creator account detected in AdminLogin - setting authorized to true');
-          console.log('User details:', { email: user.email, username: user.username });
-          setIsAuthorized(true);
-          setCheckingAuth(false);
-          return;
-        }
-        
-        try {
-          const response = await api.get('/api/auth/me');
-          const userData = response.data;
-          const actualUser = userData.user || userData;
-          
-          // Check for admin role or if user is the specific admin email
-          const hasAdminRole = actualUser.role && ['admin', 'super_admin', 'moderator'].includes(actualUser.role);
-          const isSpecificAdmin = actualUser.email === 'madoabogrida05@gmail.com' || actualUser.username === 'batta';
-          
-          console.log('AdminLogin authorization check:', {
-            email: actualUser.email,
-            username: actualUser.username,
-            role: actualUser.role,
-            hasAdminRole,
-            isSpecificAdmin
-          });
-          
-          setIsAuthorized(hasAdminRole || isSpecificAdmin);
-          
-          if (!hasAdminRole && !isSpecificAdmin) {
-            toast.error('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
-            setTimeout(() => navigate('/'), 2000);
-          }
-        } catch (error) {
-          console.error('Error checking admin authorization:', error);
-          // Fallback: check if current user email matches admin email - case insensitive
-          const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
-          const isCreatorUsername = user?.username && (
-            user.username.toLowerCase() === 'batta'
-          );
-          const isSpecificAdmin = isCreatorEmail || isCreatorUsername;
-          setIsAuthorized(isSpecificAdmin);
-          
-          if (!isSpecificAdmin) {
-            toast.error('خطأ في التحقق من الصلاحيات');
-            setTimeout(() => navigate('/'), 2000);
-          }
-        }
-      } else {
-        console.log('AdminLogin - no user found, checking localStorage for admin credentials');
-        // Check if admin credentials are stored in localStorage
-        const storedCredentials = localStorage.getItem('adminCredentials');
-        if (storedCredentials) {
-          try {
-            const credentials = JSON.parse(storedCredentials);
-            if (credentials.username === 'madoabogrida05@gmail.com' && credentials.password === 'batta1') {
-              console.log('✅ Admin credentials found in localStorage - setting authorized to true');
-              setIsAuthorized(true);
-              setCheckingAuth(false);
-              return;
-            }
-          } catch (error) {
-            console.error('Error parsing stored credentials:', error);
-          }
-        }
-        
-        setIsAuthorized(false);
-        toast.error('يجب تسجيل الدخول أولاً');
-        setTimeout(() => navigate('/login'), 2000);
+      // Simple check: if user is batta or has admin credentials, allow access
+      const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
+      const isCreatorUsername = user?.username && user.username.toLowerCase() === 'batta';
+      const hasStoredCredentials = localStorage.getItem('adminCredentials');
+      
+      console.log('AdminLogin - authorization check:', {
+        email: user?.email,
+        username: user?.username,
+        isCreatorEmail,
+        isCreatorUsername,
+        hasStoredCredentials: !!hasStoredCredentials
+      });
+      
+      if (isCreatorEmail || isCreatorUsername || hasStoredCredentials) {
+        console.log('✅ Admin access granted');
+        setIsAuthorized(true);
+        setCheckingAuth(false);
+        return;
       }
+      
+      // If no user and no stored credentials, redirect to login
+      if (!user && !hasStoredCredentials) {
+        console.log('❌ No user and no stored credentials - redirecting to login');
+        setIsAuthorized(false);
+        setCheckingAuth(false);
+        navigate('/login');
+        return;
+      }
+      
+      // If user exists but not admin, show error
+      if (user && !isCreatorEmail && !isCreatorUsername) {
+        console.log('❌ User is not admin - redirecting to home');
+        setIsAuthorized(false);
+        setCheckingAuth(false);
+        toast.error('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
+        setTimeout(() => navigate('/'), 2000);
+        return;
+      }
+      
       setCheckingAuth(false);
     };
 
@@ -119,7 +76,7 @@ const AdminLogin = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     
     console.log('AdminLogin - handleSubmit called with credentials:', {
@@ -132,21 +89,16 @@ const AdminLogin = () => {
       return;
     }
 
-    setLoading(true);
-    
-    try {
+    // Simple validation - only allow specific admin credentials
+    if (adminCredentials.username === 'madoabogrida05@gmail.com' && adminCredentials.password === 'batta1') {
       // Store admin credentials in localStorage for API calls
       localStorage.setItem('adminCredentials', JSON.stringify(adminCredentials));
       
       console.log('AdminLogin - credentials stored, navigating to /admin');
-      // Navigate to admin page
-      navigate('/admin');
       toast.success('تم تسجيل الدخول بنجاح');
-    } catch (error) {
-      console.error('Admin login error:', error);
-      toast.error('خطأ في تسجيل الدخول');
-    } finally {
-      setLoading(false);
+      navigate('/admin');
+    } else {
+      toast.error('بيانات الدخول غير صحيحة');
     }
   };
 

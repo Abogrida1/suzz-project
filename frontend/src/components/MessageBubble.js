@@ -120,8 +120,26 @@ const MessageBubble = ({
   const getStatusIcon = () => {
     if (!isOwn) return null;
     
+    // Handle optimistic messages - show loading for max 1 second
+    if (message.isOptimistic || message._id.startsWith('temp_')) {
+      const messageAge = Date.now() - new Date(message.createdAt).getTime();
+      if (messageAge > 1000) {
+        // After 1 second, assume sent
+        return <FaCheck className="h-3 w-3 text-gray-400" />;
+      }
+      return <div className="h-3 w-3 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />;
+    }
+    
+    // If message is older than 1 second and still sending, assume it's sent
+    const messageAge = Date.now() - new Date(message.createdAt).getTime();
+    const isOldMessage = messageAge > 1000;
+    
     switch (message.status) {
       case 'sending':
+        if (isOldMessage) {
+          console.log('Old message still showing as sending, assuming sent:', message._id);
+          return <FaCheck className="h-3 w-3 text-gray-400" />;
+        }
         return <div className="h-3 w-3 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />;
       case 'sent':
         return <FaCheck className="h-3 w-3 text-gray-400" />;
@@ -130,7 +148,7 @@ const MessageBubble = ({
       case 'seen':
         return <FaCheckDouble className="h-3 w-3 text-blue-500" />;
       default:
-        return null;
+        return <FaCheck className="h-3 w-3 text-gray-400" />; // Default to sent
     }
   };
 

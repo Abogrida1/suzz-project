@@ -55,68 +55,48 @@ const AdminPage = () => {
   // Check admin credentials on component mount
   // Check admin authorization
   useEffect(() => {
-    const checkAdminAuthorization = async () => {
-      if (user) {
-        // Check if user is the creator account (by email or username) - case insensitive
-        const isCreatorEmail = user.email === 'madoabogrida05@gmail.com';
-        const isCreatorUsername = user.username && (
-          user.username.toLowerCase() === 'batta'
-        );
-        
-        if (isCreatorEmail || isCreatorUsername) {
-          console.log('✅ Creator account detected in AdminPage - setting authorized to true');
-          console.log('User details:', { email: user.email, username: user.username });
-          setIsAuthorized(true);
-          setCheckingAuth(false);
-          return;
-        }
-        
-        try {
-          const response = await api.get('/api/auth/me');
-          const userData = response.data;
-          const actualUser = userData.user || userData;
-          
-          // Check for admin role or if user is the specific admin email
-          const hasAdminRole = actualUser.role && ['admin', 'super_admin', 'moderator'].includes(actualUser.role);
-          const isSpecificAdmin = actualUser.email === 'madoabogrida05@gmail.com' || actualUser.username === 'batta';
-          
-          console.log('AdminPage authorization check:', {
-            email: actualUser.email,
-            username: actualUser.username,
-            role: actualUser.role,
-            hasAdminRole,
-            isSpecificAdmin
-          });
-          
-          setIsAuthorized(hasAdminRole || isSpecificAdmin);
-          
-          if (!hasAdminRole && !isSpecificAdmin) {
-            toast.error('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
-            setTimeout(() => navigate('/'), 2000);
-            return;
-          }
-        } catch (error) {
-          console.error('Error checking admin authorization:', error);
-          // Fallback: check if current user email matches admin email - case insensitive
-          const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
-          const isCreatorUsername = user?.username && (
-            user.username.toLowerCase() === 'batta'
-          );
-          const isSpecificAdmin = isCreatorEmail || isCreatorUsername;
-          setIsAuthorized(isSpecificAdmin);
-          
-          if (!isSpecificAdmin) {
-            toast.error('خطأ في التحقق من الصلاحيات');
-            setTimeout(() => navigate('/'), 2000);
-            return;
-          }
-        }
-      } else {
-        setIsAuthorized(false);
-        toast.error('يجب تسجيل الدخول أولاً');
-        setTimeout(() => navigate('/login'), 2000);
+    const checkAdminAuthorization = () => {
+      console.log('AdminPage - checking authorization for user:', user);
+      
+      // Simple check: if user is batta or has admin credentials, allow access
+      const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
+      const isCreatorUsername = user?.username && user.username.toLowerCase() === 'batta';
+      const hasStoredCredentials = localStorage.getItem('adminCredentials');
+      
+      console.log('AdminPage - authorization check:', {
+        email: user?.email,
+        username: user?.username,
+        isCreatorEmail,
+        isCreatorUsername,
+        hasStoredCredentials: !!hasStoredCredentials
+      });
+      
+      if (isCreatorEmail || isCreatorUsername || hasStoredCredentials) {
+        console.log('✅ Admin access granted in AdminPage');
+        setIsAuthorized(true);
+        setCheckingAuth(false);
         return;
       }
+      
+      // If no user and no stored credentials, redirect to login
+      if (!user && !hasStoredCredentials) {
+        console.log('❌ No user and no stored credentials - redirecting to login');
+        setIsAuthorized(false);
+        setCheckingAuth(false);
+        navigate('/login');
+        return;
+      }
+      
+      // If user exists but not admin, show error
+      if (user && !isCreatorEmail && !isCreatorUsername) {
+        console.log('❌ User is not admin - redirecting to home');
+        setIsAuthorized(false);
+        setCheckingAuth(false);
+        toast.error('ليس لديك صلاحية للوصول إلى لوحة الإدارة');
+        setTimeout(() => navigate('/'), 2000);
+        return;
+      }
+      
       setCheckingAuth(false);
     };
 

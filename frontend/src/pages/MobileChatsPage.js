@@ -227,7 +227,7 @@ const MobileChatsPage = () => {
 
           {/* Create Group Button */}
           <button
-            onClick={() => window.location.href = '/create-group'}
+            onClick={() => navigate('/create-group')}
             className="w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors border-b border-gray-100 dark:border-gray-700 mb-4"
           >
             <div className="flex items-center space-x-3">

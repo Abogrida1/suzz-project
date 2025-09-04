@@ -26,14 +26,14 @@ export const SocketProvider = ({ children }) => {
         auth: {
           token: token
         },
-        transports: ['polling'],
+        transports: ['websocket', 'polling'],
         timeout: 30000,
         forceNew: true,
         reconnection: true,
-        reconnectionDelay: 2000,
-        reconnectionDelayMax: 10000,
-        reconnectionAttempts: 10,
-        maxReconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
+        maxReconnectionAttempts: 5,
         randomizationFactor: 0.5,
         autoConnect: true,
         upgrade: true,
@@ -175,8 +175,10 @@ export const SocketProvider = ({ children }) => {
 
       // Handle message sent confirmation
       newSocket.on('message_sent', (message) => {
+        console.log('SocketContext: message_sent event received:', message);
         // Replace optimistic message with real message
         window.dispatchEvent(new CustomEvent('messageSent', { detail: message }));
+        console.log('SocketContext: Dispatched messageSent custom event');
       });
 
       newSocket.on('new_private_message', (data) => {
@@ -255,10 +257,10 @@ export const SocketProvider = ({ children }) => {
 
   const sendMessage = (messageData) => {
     if (socket && connected) {
-      // Send actual message directly without optimistic message
+      console.log('Sending message:', messageData);
       socket.emit('send_message', messageData);
     } else {
-      console.error('Socket not connected');
+      console.error('Socket not connected', { socket: !!socket, connected });
       toast.error('Connection lost. Please refresh the page.');
     }
   };

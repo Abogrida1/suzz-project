@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import GroupSmartFeatures from './GroupSmartFeatures';
 import api from '../config/axios';
 import toast from 'react-hot-toast';
@@ -30,6 +31,7 @@ import {
 
 const GroupSettingsModal = ({ group, isOpen, onClose, onGroupUpdate }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('general');
   const [loading, setLoading] = useState(false);
   const [members, setMembers] = useState([]);
@@ -204,7 +206,7 @@ const GroupSettingsModal = ({ group, isOpen, onClose, onGroupUpdate }) => {
       toast.success('Group deleted successfully');
       onClose();
       // Navigate back to chats
-      window.location.href = '/mobile-chats';
+      navigate('/mobile-chats');
     } catch (error) {
       console.error('Error deleting group:', error);
       toast.error('Failed to delete group');
@@ -785,7 +787,7 @@ const GroupSettingsModal = ({ group, isOpen, onClose, onGroupUpdate }) => {
                         toast.success('Left group successfully');
                         onClose();
                         // Navigate back to chats
-                        window.location.href = '/mobile-chats';
+                        navigate('/mobile-chats');
                       } catch (error) {
                         console.error('Error leaving group:', error);
                         toast.error('Failed to leave group');

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useCall } from '../contexts/CallContext';
+import { useNavigate } from 'react-router-dom';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import TypingIndicator from './TypingIndicator';
@@ -21,6 +22,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
   const messagesEndRef = useRef(null);
 
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { 
     socket, 
     joinGlobalChat, 
@@ -95,7 +97,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
         leaveGroupChat(selectedUser._id);
       }
     };
-  }, [activeChat, selectedUser]);
+  }, [activeChat, selectedUser?._id]);
 
   // Handle socket events
   useEffect(() => {
@@ -106,7 +108,18 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       setMessages(prev => {
         // Check if message already exists to avoid duplicates
         const exists = prev.find(m => m._id === message._id);
-        if (exists) return prev;
+        if (exists) {
+          console.log('Message already exists, skipping duplicate');
+          return prev;
+        }
+        
+        // Don't add messages from current user (they're handled by message_sent)
+        if (message.sender._id === user._id) {
+          console.log('Message from current user, skipping (handled by message_sent)');
+          return prev;
+        }
+        
+        console.log('Adding new message to list');
         return [...prev, message];
       });
       
@@ -124,7 +137,14 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     const handlePrivateMessages = (data) => {
       console.log('Private messages received:', data);
       if (data.otherUserId === selectedUser?._id) {
-        setMessages(data.messages);
+        setMessages(data.messages || []);
+      }
+    };
+
+    const handleGroupMessages = (data) => {
+      console.log('Group messages received:', data);
+      if (data.groupId === selectedUser?._id) {
+        setMessages(data.messages || []);
       }
     };
 
@@ -151,22 +171,39 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       handleMessageReceived(message);
     };
 
+    const handleMessageSent = (event) => {
+      const message = event.detail;
+      console.log('Message sent event received:', message);
+      
+      // Remove optimistic message and add real message
+      setMessages(prev => {
+        // Remove all optimistic messages and add the real one
+        const filtered = prev.filter(m => !m.isOptimistic);
+        console.log('Removing optimistic messages and adding real message:', message._id);
+        return [...filtered, { ...message, status: 'sent' }];
+      });
+    };
+
     socket.on('message_received', handleMessageReceived);
     socket.on('global_messages', handleGlobalMessages);
     socket.on('private_messages', handlePrivateMessages);
+    socket.on('group_messages', handleGroupMessages);
     socket.on('user_typing', handleUserTyping);
     socket.on('user_stopped_typing', handleUserStoppedTyping);
     
     // Listen for custom events
     window.addEventListener('newMessage', handleNewMessage);
+    window.addEventListener('messageSent', handleMessageSent);
 
     return () => {
       socket.off('message_received', handleMessageReceived);
       socket.off('global_messages', handleGlobalMessages);
       socket.off('private_messages', handlePrivateMessages);
+      socket.off('group_messages', handleGroupMessages);
       socket.off('user_typing', handleUserTyping);
       socket.off('user_stopped_typing', handleUserStoppedTyping);
       window.removeEventListener('newMessage', handleNewMessage);
+      window.removeEventListener('messageSent', handleMessageSent);
     };
   }, [socket, selectedUser, user]);
 
@@ -178,6 +215,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       setMessages(response.data.messages || []);
     } catch (error) {
       console.error('Error loading global messages:', error);
+      setMessages([]);
     } finally {
       setLoading(false);
     }
@@ -192,6 +230,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       setMessages(response.data.messages || []);
     } catch (error) {
       console.error('Error loading private messages:', error);
+      setMessages([]);
     } finally {
       setLoading(false);
     }
@@ -206,6 +245,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       setMessages(response.data.messages || []);
     } catch (error) {
       console.error('Error loading group messages:', error);
+      setMessages([]);
     } finally {
       setLoading(false);
     }
@@ -215,6 +255,30 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
   const handleSendMessage = (messageData) => {
     if (!messageData.content && !messageData.attachment) return;
 
+    // Create optimistic message with unique ID
+    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const optimisticMessage = {
+      _id: tempId,
+      content: messageData.content,
+      type: messageData.type || 'text',
+      chatType: activeChat,
+      sender: {
+        _id: user._id,
+        username: user.username,
+        displayName: user.displayName,
+        avatar: user.avatar
+      },
+      status: 'sending',
+      createdAt: new Date().toISOString(),
+      attachment: messageData.attachment,
+      replyTo: messageData.replyTo,
+      isOptimistic: true // Mark as optimistic
+    };
+
+    // Add optimistic message immediately
+    console.log('Adding optimistic message:', optimisticMessage._id);
+    setMessages(prev => [...prev, optimisticMessage]);
+
     const data = {
       content: messageData.content,
       type: messageData.type || 'text',
@@ -222,10 +286,26 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       recipients: activeChat === 'private' ? [selectedUser._id] : 
                   activeChat === 'group' ? [selectedUser._id] : [],
       attachment: messageData.attachment,
-      replyTo: messageData.replyTo
+      replyTo: messageData.replyTo,
+      tempId: tempId // Include temp ID for tracking
     };
 
+    console.log('Sending message data:', data);
     sendMessage(data);
+
+    // Immediate fallback: Update status after 1 second
+    const timeoutId = setTimeout(() => {
+      setMessages(prev => {
+        const updated = prev.map(m => {
+          if (m._id === tempId && m.isOptimistic) {
+            console.log('Fallback: Updating optimistic message status to sent:', tempId);
+            return { ...m, status: 'sent', isOptimistic: false };
+          }
+          return m;
+        });
+        return updated;
+      });
+    }, 1000); // 1 second fallback
   };
 
   // Handle typing indicators
@@ -338,7 +418,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
           <div className="flex items-center space-x-3">
             {isMobile && (
               <button
-                onClick={() => window.location.href = '/mobile-chats'}
+                onClick={() => navigate('/mobile-chats')}
                 className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 title="Back to chats"
               >

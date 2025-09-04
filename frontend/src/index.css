@@ -107,22 +107,22 @@
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
     display: block !important;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-gray-100 dark:bg-gray-800;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
     border-radius: 4px;
     display: block !important;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-gray-400 dark:bg-gray-500 rounded-full;
     border: 1px solid transparent;
     background-clip: content-box;
     display: block !important;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-500 dark:bg-gray-400;
   }
   
