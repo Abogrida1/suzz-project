@@ -53,6 +53,41 @@ const setupSocketHandlers = (io) => {
       user: socket.user.getPublicProfile()
     });
 
+    // Mark all pending messages as delivered when user comes online
+    try {
+      const pendingMessages = await Message.find({
+        'deliveryStatus.user': socket.userId,
+        'deliveryStatus.status': { $ne: 'delivered' }
+      });
+
+      for (const message of pendingMessages) {
+        const existingStatus = message.deliveryStatus.find(ds => ds.user.toString() === socket.userId.toString());
+        if (existingStatus) {
+          existingStatus.status = 'delivered';
+          existingStatus.timestamp = new Date();
+        } else {
+          message.deliveryStatus.push({
+            user: socket.userId,
+            status: 'delivered',
+            timestamp: new Date()
+          });
+        }
+        await message.save();
+
+        // Notify sender about delivery
+        const senderSocket = await findUserSocket(message.sender);
+        if (senderSocket) {
+          senderSocket.emit('message_delivery_update', {
+            messageId: message._id,
+            status: 'delivered',
+            recipientId: socket.userId
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error marking messages as delivered:', error);
+    }
+
     // Handle joining global chat
     socket.on('join_global', async () => {
       socket.join('global_chat');
@@ -326,6 +361,17 @@ const setupSocketHandlers = (io) => {
         socket.emit('message_sent', message);
         console.log('Sent message_sent event to sender:', socket.user.username, 'message ID:', message._id);
 
+        // Set up delivery status tracking for private messages
+        if (chatType === 'private' && recipients && recipients.length === 1) {
+          // Mark as delivered when recipient comes online
+          message.deliveryStatus.push({
+            user: recipients[0],
+            status: 'delivered',
+            timestamp: new Date()
+          });
+          await message.save();
+        }
+
       } catch (error) {
         console.error('Send message error:', error);
         socket.emit('error', { 
@@ -370,6 +416,43 @@ const setupSocketHandlers = (io) => {
       }
     });
 
+    // Handle message delivery status
+    socket.on('message_delivered', async (data) => {
+      try {
+        const { messageId, recipientId } = data;
+        console.log('Message delivered:', messageId, 'to:', recipientId);
+        
+        const message = await Message.findById(messageId);
+        if (message) {
+          // Update delivery status
+          const existingStatus = message.deliveryStatus.find(ds => ds.user.toString() === recipientId);
+          if (existingStatus) {
+            existingStatus.status = 'delivered';
+            existingStatus.timestamp = new Date();
+          } else {
+            message.deliveryStatus.push({
+              user: recipientId,
+              status: 'delivered',
+              timestamp: new Date()
+            });
+          }
+          await message.save();
+          
+          // Notify sender about delivery
+          const senderSocket = await findUserSocket(message.sender);
+          if (senderSocket) {
+            senderSocket.emit('message_delivery_update', {
+              messageId: message._id,
+              status: 'delivered',
+              recipientId: recipientId
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Message delivery error:', error);
+      }
+    });
+
     // Handle message read status
     socket.on('mark_message_read', async (data) => {
       try {
@@ -379,12 +462,27 @@ const setupSocketHandlers = (io) => {
         if (message) {
           await message.markAsRead(socket.userId);
           
+          // Update read status in deliveryStatus
+          const existingStatus = message.deliveryStatus.find(ds => ds.user.toString() === socket.userId.toString());
+          if (existingStatus) {
+            existingStatus.status = 'seen';
+            existingStatus.timestamp = new Date();
+          } else {
+            message.deliveryStatus.push({
+              user: socket.userId,
+              status: 'seen',
+              timestamp: new Date()
+            });
+          }
+          await message.save();
+          
           // Notify sender that message was read
           const senderSocket = await findUserSocket(message.sender);
           if (senderSocket) {
-            senderSocket.emit('message_read', {
+            senderSocket.emit('message_read_update', {
               messageId,
-              readBy: socket.userId,
+              status: 'seen',
+              readerId: socket.userId,
               readAt: new Date()
             });
           }

@@ -32,6 +32,8 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     joinGroupChat,
     leaveGroupChat,
     sendMessage,
+    markMessageDelivered,
+    markMessageRead,
     startTyping,
     stopTyping,
     typingUsers: socketTypingUsers
@@ -184,6 +186,34 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       });
     };
 
+    const handleMessageDeliveryUpdate = (event) => {
+      const data = event.detail;
+      console.log('Message delivery update received:', data);
+      
+      setMessages(prev => {
+        return prev.map(m => {
+          if (m._id === data.messageId) {
+            return { ...m, status: 'delivered' };
+          }
+          return m;
+        });
+      });
+    };
+
+    const handleMessageReadUpdate = (event) => {
+      const data = event.detail;
+      console.log('Message read update received:', data);
+      
+      setMessages(prev => {
+        return prev.map(m => {
+          if (m._id === data.messageId) {
+            return { ...m, status: 'seen' };
+          }
+          return m;
+        });
+      });
+    };
+
     socket.on('message_received', handleMessageReceived);
     socket.on('global_messages', handleGlobalMessages);
     socket.on('private_messages', handlePrivateMessages);
@@ -194,6 +224,8 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     // Listen for custom events
     window.addEventListener('newMessage', handleNewMessage);
     window.addEventListener('messageSent', handleMessageSent);
+    window.addEventListener('messageDeliveryUpdate', handleMessageDeliveryUpdate);
+    window.addEventListener('messageReadUpdate', handleMessageReadUpdate);
 
     return () => {
       socket.off('message_received', handleMessageReceived);
@@ -204,8 +236,43 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       socket.off('user_stopped_typing', handleUserStoppedTyping);
       window.removeEventListener('newMessage', handleNewMessage);
       window.removeEventListener('messageSent', handleMessageSent);
+      window.removeEventListener('messageDeliveryUpdate', handleMessageDeliveryUpdate);
+      window.removeEventListener('messageReadUpdate', handleMessageReadUpdate);
     };
   }, [socket, selectedUser, user]);
+
+  // Mark messages as delivered when user opens the chat
+  useEffect(() => {
+    if (socket && selectedUser && activeChat === 'private') {
+      // Mark all unread messages as delivered
+      const unreadMessages = messages.filter(m => 
+        m.sender._id !== user._id && 
+        m.status === 'sent' && 
+        !m.deliveryStatus?.some(ds => ds.user.toString() === selectedUser._id.toString() && ds.status === 'delivered')
+      );
+      
+      unreadMessages.forEach(message => {
+        console.log('Marking message as delivered:', message._id, 'to:', selectedUser._id);
+        markMessageDelivered(message._id, selectedUser._id);
+      });
+    }
+  }, [socket, selectedUser, activeChat, messages, user._id, markMessageDelivered]);
+
+  // Mark messages as read when user views them
+  useEffect(() => {
+    if (socket && selectedUser && activeChat === 'private') {
+      // Mark all delivered messages as read
+      const deliveredMessages = messages.filter(m => 
+        m.sender._id !== user._id && 
+        m.status === 'delivered' && 
+        !m.deliveryStatus?.some(ds => ds.user.toString() === selectedUser._id.toString() && ds.status === 'seen')
+      );
+      
+      deliveredMessages.forEach(message => {
+        markMessageRead(message._id);
+      });
+    }
+  }, [socket, selectedUser, activeChat, messages, user._id, markMessageRead]);
 
   // Load messages
   const loadGlobalMessages = async () => {

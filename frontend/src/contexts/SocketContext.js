@@ -181,6 +181,18 @@ export const SocketProvider = ({ children }) => {
         console.log('SocketContext: Dispatched messageSent custom event');
       });
 
+      // Handle message delivery updates
+      newSocket.on('message_delivery_update', (data) => {
+        console.log('SocketContext: message_delivery_update event received:', data);
+        window.dispatchEvent(new CustomEvent('messageDeliveryUpdate', { detail: data }));
+      });
+
+      // Handle message read updates
+      newSocket.on('message_read_update', (data) => {
+        console.log('SocketContext: message_read_update event received:', data);
+        window.dispatchEvent(new CustomEvent('messageReadUpdate', { detail: data }));
+      });
+
       newSocket.on('new_private_message', (data) => {
         // Show notification for new private messages
         if (data.sender._id !== user._id) {
@@ -265,6 +277,20 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
+  const markMessageDelivered = (messageId, recipientId) => {
+    if (socket && connected) {
+      console.log('Marking message as delivered:', messageId, 'to:', recipientId);
+      socket.emit('message_delivered', { messageId, recipientId });
+    }
+  };
+
+  const markMessageRead = (messageId) => {
+    if (socket && connected) {
+      console.log('Marking message as read:', messageId);
+      socket.emit('mark_message_read', { messageId });
+    }
+  };
+
   const startTyping = (chatType, recipients) => {
     if (socket) {
       socket.emit('typing_start', { chatType, recipients });
@@ -326,9 +352,10 @@ export const SocketProvider = ({ children }) => {
     joinGroupChat,
     leaveGroupChat,
     sendMessage,
+    markMessageDelivered,
+    markMessageRead,
     startTyping,
     stopTyping,
-    markMessageRead,
     confirmMessageDelivery,
     confirmMessageRead,
     addReaction,

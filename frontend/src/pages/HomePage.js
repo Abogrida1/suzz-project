@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
+import { useSocket } from '../contexts/SocketContext';
 import Navigation from '../components/Navigation';
 import toast from 'react-hot-toast';
 import { 
@@ -18,8 +19,17 @@ import {
 
 const HomePage = () => {
   const { user } = useAuth();
+  const { socket, markMessageDelivered } = useSocket();
   const navigate = useNavigate();
   const isMobile = window.innerWidth < 768;
+
+  // Mark messages as delivered when user opens the website
+  useEffect(() => {
+    if (socket && user) {
+      // This will be handled by the socket connection
+      console.log('User opened website, marking messages as delivered');
+    }
+  }, [socket, user]);
 
   const handleStartChatting = () => {
     if (isMobile) {
