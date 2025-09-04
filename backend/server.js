@@ -136,6 +136,15 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Test route for debugging
+app.get('/test', (req, res) => {
+  res.json({ 
+    message: 'Server is working!',
+    path: req.path,
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Root endpoint moved to the end for proper SPA routing
 
 // Serve frontend build files
