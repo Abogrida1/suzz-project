@@ -6,7 +6,6 @@ import { SocketProvider } from './contexts/SocketContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CallProvider } from './contexts/CallContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import Navigation from './components/Navigation';
 import VoiceCallModal from './components/VoiceCallModal';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -17,7 +16,6 @@ import Chat from './pages/Chat';
 import CreateGroupPage from './pages/CreateGroupPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
-import AdminRoutes from './routes/AdminRoutes';
 import AdminPage from './pages/AdminPage';
 import AdminLogin from './pages/AdminLogin';
 

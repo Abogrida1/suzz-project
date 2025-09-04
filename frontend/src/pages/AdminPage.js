@@ -347,6 +347,28 @@ const AdminPage = () => {
     );
   }
 
+  // If still checking authorization, show loading
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 w-full max-w-md text-center"
+        >
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full mb-4">
+            <FaShieldAlt className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            جاري التحقق من الصلاحيات...
+          </h1>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto"></div>
+        </motion.div>
+      </div>
+    );
+  }
+
   // If user is not authorized, show error message
   if (!isAuthorized) {
     return (
