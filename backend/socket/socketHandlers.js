@@ -922,15 +922,23 @@ const setupSocketHandlers = (io) => {
           duration: 0
         };
 
-        // Emit to recipient
-        socket.to(recipientId).emit('incoming_call', callData);
+        // Store call data globally
+        global.activeCalls = global.activeCalls || {};
+        global.activeCalls[callData.id] = callData;
+
+        // Emit to recipient with retry mechanism
+        const recipientSocket = io.sockets.sockets.get(recipientId);
+        if (recipientSocket) {
+          recipientSocket.emit('incoming_call', callData);
+          console.log('Call sent to recipient:', recipientId);
+        } else {
+          console.log('Recipient not found:', recipientId);
+        }
         
         // Emit to caller
         socket.emit('call_initiated', callData);
         
         console.log('Call initiated:', callData);
-        console.log('Emitted to recipient:', recipientId);
-        console.log('Emitted to caller:', socket.userId);
         
       } catch (error) {
         console.error('Start call error:', error);
@@ -944,12 +952,25 @@ const setupSocketHandlers = (io) => {
         
         console.log('Call accepted:', { callId, acceptedBy: socket.userId });
         
-        // Emit to all participants
-        io.emit('call_accepted', {
-          callId,
-          acceptedBy: socket.userId,
-          acceptedAt: new Date()
-        });
+        // Update call status
+        if (global.activeCalls && global.activeCalls[callId]) {
+          global.activeCalls[callId].status = 'accepted';
+          global.activeCalls[callId].acceptedAt = new Date();
+        }
+        
+        // Emit to caller specifically
+        const callData = global.activeCalls?.[callId];
+        if (callData) {
+          const callerSocket = io.sockets.sockets.get(callData.callerId);
+          if (callerSocket) {
+            callerSocket.emit('call_accepted', {
+              callId,
+              acceptedBy: socket.userId,
+              acceptedAt: new Date()
+            });
+            console.log('Call accepted sent to caller:', callData.callerId);
+          }
+        }
         
       } catch (error) {
         console.error('Accept call error:', error);
@@ -961,12 +982,27 @@ const setupSocketHandlers = (io) => {
       try {
         const { callId } = data;
         
-        // Emit to all participants
-        io.emit('call_rejected', {
-          callId,
-          rejectedBy: socket.userId,
-          rejectedAt: new Date()
-        });
+        console.log('Call rejected:', { callId, rejectedBy: socket.userId });
+        
+        // Update call status
+        if (global.activeCalls && global.activeCalls[callId]) {
+          global.activeCalls[callId].status = 'rejected';
+          global.activeCalls[callId].rejectedAt = new Date();
+        }
+        
+        // Emit to caller specifically
+        const callData = global.activeCalls?.[callId];
+        if (callData) {
+          const callerSocket = io.sockets.sockets.get(callData.callerId);
+          if (callerSocket) {
+            callerSocket.emit('call_rejected', {
+              callId,
+              rejectedBy: socket.userId,
+              rejectedAt: new Date()
+            });
+            console.log('Call rejected sent to caller:', callData.callerId);
+          }
+        }
         
       } catch (error) {
         console.error('Reject call error:', error);
@@ -978,17 +1014,83 @@ const setupSocketHandlers = (io) => {
       try {
         const { callId, duration } = data;
         
+        console.log('Call ended:', { callId, endedBy: socket.userId, duration });
+        
+        // Update call status
+        if (global.activeCalls && global.activeCalls[callId]) {
+          global.activeCalls[callId].status = 'ended';
+          global.activeCalls[callId].endedAt = new Date();
+          global.activeCalls[callId].duration = duration || 0;
+        }
+        
         // Emit to all participants
-        io.emit('call_ended', {
-          callId,
-          endedBy: socket.userId,
-          endedAt: new Date(),
-          duration: duration || 0
-        });
+        const callData = global.activeCalls?.[callId];
+        if (callData) {
+          // Emit to caller
+          const callerSocket = io.sockets.sockets.get(callData.callerId);
+          if (callerSocket) {
+            callerSocket.emit('call_ended', {
+              callId,
+              endedBy: socket.userId,
+              endedAt: new Date(),
+              duration: duration || 0
+            });
+          }
+          
+          // Emit to recipient
+          const recipientSocket = io.sockets.sockets.get(callData.recipientId);
+          if (recipientSocket) {
+            recipientSocket.emit('call_ended', {
+              callId,
+              endedBy: socket.userId,
+              endedAt: new Date(),
+              duration: duration || 0
+            });
+          }
+          
+          // Remove from active calls
+          delete global.activeCalls[callId];
+        }
         
       } catch (error) {
         console.error('End call error:', error);
         socket.emit('call_error', { message: 'Failed to end call' });
+      }
+    });
+
+    // WebRTC Handlers
+    socket.on('offer', (data) => {
+      const { callId, offer } = data;
+      const callData = global.activeCalls?.[callId];
+      if (callData) {
+        const recipientSocket = io.sockets.sockets.get(callData.recipientId);
+        if (recipientSocket) {
+          recipientSocket.emit('offer', { callId, offer });
+        }
+      }
+    });
+
+    socket.on('answer', (data) => {
+      const { callId, answer } = data;
+      const callData = global.activeCalls?.[callId];
+      if (callData) {
+        const callerSocket = io.sockets.sockets.get(callData.callerId);
+        if (callerSocket) {
+          callerSocket.emit('answer', { callId, answer });
+        }
+      }
+    });
+
+    socket.on('ice_candidate', (data) => {
+      const { callId, candidate } = data;
+      const callData = global.activeCalls?.[callId];
+      if (callData) {
+        const targetSocket = io.sockets.sockets.get(
+          socket.userId === callData.callerId ? callData.recipientId : callData.callerId
+        );
+        if (targetSocket) {
+          targetSocket.emit('ice_candidate', { callId, candidate });
+        }
       }
     });
 

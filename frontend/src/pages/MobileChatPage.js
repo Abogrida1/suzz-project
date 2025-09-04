@@ -51,9 +51,44 @@ const MobileChatPage = () => {
   const [isSpeakerOn, setIsSpeakerOn] = useState(false);
   const [localStream, setLocalStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
+  const [callDuration, setCallDuration] = useState(0);
+  const [callStartTime, setCallStartTime] = useState(null);
+  const [peerConnection, setPeerConnection] = useState(null);
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  // WebRTC configuration
+  const rtcConfig = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]
+  };
+
+  // Create peer connection
+  const createPeerConnection = () => {
+    const pc = new RTCPeerConnection(rtcConfig);
+    
+    // Handle remote stream
+    pc.ontrack = (event) => {
+      console.log('Remote stream received');
+      setRemoteStream(event.streams[0]);
+    };
+    
+    // Handle ICE candidates
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit('ice_candidate', {
+          callId: callData?.id,
+          candidate: event.candidate
+        });
+      }
+    };
+    
+    setPeerConnection(pc);
+    return pc;
+  };
 
   // Scroll to bottom when new messages arrive
   const scrollToBottom = () => {
@@ -309,6 +344,15 @@ const MobileChatPage = () => {
           video: false 
         });
         setLocalStream(stream);
+        
+        // Create peer connection
+        const pc = createPeerConnection();
+        
+        // Add local stream to peer connection
+        stream.getTracks().forEach(track => {
+          pc.addTrack(track, stream);
+        });
+        
         console.log('Local stream started for outgoing call');
       } catch (error) {
         console.error('Error getting user media for outgoing call:', error);
@@ -318,6 +362,8 @@ const MobileChatPage = () => {
 
     socket.on('call_accepted', (data) => {
       console.log('Call accepted:', data);
+      setCallStartTime(Date.now());
+      setCallDuration(0);
     });
 
     socket.on('call_rejected', (data) => {
@@ -371,6 +417,50 @@ const MobileChatPage = () => {
       setMessages(prev => prev.filter(msg => msg.id !== data.messageId));
     });
 
+    // WebRTC handlers
+    socket.on('offer', async (data) => {
+      try {
+        const pc = createPeerConnection();
+        await pc.setRemoteDescription(data.offer);
+        
+        if (localStream) {
+          localStream.getTracks().forEach(track => {
+            pc.addTrack(track, localStream);
+          });
+        }
+        
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        
+        socket.emit('answer', {
+          callId: data.callId,
+          answer: answer
+        });
+      } catch (error) {
+        console.error('Error handling offer:', error);
+      }
+    });
+
+    socket.on('answer', async (data) => {
+      try {
+        if (peerConnection) {
+          await peerConnection.setRemoteDescription(data.answer);
+        }
+      } catch (error) {
+        console.error('Error handling answer:', error);
+      }
+    });
+
+    socket.on('ice_candidate', async (data) => {
+      try {
+        if (peerConnection) {
+          await peerConnection.addIceCandidate(data.candidate);
+        }
+      } catch (error) {
+        console.error('Error handling ICE candidate:', error);
+      }
+    });
+
     return () => {
       socket.off('message_received', handleMessageReceived);
       socket.off('message_sent', handleMessageSent);
@@ -383,6 +473,9 @@ const MobileChatPage = () => {
       socket.off('call_error');
       socket.off('voice_message');
       socket.off('voice_message_deleted');
+      socket.off('offer');
+      socket.off('answer');
+      socket.off('ice_candidate');
       
       // Cleanup streams
       if (localStream) {
@@ -391,8 +484,24 @@ const MobileChatPage = () => {
       if (remoteStream) {
         remoteStream.getTracks().forEach(track => track.stop());
       }
+      if (peerConnection) {
+        peerConnection.close();
+      }
     };
   }, [socket, chatId, user]);
+
+  // Call duration timer
+  useEffect(() => {
+    let interval;
+    if (isCallActive && callStartTime) {
+      interval = setInterval(() => {
+        setCallDuration(Math.floor((Date.now() - callStartTime) / 1000));
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isCallActive, callStartTime]);
 
   // Send message
   const sendMessage = async () => {
@@ -513,6 +622,28 @@ const MobileChatPage = () => {
         });
         setLocalStream(stream);
         
+        // Create peer connection
+        const pc = createPeerConnection();
+        
+        // Add local stream to peer connection
+        stream.getTracks().forEach(track => {
+          pc.addTrack(track, stream);
+        });
+        
+        // Create offer
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        
+        // Send offer to caller
+        socket.emit('offer', {
+          callId: callData.id,
+          offer: offer
+        });
+        
+        // Start call timer
+        setCallStartTime(Date.now());
+        setCallDuration(0);
+        
         socket.emit('accept_call', { callId: callData.id });
         console.log('Call accepted and local stream started');
       } catch (error) {
@@ -530,7 +661,10 @@ const MobileChatPage = () => {
 
   const endCall = () => {
     if (socket && callData) {
-      socket.emit('end_call', { callId: callData.id });
+      socket.emit('end_call', { 
+        callId: callData.id, 
+        duration: callDuration 
+      });
     }
     
     // Stop all streams
@@ -547,6 +681,8 @@ const MobileChatPage = () => {
     setCallData(null);
     setIsMuted(false);
     setIsSpeakerOn(false);
+    setCallDuration(0);
+    setCallStartTime(null);
   };
 
   // Mute/Unmute functions
@@ -1085,7 +1221,7 @@ const MobileChatPage = () => {
           onSpeakerOff={handleSpeakerOff}
           isMuted={isMuted}
           isSpeakerOn={isSpeakerOn}
-          callDuration={0}
+          callDuration={callDuration}
         />
       )}
 

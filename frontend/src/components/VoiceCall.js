@@ -36,18 +36,24 @@ const VoiceCall = ({
 
   // Timer effect
   useEffect(() => {
-    if (isAccepted && !isIncoming) {
+    if (isAccepted) {
       intervalRef.current = setInterval(() => {
         setCallTime(prev => prev + 1);
       }, 1000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [isAccepted, isIncoming]);
+  }, [isAccepted]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
