@@ -60,6 +60,37 @@ const MobileChatPage = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Prevent zoom on input focus for mobile
+  useEffect(() => {
+    const handleFocusIn = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        // Prevent zoom on iOS
+        const viewport = document.querySelector('meta[name=viewport]');
+        if (viewport) {
+          viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
+        }
+      }
+    };
+
+    const handleFocusOut = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        // Restore normal viewport
+        const viewport = document.querySelector('meta[name=viewport]');
+        if (viewport) {
+          viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
+        }
+      }
+    };
+
+    document.addEventListener('focusin', handleFocusIn);
+    document.addEventListener('focusout', handleFocusOut);
+
+    return () => {
+      document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
+
   // Fetch chat info and messages
   useEffect(() => {
     const fetchChatData = async () => {
@@ -93,6 +124,7 @@ const MobileChatPage = () => {
             if (conversation) {
               setChatInfo({
                 id: chatId,
+                userId: conversation.otherUser._id,
                 type: 'private',
                 name: conversation.otherUser.displayName || conversation.otherUser.username || 'Unknown User',
                 avatar: conversation.otherUser.avatar || `https://ui-avatars.com/api/?name=${conversation.otherUser.username || 'U'}&background=3b82f6&color=fff`,
@@ -146,6 +178,7 @@ const MobileChatPage = () => {
               
               setChatInfo({
                 id: chatId,
+                userId: otherUser._id,
                 type: 'private',
                 name: otherUser.displayName || otherUser.username || 'Unknown',
                 avatar: otherUser.avatar || `https://ui-avatars.com/api/?name=${otherUser.username || 'U'}&background=3b82f6&color=fff`,
@@ -163,6 +196,7 @@ const MobileChatPage = () => {
         if (!foundUser) {
           setChatInfo({
             id: chatId,
+            userId: null, // Will be set when we get the actual user ID
             type: 'private',
             name: 'المستخدم',
             avatar: `https://ui-avatars.com/api/?name=U&background=3b82f6&color=fff`,
@@ -176,6 +210,7 @@ const MobileChatPage = () => {
         // Set basic chat info even if there's an error
         setChatInfo({
           id: chatId,
+          userId: null, // Will be set when we get the actual user ID
           type: 'private',
           name: 'المستخدم',
           avatar: `https://ui-avatars.com/api/?name=U&background=3b82f6&color=fff`,
@@ -398,11 +433,14 @@ const MobileChatPage = () => {
 
   // Voice call functions
   const startCall = () => {
-    if (socket && chatInfo) {
+    if (socket && chatInfo && chatInfo.userId) {
       socket.emit('start_call', {
         recipientId: chatInfo.userId,
         callType: 'voice'
       });
+    } else {
+      console.error('Cannot start call: missing socket, chatInfo, or userId');
+      alert('لا يمكن بدء المكالمة: معلومات المستخدم غير مكتملة');
     }
   };
 
@@ -717,7 +755,7 @@ const MobileChatPage = () => {
 
       {/* Typing Indicator - Fixed above input */}
       {typingUsers.length > 0 && (
-        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-t border-gray-200/50 dark:border-gray-700/50 px-4 py-2">
+        <div className="typing-indicator px-4 py-2">
           <div className="flex justify-start">
             <div className="bg-white dark:bg-gray-700 px-4 py-2 rounded-2xl rounded-bl-md border border-gray-200 dark:border-gray-600">
               <div className="flex items-center space-x-2 rtl:space-x-reverse">

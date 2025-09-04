@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
+import './MobileChatsPage.css';
 import { 
   FaSearch, 
   FaPlus, 
@@ -219,7 +220,7 @@ const MobileChatsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-900">
+    <div className="mobile-chats-container bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-900">
       <Navigation user={user} />
       
       {/* Modern Header */}
@@ -289,16 +290,16 @@ const MobileChatsPage = () => {
                       </div>
                       
       {/* Conversations List */}
-      <div className="overflow-y-auto">
+      <div className="conversations-scroll conversations-container">
         {loading ? (
-          <div className="flex items-center justify-center py-12 pb-20">
+          <div className="flex items-center justify-center py-12 pb-32">
             <div className="flex flex-col items-center space-y-4">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
               <p className="text-gray-500 dark:text-gray-400">جاري التحميل...</p>
                       </div>
                     </div>
         ) : filteredConversations.length === 0 ? (
-          <div className="text-center py-12 pb-20">
+          <div className="text-center py-12 pb-32">
             <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 rounded-full flex items-center justify-center mx-auto mb-6">
               <FaComments className="text-blue-500 dark:text-blue-400" size={32} />
               </div>
@@ -318,7 +319,7 @@ const MobileChatsPage = () => {
             )}
           </div>
         ) : (
-          <div className="px-6 py-4 pb-20 space-y-4">
+          <div className="conversations-list px-6 py-4 space-y-4">
             {filteredConversations.map((conversation, index) => (
               <motion.div
                 key={conversation.id}

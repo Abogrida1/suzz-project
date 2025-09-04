@@ -1,8 +1,11 @@
 /* Mobile Chat Page Styles */
 .mobile-chat-container {
   height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile */
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  position: relative;
 }
 
 .mobile-chat-header {
@@ -24,6 +27,7 @@
   flex: 1;
   overflow-y: auto;
   scroll-behavior: smooth;
+  min-height: 0; /* Important for flexbox */
   /* Custom scrollbar for webkit browsers */
   scrollbar-width: thin;
   scrollbar-color: #cbd5e0 #f7fafc;
@@ -51,6 +55,9 @@
   position: sticky;
   bottom: 0;
   z-index: 10;
+  /* Prevent keyboard from pushing content up */
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 /* Dark mode scrollbar */
@@ -111,6 +118,19 @@
   .mobile-chat-messages {
     -webkit-overflow-scrolling: touch;
   }
+  
+  /* Prevent keyboard issues on mobile */
+  .mobile-chat-container {
+    height: 100vh;
+    height: 100dvh;
+  }
+  
+  /* Fix for iOS Safari */
+  @supports (-webkit-touch-callout: none) {
+    .mobile-chat-container {
+      height: -webkit-fill-available;
+    }
+  }
 }
 
 /* Additional responsive improvements */
@@ -147,5 +167,38 @@
 @media (min-width: 640px) {
   .mobile-chat-header .flex {
     gap: 0.75rem;
+  }
+}
+
+/* Typing indicator positioning */
+.typing-indicator {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.dark .typing-indicator {
+  background: rgba(31, 41, 55, 0.95);
+  border-top: 1px solid rgba(75, 85, 99, 0.5);
+}
+
+/* Prevent layout shift when typing indicator appears */
+.mobile-chat-messages {
+  padding-bottom: 0;
+}
+
+/* Keyboard handling */
+@media (max-width: 768px) {
+  .mobile-chat-container {
+    /* Prevent zoom on input focus */
+    font-size: 16px;
+  }
+  
+  .mobile-chat-input input,
+  .mobile-chat-input textarea {
+    font-size: 16px;
   }
 }
