@@ -928,6 +928,8 @@ const setupSocketHandlers = (io) => {
         // Emit to caller
         socket.emit('call_initiated', callData);
         
+        console.log('Call initiated:', callData);
+        
       } catch (error) {
         console.error('Start call error:', error);
         socket.emit('call_error', { message: 'Failed to start call' });

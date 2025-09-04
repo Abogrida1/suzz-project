@@ -288,6 +288,13 @@ const MobileChatPage = () => {
 
     // Voice call handlers
     socket.on('incoming_call', (data) => {
+      console.log('Incoming call:', data);
+      setCallData(data);
+      setIsCallActive(true);
+    });
+
+    socket.on('call_initiated', (data) => {
+      console.log('Call initiated:', data);
       setCallData(data);
       setIsCallActive(true);
     });
@@ -339,6 +346,7 @@ const MobileChatPage = () => {
       socket.off('message_sent', handleMessageSent);
       socket.off('user_typing', handleTyping);
       socket.off('incoming_call');
+      socket.off('call_initiated');
       socket.off('call_accepted');
       socket.off('call_rejected');
       socket.off('call_ended');
@@ -433,15 +441,28 @@ const MobileChatPage = () => {
 
   // Voice call functions
   const startCall = () => {
-    if (socket && chatInfo && chatInfo.userId) {
-      socket.emit('start_call', {
-        recipientId: chatInfo.userId,
-        callType: 'voice'
-      });
-    } else {
-      console.error('Cannot start call: missing socket, chatInfo, or userId');
-      alert('لا يمكن بدء المكالمة: معلومات المستخدم غير مكتملة');
+    console.log('Start call clicked', { socket: !!socket, chatInfo, userId: chatInfo?.userId });
+    
+    if (!socket) {
+      alert('لا يمكن بدء المكالمة: الاتصال غير متاح');
+      return;
     }
+    
+    if (!chatInfo) {
+      alert('لا يمكن بدء المكالمة: معلومات المحادثة غير متاحة');
+      return;
+    }
+    
+    if (!chatInfo.userId) {
+      alert('لا يمكن بدء المكالمة: معرف المستخدم غير متاح');
+      return;
+    }
+    
+    console.log('Starting call with recipientId:', chatInfo.userId);
+    socket.emit('start_call', {
+      recipientId: chatInfo.userId,
+      callType: 'voice'
+    });
   };
 
   const acceptCall = () => {
@@ -942,11 +963,19 @@ const MobileChatPage = () => {
       {/* Voice Call Modal */}
       {isCallActive && callData && (
         <VoiceCall
-          callData={callData}
+          isIncoming={callData.recipientId === user._id}
+          callerName={callData.callerName || callData.recipientName}
+          callerAvatar={callData.callerAvatar || callData.recipientAvatar}
           onAccept={acceptCall}
           onReject={rejectCall}
           onEnd={endCall}
-          isIncoming={callData.recipientId === user._id}
+          onMute={() => console.log('Mute')}
+          onUnmute={() => console.log('Unmute')}
+          onSpeakerOn={() => console.log('Speaker On')}
+          onSpeakerOff={() => console.log('Speaker Off')}
+          isMuted={false}
+          isSpeakerOn={false}
+          callDuration={0}
         />
       )}
     </div>
