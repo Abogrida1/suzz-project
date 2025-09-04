@@ -21,6 +21,13 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
   const [replyTo, setReplyTo] = useState(null);
   const messagesEndRef = useRef(null);
 
+  console.log('ChatArea - Component rendered with props:', {
+    activeChat,
+    selectedUser: selectedUser?.username || selectedUser?.displayName,
+    isMobile,
+    messagesCount: messages.length
+  });
+
   const { user } = useAuth();
   const navigate = useNavigate();
   const { 
@@ -295,10 +302,17 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
   const loadGlobalMessages = async () => {
     setLoading(true);
     try {
+      console.log('Loading global messages...');
       const response = await api.get('/api/messages/global');
+      console.log('Global messages response:', response.data);
       setMessages(response.data.messages || []);
     } catch (error) {
       console.error('Error loading global messages:', error);
+      console.error('Error details:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
       setMessages([]);
     } finally {
       setLoading(false);

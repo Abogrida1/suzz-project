@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -8,6 +9,7 @@ import UserProfile from '../components/UserProfile';
 import { FaBars, FaMoon, FaSun } from 'react-icons/fa';
 
 const Chat = () => {
+  const { chatId } = useParams();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeChat, setActiveChat] = useState('global');
   const [selectedUser, setSelectedUser] = useState(null);
@@ -17,6 +19,15 @@ const Chat = () => {
   const { user, logout } = useAuth();
   const { connected } = useSocket();
   const { theme, toggleTheme } = useTheme();
+
+  console.log('Chat - Component rendered with state:', {
+    chatId,
+    activeChat,
+    selectedUser: selectedUser?.username || selectedUser?.displayName,
+    sidebarOpen,
+    isMobile,
+    hasUser: !!user
+  });
 
   // Handle mobile responsiveness
   useEffect(() => {
@@ -34,6 +45,15 @@ const Chat = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Handle chatId parameter
+  useEffect(() => {
+    if (chatId) {
+      console.log('Chat component - chatId from URL:', chatId);
+      // If chatId is provided, set it as active chat
+      setActiveChat(chatId);
+    }
+  }, [chatId]);
 
   const handleChatSelect = (chatType, user = null) => {
     setActiveChat(chatType);
