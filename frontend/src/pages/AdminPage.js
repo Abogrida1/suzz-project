@@ -103,9 +103,9 @@ const AdminPage = () => {
     checkAdminAuthorization();
   }, [user, navigate]);
 
-  // Auto-redirect when authorization is granted
+  // Load admin data when authorized
   useEffect(() => {
-    if (isAuthorized && !checkingAuth) {
+    if (isAuthorized && !checkingAuth && adminCredentials) {
       console.log('AdminPage - authorization granted, loading admin data');
       // Test API connection first
       testAdminAPI();
@@ -115,7 +115,7 @@ const AdminPage = () => {
       loadMessages();
       loadGroups();
     }
-  }, [isAuthorized, checkingAuth]);
+  }, [isAuthorized, checkingAuth, adminCredentials]);
 
   // Test admin API connection
   const testAdminAPI = async () => {

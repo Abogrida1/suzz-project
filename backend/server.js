@@ -217,6 +217,10 @@ app.get('/account', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
 });
 
+app.get('/settings', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+});
+
 // Add admin routes
 app.get('/admin', (req, res) => {
   console.log('Admin route hit:', req.path);
@@ -275,7 +279,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Serve all frontend routes (catch-all for SPA) - MUST BE LAST
+// 404 handler for API routes only
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ message: 'API route not found' });
+});
+
+// Serve all frontend routes (catch-all for SPA) - MUST BE ABSOLUTELY LAST
 app.get('*', (req, res) => {
   console.log('Catch-all route hit for:', req.path);
   const frontendPath = path.join(__dirname, '../frontend/build/index.html');
@@ -292,11 +301,6 @@ app.get('*', (req, res) => {
       instructions: 'Please build the frontend first'
     });
   }
-});
-
-// 404 handler for API routes only (after catch-all)
-app.use('/api/*', (req, res) => {
-  res.status(404).json({ message: 'API route not found' });
 });
 
 // Database connection
