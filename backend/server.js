@@ -281,7 +281,12 @@ app.use((err, req, res, next) => {
 
 // 404 handler for API routes only
 app.use('/api/*', (req, res) => {
-  res.status(404).json({ message: 'API route not found' });
+  console.log('API route not found:', req.method, req.path);
+  res.status(404).json({ 
+    message: 'API route not found',
+    method: req.method,
+    path: req.path
+  });
 });
 
 // Serve all frontend routes (catch-all for SPA) - MUST BE ABSOLUTELY LAST

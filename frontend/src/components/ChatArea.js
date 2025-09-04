@@ -61,7 +61,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
     if (messages.length > 0) {
       const unreadMessages = messages.filter(msg => 
         msg.sender._id !== user._id && 
-        (!msg.readBy || !msg.readBy.some(read => read.user === user._id))
+        (!msg.readBy || !msg.readBy.some(read => read.user && read.user === user._id))
       );
       
       if (unreadMessages.length > 0) {
@@ -289,7 +289,7 @@ const ChatArea = ({ activeChat, selectedUser, onBackToSidebar, isMobile }) => {
       const deliveredMessages = messages.filter(m => 
         m.sender._id !== user._id && 
         m.status === 'delivered' && 
-        !m.deliveryStatus?.some(ds => ds.user.toString() === selectedUser._id.toString() && ds.status === 'seen')
+        !m.deliveryStatus?.some(ds => ds.user && ds.user.toString() === selectedUser._id.toString() && ds.status === 'seen')
       );
       
       deliveredMessages.forEach(message => {

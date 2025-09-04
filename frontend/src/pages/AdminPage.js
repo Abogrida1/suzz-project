@@ -66,29 +66,41 @@ const AdminPage = () => {
     const checkAdminAuthorization = () => {
       console.log('AdminPage - checking authorization for user:', user);
       
-      // Simple check: if user is batta or has admin credentials, allow access
+      // Strict check: only allow specific admin users
       const isCreatorEmail = user?.email === 'madoabogrida05@gmail.com';
       const isCreatorUsername = user?.username && user.username.toLowerCase() === 'batta';
-      const hasStoredCredentials = localStorage.getItem('adminCredentials');
+      
+      // Check stored credentials - must be valid admin credentials
+      let hasValidCredentials = false;
+      try {
+        const storedCredentials = localStorage.getItem('adminCredentials');
+        if (storedCredentials) {
+          const credentials = JSON.parse(storedCredentials);
+          hasValidCredentials = credentials.username === 'madoabogrida05@gmail.com' && credentials.password === 'batta1';
+        }
+      } catch (error) {
+        console.error('Error parsing stored credentials:', error);
+        hasValidCredentials = false;
+      }
       
       console.log('AdminPage - authorization check:', {
         email: user?.email,
         username: user?.username,
         isCreatorEmail,
         isCreatorUsername,
-        hasStoredCredentials: !!hasStoredCredentials
+        hasValidCredentials
       });
       
-      if (isCreatorEmail || isCreatorUsername || hasStoredCredentials) {
+      if (isCreatorEmail || isCreatorUsername || hasValidCredentials) {
         console.log('✅ Admin access granted in AdminPage');
         setIsAuthorized(true);
         setCheckingAuth(false);
         return;
       }
       
-      // If no user and no stored credentials, redirect to login
-      if (!user && !hasStoredCredentials) {
-        console.log('❌ No user and no stored credentials - redirecting to login');
+      // If no user and no valid credentials, redirect to login
+      if (!user && !hasValidCredentials) {
+        console.log('❌ No user and no valid credentials - redirecting to login');
         setIsAuthorized(false);
         setCheckingAuth(false);
         navigate('/login');
