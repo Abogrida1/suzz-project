@@ -35,6 +35,14 @@ const AdminPage = () => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   
+  console.log('AdminPage - Component rendered, state:', {
+    isAuthorized,
+    checkingAuth,
+    hasUser: !!user,
+    userEmail: user?.email,
+    userUsername: user?.username
+  });
+  
   // Stats data
   const [stats, setStats] = useState(null);
   const [recentUsers, setRecentUsers] = useState([]);
@@ -105,7 +113,7 @@ const AdminPage = () => {
 
   // Load admin data when authorized
   useEffect(() => {
-    if (isAuthorized && !checkingAuth && adminCredentials) {
+    if (isAuthorized && !checkingAuth) {
       console.log('AdminPage - authorization granted, loading admin data');
       // Test API connection first
       testAdminAPI();
@@ -115,7 +123,21 @@ const AdminPage = () => {
       loadMessages();
       loadGroups();
     }
-  }, [isAuthorized, checkingAuth, adminCredentials]);
+  }, [isAuthorized, checkingAuth]);
+
+  // Load admin credentials from localStorage
+  useEffect(() => {
+    const storedCredentials = localStorage.getItem('adminCredentials');
+    if (storedCredentials) {
+      try {
+        const credentials = JSON.parse(storedCredentials);
+        setAdminCredentials(credentials);
+        console.log('AdminPage - loaded credentials from localStorage:', credentials);
+      } catch (error) {
+        console.error('Error parsing admin credentials:', error);
+      }
+    }
+  }, []);
 
   // Test admin API connection
   const testAdminAPI = async () => {

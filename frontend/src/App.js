@@ -18,6 +18,8 @@ import CreateGroupPage from './pages/CreateGroupPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
 import AdminRoutes from './routes/AdminRoutes';
+import AdminPage from './pages/AdminPage';
+import AdminLogin from './pages/AdminLogin';
 
 import './App.css';
 
@@ -102,7 +104,30 @@ function App() {
                   } 
                 />
                 {/* Admin routes - only accessible to authorized users */}
-                <Route path="/admin/*" element={<AdminRoutes />} />
+                <Route 
+                  path="/admin-login" 
+                  element={
+                    <ProtectedRoute>
+                      <AdminLogin />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <ProtectedRoute>
+                      <AdminPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin/*" 
+                  element={
+                    <ProtectedRoute>
+                      <AdminPage />
+                    </ProtectedRoute>
+                  } 
+                />
                 
                 {/* Catch all route - redirect to home */}
                 <Route path="*" element={<Navigate to="/" replace />} />
