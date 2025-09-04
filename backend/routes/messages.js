@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const Message = require('../models/Message');
 const User = require('../models/User');
+const { authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -28,9 +29,12 @@ router.get('/private/:userId', async (req, res) => {
     const { userId } = req.params;
     const { limit = 50, skip = 0 } = req.query;
     
+    console.log('Fetching private messages for:', req.user._id, 'with:', userId);
+    
     // Check if user exists
     const otherUser = await User.findById(userId);
     if (!otherUser) {
+      console.log('Other user not found:', userId);
       return res.status(404).json({ message: 'User not found' });
     }
 
@@ -40,6 +44,14 @@ router.get('/private/:userId', async (req, res) => {
       parseInt(limit), 
       parseInt(skip)
     );
+    
+    console.log('Found messages:', messages.length);
+    console.log('Messages details:', messages.map(m => ({
+      id: m._id,
+      sender: m.sender?.username,
+      content: m.content,
+      createdAt: m.createdAt
+    })));
     
     res.json({ 
       messages: messages.reverse(),
@@ -406,6 +418,52 @@ router.post('/read', async (req, res) => {
       message: 'Failed to mark messages as read',
       error: error.message 
     });
+  }
+});
+
+// Get messages for a specific conversation
+router.get('/conversation/:conversationId', async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { limit = 50, skip = 0 } = req.query;
+    const userId = req.user._id;
+    
+    console.log('Fetching messages for conversation:', conversationId, 'user:', userId);
+    
+    // Try to find as private conversation first
+    const privateMessages = await Message.find({
+      $or: [
+        { privateChatWith: new mongoose.Types.ObjectId(userId), sender: new mongoose.Types.ObjectId(conversationId) },
+        { privateChatWith: new mongoose.Types.ObjectId(conversationId), sender: new mongoose.Types.ObjectId(userId) }
+      ]
+    })
+    .populate('sender', 'username displayName avatar')
+    .sort({ createdAt: -1 })
+    .limit(parseInt(limit))
+    .skip(parseInt(skip));
+    
+    if (privateMessages.length > 0) {
+      return res.json(privateMessages.reverse());
+    }
+    
+    // Try to find as group conversation
+    const group = await Group.findById(conversationId);
+    if (group && group.members.includes(userId)) {
+      const groupMessages = await Message.find({
+        groupId: new mongoose.Types.ObjectId(conversationId)
+      })
+      .populate('sender', 'username displayName avatar')
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .skip(parseInt(skip));
+      
+      return res.json(groupMessages.reverse());
+    }
+    
+    res.status(404).json({ message: 'Conversation not found' });
+  } catch (error) {
+    console.error('Get conversation messages error:', error);
+    res.status(500).json({ message: 'Failed to fetch conversation messages' });
   }
 });
 

@@ -81,12 +81,25 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       if (state.token) {
         try {
-          const response = await api.get('/api/auth/me');
-          console.log('Auth check response:', response.data);
+          const response = await fetch('/api/auth/me', {
+            headers: {
+              'Authorization': `Bearer ${state.token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('Auth check failed');
+          }
+          
+          const data = await response.json();
+          console.log('Auth check response:', data);
+          const userData = data.user || data;
+          console.log('Setting user data:', userData);
           dispatch({
             type: 'AUTH_SUCCESS',
             payload: {
-              user: response.data.user,
+              user: userData,
               token: state.token
             }
           });

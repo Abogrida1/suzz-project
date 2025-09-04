@@ -23,7 +23,11 @@ export const SocketProvider = ({ children }) => {
         return process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
       };
 
-      const newSocket = io(getSocketURL(), {
+      const socketURL = getSocketURL();
+      console.log('Attempting to connect to socket:', socketURL);
+      console.log('User authenticated:', { userId: user._id, username: user.username });
+
+      const newSocket = io(socketURL, {
         auth: {
           token: token
         },
@@ -56,16 +60,22 @@ export const SocketProvider = ({ children }) => {
       newSocket.on('connect_error', (error) => {
         console.error('Connection error:', error);
         console.error('Connection error details:', {
-          message: error.message,
-          type: error.type,
-          description: error.description,
-          data: error.data
+          message: error?.message || 'No message',
+          type: error?.type || 'Unknown type',
+          description: error?.description || 'No description',
+          data: error?.data || 'No data',
+          code: error?.code || 'No code',
+          stack: error?.stack || 'No stack trace'
         });
+        
+        // Log the full error object for debugging
+        console.error('Full connection error object:', JSON.stringify(error, null, 2));
+        
         setConnected(false);
         setConnectionError(error);
         
         // Show error only after multiple failed attempts
-        if (error.type === 'TransportError' || error.message?.includes('timeout')) {
+        if (error?.type === 'TransportError' || error?.message?.includes('timeout')) {
           console.warn('Connection timeout or transport error - will retry');
         }
       });
@@ -171,15 +181,21 @@ export const SocketProvider = ({ children }) => {
       newSocket.on('error', (error) => {
         console.error('Socket error:', error);
         console.error('Error details:', {
-          message: error.message,
-          type: error.type,
-          description: error.description,
-          context: error.context
+          message: error?.message || 'No message',
+          type: error?.type || 'Unknown type',
+          description: error?.description || 'No description',
+          context: error?.context || 'No context',
+          code: error?.code || 'No code',
+          data: error?.data || 'No data',
+          stack: error?.stack || 'No stack trace'
         });
         
+        // Log the full error object for debugging
+        console.error('Full error object:', JSON.stringify(error, null, 2));
+        
         // Only show user-friendly errors, not connection issues
-        if (error.type !== 'TransportError' && error.type !== 'ConnectionError') {
-          toast.error(error.message || 'An error occurred');
+        if (error?.type !== 'TransportError' && error?.type !== 'ConnectionError') {
+          toast.error(error?.message || 'An error occurred');
         }
       });
 

@@ -9,28 +9,44 @@ const setupSocketHandlers = (io) => {
     try {
       const token = socket.handshake.auth.token;
       
+      console.log('Socket authentication attempt:', {
+        hasToken: !!token,
+        tokenLength: token?.length || 0,
+        socketId: socket.id
+      });
+      
       if (!token) {
-        return next(new Error('Authentication error'));
+        console.error('No token provided for socket authentication');
+        return next(new Error('Authentication error: No token provided'));
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('Token decoded successfully:', { userId: decoded.userId });
+      
       const user = await User.findById(decoded.userId);
       
       if (!user) {
-        return next(new Error('User not found'));
+        console.error('User not found for socket authentication:', decoded.userId);
+        return next(new Error('Authentication error: User not found'));
       }
 
       socket.userId = user._id.toString();
       socket.user = user;
+      console.log('Socket authenticated successfully:', { userId: socket.userId, username: user.username });
       next();
     } catch (error) {
-      next(new Error('Authentication error'));
+      console.error('Socket authentication error:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
+      next(new Error(`Authentication error: ${error.message}`));
     }
   });
 
   io.on('connection', async (socket) => {
     try {
-      console.log(`User ${socket.user.username} connected with socket ${socket.id}`);
+      console.log(`User ${socket.user?.username || 'Unknown'} connected with socket ${socket.id}`);
 
       // Update user's socket ID and online status
       await User.findByIdAndUpdate(socket.userId, {
@@ -38,8 +54,17 @@ const setupSocketHandlers = (io) => {
         isOnline: true,
         lastSeen: new Date()
       });
+      
+      console.log(`User ${socket.user.username} status updated successfully`);
     } catch (error) {
-      console.error('Connection error:', error);
+      console.error('Connection error:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+        socketId: socket.id,
+        userId: socket.userId
+      });
+      socket.emit('error', { message: 'Connection failed', error: error.message });
       socket.disconnect();
       return;
     }
@@ -207,7 +232,7 @@ const setupSocketHandlers = (io) => {
     socket.on('send_message', async (data) => {
       try {
         console.log('Received message from user:', socket.user.username, 'data:', data);
-        const { content, type = 'text', chatType, recipients, attachment, replyTo } = data;
+        const { content, type = 'text', chatType, recipients, attachment, replyTo, tempId } = data;
 
         if (!content && !attachment) {
           console.log('No content or attachment provided');
@@ -251,7 +276,9 @@ const setupSocketHandlers = (io) => {
         if (chatType === 'global') {
           messageData.recipients = []; // Global chat doesn't need specific recipients
         } else if (chatType === 'private' && recipients && recipients.length === 1) {
-          messageData.privateChatWith = recipients[0];
+          // Convert string to ObjectId for privateChatWith
+          const mongoose = require('mongoose');
+          messageData.privateChatWith = new mongoose.Types.ObjectId(recipients[0]);
         } else if (chatType === 'group' && recipients && recipients.length > 0) {
           const groupId = recipients[0];
           
@@ -365,10 +392,21 @@ const setupSocketHandlers = (io) => {
         console.log('Sent message_sent event to sender:', socket.user.username, 'message ID:', message._id);
 
       } catch (error) {
-        console.error('Send message error:', error);
+        console.error('Send message error:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack,
+          userId: socket.userId,
+          username: socket.user?.username,
+          data: data
+        });
         socket.emit('error', { 
           message: 'Failed to send message',
-          error: error.message 
+          error: error.message,
+          details: {
+            name: error.name,
+            code: error.code
+          }
         });
       }
     });

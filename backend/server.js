@@ -122,6 +122,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', authenticateToken, checkDatabaseConnection, userRoutes);
 app.use('/api/messages', authenticateToken, checkDatabaseConnection, messageRoutes);
 app.use('/api/upload', authenticateToken, checkDatabaseConnection, uploadRoutes);
+app.use('/api/conversations', authenticateToken, checkDatabaseConnection, require('./routes/conversations'));
 app.use('/api/groups', authenticateToken, checkDatabaseConnection, require('./routes/groups'));
 app.use('/api/admin', authenticateToken, checkDatabaseConnection, require('./routes/admin'));
 app.use('/api/admin-management', authenticateToken, checkDatabaseConnection, require('./routes/adminManagement'));

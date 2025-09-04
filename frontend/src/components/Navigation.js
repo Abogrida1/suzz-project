@@ -17,7 +17,7 @@ import {
   FaShieldAlt
 } from 'react-icons/fa';
 
-const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
+const Navigation = ({ user: propUser, onLogout, hideBottomMenu = false }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,7 +25,10 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user: contextUser, logout } = useAuth();
+  
+  // Use context user if available, otherwise use prop user
+  const user = contextUser || propUser;
 
   // Debug: Log user on every render
   console.log('Navigation render - user:', user);
@@ -100,6 +103,11 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
   const isCreatorUsername = user?.username && (
     user.username.toLowerCase() === 'batta'
   );
+  
+  console.log('Navigation - user data:', user);
+  console.log('Navigation - user displayName:', user?.displayName);
+  console.log('Navigation - user username:', user?.username);
+  console.log('Navigation - user name:', user?.name);
   
   // Only show admin link for specific users or users with admin role
   if (isAdmin || isCreatorUsername || isCreatorEmail) {
@@ -276,12 +284,12 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           <div className="flex items-center space-x-3 pl-4 border-l border-gray-200 dark:border-gray-700">
             <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">
-                {user?.displayName?.charAt(0) || 'U'}
+                {user?.displayName?.charAt(0) || user?.username?.charAt(0) || user?.name?.charAt(0) || 'U'}
               </span>
             </div>
             <div className="hidden lg:block">
               <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {user?.displayName || 'User'}
+                {user?.displayName || user?.username || user?.name || 'المستخدم'}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {user?.email}

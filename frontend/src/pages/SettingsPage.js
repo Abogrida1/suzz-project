@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import Navigation from '../components/Navigation';
+import ProfilePictureUpload from '../components/ProfilePictureUpload';
 import api from '../config/axios';
 import toast from 'react-hot-toast';
 import { 
@@ -40,6 +41,20 @@ const SettingsPage = () => {
     bio: '',
     avatar: null
   });
+
+  // Handle avatar upload
+  const handleAvatarUpload = (avatarUrl) => {
+    setProfileData(prev => ({ ...prev, avatar: avatarUrl }));
+    updateUser({ ...user, avatar: avatarUrl });
+    toast.success('تم رفع الصورة الشخصية بنجاح');
+  };
+
+  // Handle avatar removal
+  const handleAvatarRemove = () => {
+    setProfileData(prev => ({ ...prev, avatar: null }));
+    updateUser({ ...user, avatar: null });
+    toast.success('تم حذف الصورة الشخصية');
+  };
   
   // Security settings
   const [securityData, setSecurityData] = useState({
@@ -231,37 +246,22 @@ const SettingsPage = () => {
                   <form onSubmit={handleProfileUpdate} className="space-y-6">
                     {/* Avatar */}
                     <div className="flex items-center space-x-6">
-                      <div className="relative">
-                        <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-                          {profileData.avatar ? (
-                            <img
-                              src={typeof profileData.avatar === 'string' 
-                                ? profileData.avatar 
-                                : URL.createObjectURL(profileData.avatar)
-                              }
-                              alt="Avatar"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <FaUser className="w-8 h-8 text-gray-400" />
-                          )}
-                        </div>
-                        <label className="absolute bottom-0 right-0 bg-blue-500 text-white rounded-full p-1 cursor-pointer hover:bg-blue-600">
-                          <FaCamera className="w-3 h-3" />
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleAvatarChange}
-                            className="hidden"
-                          />
-                        </label>
-                      </div>
+                      <ProfilePictureUpload
+                        currentAvatar={profileData.avatar || user?.avatar}
+                        onUpload={handleAvatarUpload}
+                        onRemove={handleAvatarRemove}
+                        size="large"
+                        className="flex-shrink-0"
+                      />
                       <div>
                         <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                          Profile Picture
+                          الصورة الشخصية
                         </h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Click the camera icon to change your avatar
+                          اضغط على أيقونة الكاميرا لتغيير صورتك الشخصية
+                        </p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                          الحد الأقصى: 5 ميجابايت • JPG, PNG, GIF
                         </p>
                       </div>
                     </div>

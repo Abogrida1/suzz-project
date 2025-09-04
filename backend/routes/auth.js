@@ -200,4 +200,35 @@ router.post('/refresh', async (req, res) => {
   }
 });
 
+// Get current user info
+router.get('/me', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    console.log('Returning user data for /me:', {
+      id: user._id,
+      username: user.username,
+      displayName: user.displayName,
+      email: user.email
+    });
+    
+    res.json({
+      user: {
+        _id: user._id,
+        username: user.username,
+        displayName: user.displayName,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Error fetching user data' });
+  }
+});
+
 module.exports = router;

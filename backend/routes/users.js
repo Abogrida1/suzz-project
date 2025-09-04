@@ -31,35 +31,100 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Search users
+// Search users (for mobile chat) with smart suggestions
 router.get('/search', async (req, res) => {
   try {
-    const { q, limit = 20 } = req.query;
+    const { q, smart = false } = req.query;
     
     if (!q || q.length < 2) {
-      return res.json({ users: [] });
+      return res.json([]);
     }
-
-    // If no authenticated user, return empty results
-    if (!req.user || !req.user._id) {
-      return res.json({ users: [] });
-    }
-
-    const users = await User.find({
-      $and: [
-        { _id: { $ne: req.user._id } }, // Exclude current user
-        {
-          $or: [
-            { username: { $regex: q, $options: 'i' } },
-            { displayName: { $regex: q, $options: 'i' } }
-          ]
-        }
+    
+    let query = {
+      $or: [
+        { username: { $regex: q, $options: 'i' } },
+        { displayName: { $regex: q, $options: 'i' } }
       ]
-    })
-    .select('username displayName avatar status isOnline lastSeen')
-    .limit(parseInt(limit));
+    };
 
-    res.json({ users });
+    // Smart search with better matching
+    if (smart === 'true') {
+      // Add exact match priority
+      const exactMatchQuery = {
+        $or: [
+          { username: { $regex: `^${q}`, $options: 'i' } },
+          { displayName: { $regex: `^${q}`, $options: 'i' } }
+        ]
+      };
+      
+      const partialMatchQuery = {
+        $or: [
+          { username: { $regex: q, $options: 'i' } },
+          { displayName: { $regex: q, $options: 'i' } }
+        ]
+      };
+
+      // Get exact matches first
+      const exactMatches = await User.find(exactMatchQuery)
+        .select('username displayName avatar status isOnline lastSeen')
+        .limit(10);
+
+      // Get partial matches
+      const partialMatches = await User.find({
+        ...partialMatchQuery,
+        _id: { $nin: exactMatches.map(u => u._id) }
+      })
+        .select('username displayName avatar status isOnline lastSeen')
+        .limit(10);
+
+      // Combine and sort by relevance
+      const allUsers = [...exactMatches, ...partialMatches];
+      
+      // Sort by relevance: exact matches first, then by display name similarity
+      allUsers.sort((a, b) => {
+        const aUsername = a.username.toLowerCase();
+        const bUsername = b.username.toLowerCase();
+        const aDisplay = (a.displayName || '').toLowerCase();
+        const bDisplay = (b.displayName || '').toLowerCase();
+        const queryLower = q.toLowerCase();
+
+        // Exact username match
+        const aExactUsername = aUsername.startsWith(queryLower);
+        const bExactUsername = bUsername.startsWith(queryLower);
+        if (aExactUsername && !bExactUsername) return -1;
+        if (!aExactUsername && bExactUsername) return 1;
+
+        // Exact display name match
+        const aExactDisplay = aDisplay.startsWith(queryLower);
+        const bExactDisplay = bDisplay.startsWith(queryLower);
+        if (aExactDisplay && !bExactDisplay) return -1;
+        if (!aExactDisplay && bExactDisplay) return 1;
+
+        // Partial matches
+        const aUsernameScore = aUsername.includes(queryLower) ? 1 : 0;
+        const bUsernameScore = bUsername.includes(queryLower) ? 1 : 0;
+        if (aUsernameScore !== bUsernameScore) return bUsernameScore - aUsernameScore;
+
+        const aDisplayScore = aDisplay.includes(queryLower) ? 1 : 0;
+        const bDisplayScore = bDisplay.includes(queryLower) ? 1 : 0;
+        if (aDisplayScore !== bDisplayScore) return bDisplayScore - aDisplayScore;
+
+        // Online status
+        if (a.isOnline !== b.isOnline) return b.isOnline - a.isOnline;
+
+        return 0;
+      });
+
+      return res.json(allUsers.slice(0, 20));
+    }
+    
+    // Regular search
+    const users = await User.find(query)
+      .select('username displayName avatar status isOnline lastSeen')
+      .sort({ isOnline: -1, lastSeen: -1 })
+      .limit(20);
+
+    res.json(users);
   } catch (error) {
     console.error('Search users error:', error);
     res.status(500).json({ message: 'Failed to search users' });

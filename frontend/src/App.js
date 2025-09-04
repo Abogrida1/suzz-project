@@ -12,6 +12,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import HomePage from './pages/HomePage';
 import ModernChat from './pages/ModernChat';
+import MobileChatsPage from './pages/MobileChatsPage';
+import MobileChatPage from './pages/MobileChatPage';
+import GlobalChatPage from './pages/GlobalChatPage';
 import CreateGroupPage from './pages/CreateGroupPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
@@ -65,6 +68,31 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ModernChat />
+                    </ProtectedRoute>
+                  } 
+                />
+                {/* Mobile Chat Routes */}
+                <Route 
+                  path="/mobile-chats" 
+                  element={
+                    <ProtectedRoute>
+                      <MobileChatsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/mobile-chat/:chatId" 
+                  element={
+                    <ProtectedRoute>
+                      <MobileChatPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/global-chat" 
+                  element={
+                    <ProtectedRoute>
+                      <GlobalChatPage />
                     </ProtectedRoute>
                   } 
                 />
