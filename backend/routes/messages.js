@@ -358,6 +358,55 @@ router.get('/conversations/recent', async (req, res) => {
   }
 });
 
+// Mark messages as read
+router.post('/read', async (req, res) => {
+  try {
+    const { messageIds, chatType, otherUserId } = req.body;
+    
+    console.log('Mark messages as read request:', {
+      messageIds,
+      chatType,
+      otherUserId,
+      userId: req.user?._id
+    });
 
+    if (!messageIds || !Array.isArray(messageIds) || messageIds.length === 0) {
+      return res.status(400).json({ message: 'Message IDs are required' });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    // Update messages to mark them as read
+    const updateResult = await Message.updateMany(
+      { 
+        _id: { $in: messageIds },
+        sender: { $ne: req.user._id } // Don't mark own messages as read
+      },
+      { 
+        $addToSet: { 
+          readBy: { 
+            user: req.user._id, 
+            readAt: new Date() 
+          } 
+        } 
+      }
+    );
+
+    console.log('Messages marked as read:', updateResult);
+
+    res.json({ 
+      message: 'Messages marked as read successfully',
+      modifiedCount: updateResult.modifiedCount
+    });
+  } catch (error) {
+    console.error('Mark messages as read error:', error);
+    res.status(500).json({ 
+      message: 'Failed to mark messages as read',
+      error: error.message 
+    });
+  }
+});
 
 module.exports = router;
