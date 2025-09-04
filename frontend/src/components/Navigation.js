@@ -68,6 +68,7 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
           setIsAdmin(hasAdminRole);
         } catch (error) {
           console.error('Error checking admin status:', error);
+          console.log('❌ API call failed - setting admin to false');
           setIsAdmin(false);
         }
       } else {
@@ -77,6 +78,9 @@ const Navigation = ({ user, onLogout, hideBottomMenu = false }) => {
 
     checkAdminStatus();
   }, [user]);
+
+  // Debug: Log final admin state
+  console.log('Navigation - isAdmin state set to:', isAdmin);
 
   // Debug: Log isAdmin state changes
   useEffect(() => {

@@ -6,6 +6,7 @@ import { SocketProvider } from './contexts/SocketContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { CallProvider } from './contexts/CallContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 import VoiceCallModal from './components/VoiceCallModal';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -105,25 +106,25 @@ function App() {
                 <Route 
                   path="/admin-login" 
                   element={
-                    <ProtectedRoute>
+                    <AdminProtectedRoute>
                       <AdminLogin />
-                    </ProtectedRoute>
+                    </AdminProtectedRoute>
                   } 
                 />
                 <Route 
                   path="/admin" 
                   element={
-                    <ProtectedRoute>
+                    <AdminProtectedRoute>
                       <AdminPage />
-                    </ProtectedRoute>
+                    </AdminProtectedRoute>
                   } 
                 />
                 <Route 
                   path="/admin/*" 
                   element={
-                    <ProtectedRoute>
+                    <AdminProtectedRoute>
                       <AdminPage />
-                    </ProtectedRoute>
+                    </AdminProtectedRoute>
                   } 
                 />
                 
