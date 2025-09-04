@@ -73,7 +73,15 @@ const MobileChatPage = () => {
     // Handle remote stream
     pc.ontrack = (event) => {
       console.log('Remote stream received');
+      console.log('Remote stream tracks:', event.streams[0].getTracks());
       setRemoteStream(event.streams[0]);
+      
+      // Start call timer when remote stream is received
+      if (!callStartTime) {
+        setCallStartTime(Date.now());
+        setCallDuration(0);
+        console.log('Call timer started - remote stream received');
+      }
     };
     
     // Handle ICE candidates
@@ -83,6 +91,19 @@ const MobileChatPage = () => {
           callId: callData?.id,
           candidate: event.candidate
         });
+      }
+    };
+    
+    // Handle connection state changes
+    pc.onconnectionstatechange = () => {
+      console.log('Connection state:', pc.connectionState);
+      if (pc.connectionState === 'connected') {
+        // Start call timer when connection is established
+        if (!callStartTime) {
+          setCallStartTime(Date.now());
+          setCallDuration(0);
+          console.log('Call timer started - connection established');
+        }
       }
     };
     
@@ -356,6 +377,8 @@ const MobileChatPage = () => {
         });
         
         console.log('Local stream started for outgoing call');
+        
+        // Don't start timer here - wait for WebRTC connection
       } catch (error) {
         console.error('Error getting user media for outgoing call:', error);
         alert('لا يمكن الوصول للميكروفون');
@@ -364,8 +387,7 @@ const MobileChatPage = () => {
 
     socket.on('call_accepted', (data) => {
       console.log('Call accepted:', data);
-      setCallStartTime(Date.now());
-      setCallDuration(0);
+      // Don't start timer here, wait for actual call connection
     });
 
     socket.on('call_rejected', (data) => {
@@ -504,6 +526,45 @@ const MobileChatPage = () => {
       if (interval) clearInterval(interval);
     };
   }, [isCallActive, callStartTime]);
+
+  // Handle remote stream audio setup
+  useEffect(() => {
+    if (remoteStream) {
+      console.log('Setting up remote audio element...');
+      const audioElement = document.querySelector('#remote-audio');
+      if (audioElement) {
+        audioElement.srcObject = remoteStream;
+        audioElement.volume = isSpeakerOn ? 1.0 : 0.0;
+        audioElement.muted = !isSpeakerOn;
+        console.log('Remote audio element configured:', {
+          volume: audioElement.volume,
+          muted: audioElement.muted,
+          isSpeakerOn,
+          srcObject: audioElement.srcObject,
+          readyState: audioElement.readyState
+        });
+        
+        // Add event listeners for debugging
+        audioElement.addEventListener('loadedmetadata', () => {
+          console.log('Remote audio metadata loaded');
+        });
+        
+        audioElement.addEventListener('canplay', () => {
+          console.log('Remote audio can play');
+        });
+        
+        audioElement.addEventListener('play', () => {
+          console.log('Remote audio started playing');
+        });
+        
+        audioElement.addEventListener('error', (e) => {
+          console.error('Remote audio error:', e);
+        });
+      } else {
+        console.log('Remote audio element not found');
+      }
+    }
+  }, [remoteStream, isSpeakerOn]);
 
   // Send message
   const sendMessage = async () => {
@@ -656,12 +717,11 @@ const MobileChatPage = () => {
         });
         console.log('Offer sent to caller');
         
-        // Start call timer
-        setCallStartTime(Date.now());
-        setCallDuration(0);
-        
         socket.emit('accept_call', { callId: callData.id });
         console.log('Call accepted and local stream started');
+        
+        // Start call timer only after WebRTC connection is established
+        // This will be handled in the WebRTC connection success callback
       } catch (error) {
         console.error('Error getting user media:', error);
         alert('لا يمكن الوصول للميكروفون');
@@ -724,22 +784,26 @@ const MobileChatPage = () => {
 
   // Speaker functions
   const handleSpeakerOn = () => {
-    if (remoteStream) {
-      const audioElement = document.querySelector('#remote-audio');
-      if (audioElement) {
-        audioElement.volume = 1.0;
-      }
+    const audioElement = document.querySelector('#remote-audio');
+    if (audioElement) {
+      audioElement.volume = 1.0;
+      audioElement.muted = false;
+      console.log('Speaker turned on - volume:', audioElement.volume);
+    } else {
+      console.log('Remote audio element not found');
     }
     setIsSpeakerOn(true);
     console.log('Speaker turned on');
   };
 
   const handleSpeakerOff = () => {
-    if (remoteStream) {
-      const audioElement = document.querySelector('#remote-audio');
-      if (audioElement) {
-        audioElement.volume = 0.0;
-      }
+    const audioElement = document.querySelector('#remote-audio');
+    if (audioElement) {
+      audioElement.volume = 0.0;
+      audioElement.muted = true;
+      console.log('Speaker turned off - volume:', audioElement.volume);
+    } else {
+      console.log('Remote audio element not found');
     }
     setIsSpeakerOn(false);
     console.log('Speaker turned off');
@@ -1241,7 +1305,21 @@ const MobileChatPage = () => {
         />
       )}
 
-      {/* Hidden audio element for remote stream */}
+      {/* Hidden audio elements for streams */}
+      {localStream && (
+        <audio
+          id="local-audio"
+          autoPlay
+          playsInline
+          muted
+          ref={(audio) => {
+            if (audio && localStream) {
+              audio.srcObject = localStream;
+            }
+          }}
+        />
+      )}
+      
       {remoteStream && (
         <audio
           id="remote-audio"
