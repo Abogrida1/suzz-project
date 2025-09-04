@@ -553,8 +553,12 @@ const MobileChatPage = () => {
           })
         )}
         
-        {/* Typing Indicator */}
-        {typingUsers.length > 0 && (
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Typing Indicator - Fixed above input */}
+      {typingUsers.length > 0 && (
+        <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-t border-gray-200/50 dark:border-gray-700/50 px-4 py-2">
           <div className="flex justify-start">
             <div className="bg-white dark:bg-gray-700 px-4 py-2 rounded-2xl rounded-bl-md border border-gray-200 dark:border-gray-600">
               <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -569,10 +573,8 @@ const MobileChatPage = () => {
               </div>
             </div>
           </div>
-        )}
-        
-        <div ref={messagesEndRef} />
-      </div>
+        </div>
+      )}
 
       {/* Fixed Input Area */}
       <div className="mobile-chat-input bg-white/90 dark:bg-gray-800/90 backdrop-blur-md border-t border-gray-200/50 dark:border-gray-700/50 p-3 sm:p-4">

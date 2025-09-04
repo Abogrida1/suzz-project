@@ -89,9 +89,9 @@ const MobileChatsPage = () => {
           }));
         }
 
-        const allConversations = [...privateChats, ...groupChats].sort((a, b) =>
-          new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
-        );
+        const allConversations = [...privateChats, ...groupChats]
+          .filter(conv => conv.userId !== user._id) // إزالة الشات مع النفس
+          .sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
         
         setConversations(allConversations);
       } catch (error) {
@@ -219,106 +219,106 @@ const MobileChatsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-900">
+    <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-indigo-900 flex flex-col overflow-hidden safe-area-inset">
       <Navigation user={user} />
       
-      {/* Modern Header */}
-      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl shadow-2xl border-b border-gray-200/30 dark:border-gray-700/30 sticky top-0 z-40">
-        <div className="px-6 py-5">
+      {/* Fixed Modern Header */}
+      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl shadow-2xl border-b border-gray-200/30 dark:border-gray-700/30 z-40 flex-shrink-0">
+        <div className="px-4 sm:px-6 py-4 sm:py-5">
         <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 rtl:space-x-reverse">
+            <div className="flex items-center space-x-3 sm:space-x-4 rtl:space-x-reverse">
               <div className="relative">
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-xl ring-4 ring-blue-100 dark:ring-blue-900/30">
-                <span className="text-white font-bold text-xl">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-700 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl ring-2 sm:ring-4 ring-blue-100 dark:ring-blue-900/30">
+                  <span className="text-white font-bold text-lg sm:text-xl">
                   {user?.displayName?.charAt(0) || user?.username?.charAt(0) || 'U'}
                 </span>
                 </div>
-                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-3 border-white dark:border-gray-800 shadow-lg"></div>
+                <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-2 sm:border-3 border-white dark:border-gray-800 shadow-lg"></div>
               </div>
             <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
                   المحادثات
               </h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
                   {conversations.length} محادثة نشطة
               </p>
             </div>
           </div>
-            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+            <div className="flex items-center space-x-2 sm:space-x-3 rtl:space-x-reverse">
               <button 
                 onClick={() => navigate('/global-chat')}
-                className="p-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-3"
+                className="p-2 sm:p-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-3"
                 title="الشات العالمي"
               >
-                <FaGlobe size={18} />
+                <FaGlobe size={16} className="sm:w-[18px] sm:h-[18px]" />
               </button>
             <button 
                 onClick={() => setShowUserSearch(true)}
-                className="p-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-3"
+                className="p-2 sm:p-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-3"
                 title="إضافة مستخدم"
             >
-                <FaUserPlus size={18} />
+                <FaUserPlus size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
             <button 
                 onClick={() => setShowGroupCreate(true)}
-                className="p-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-3"
+                className="p-2 sm:p-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl sm:rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-3"
                 title="إنشاء مجموعة"
             >
-                <FaUsers size={18} />
+                <FaUsers size={16} className="sm:w-[18px] sm:h-[18px]" />
             </button>
           </div>
         </div>
             </div>
 
         {/* Modern Search Bar */}
-        <div className="px-6 pb-6">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6">
           <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-2xl blur-sm group-hover:blur-md transition-all duration-300"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl sm:rounded-2xl blur-sm group-hover:blur-md transition-all duration-300"></div>
           <div className="relative">
-              <FaSearch className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 transition-colors duration-200" />
+              <FaSearch className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 transition-colors duration-200" />
             <input
               type="text"
                 placeholder="🔍 ابحث في المحادثات..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pr-12 pl-4 py-4 border-0 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="w-full pr-10 sm:pr-12 pl-4 py-3 sm:py-4 border-0 rounded-xl sm:rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500/50 focus:bg-white dark:focus:bg-gray-800 transition-all duration-300 shadow-lg hover:shadow-xl text-sm sm:text-base"
             />
             </div>
               </div>
             </div>
                       </div>
                       
-      {/* Conversations List */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Scrollable Conversations List */}
+      <div className="flex-1 overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent pb-safe">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-12 pb-108 sm:pb-112">
             <div className="flex flex-col items-center space-y-4">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
               <p className="text-gray-500 dark:text-gray-400">جاري التحميل...</p>
                       </div>
                     </div>
         ) : filteredConversations.length === 0 ? (
-          <div className="text-center py-12 px-4">
-            <div className="w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FaComments className="text-blue-500 dark:text-blue-400" size={32} />
+          <div className="text-center py-8 sm:py-12 px-4 pb-112 sm:pb-116">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+              <FaComments className="text-blue-500 dark:text-blue-400" size={24} />
               </div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
               {searchQuery ? 'لا توجد نتائج للبحث' : 'لا توجد محادثات بعد'}
           </h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-6">
+            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mb-4 sm:mb-6">
               {searchQuery ? 'جرب كلمات مختلفة للبحث' : 'ابدأ محادثة جديدة مع أصدقائك'}
             </p>
             {!searchQuery && (
                 <button
                 onClick={() => setShowUserSearch(true)}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-xl sm:rounded-2xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg text-sm sm:text-base"
               >
                 ابدأ محادثة جديدة
               </button>
             )}
           </div>
         ) : (
-          <div className="px-6 py-4 space-y-4">
+          <div className="px-4 sm:px-6 py-4 pb-112 sm:pb-116 space-y-3 sm:space-y-4">
             {filteredConversations.map((conversation, index) => (
               <motion.div
                 key={conversation.id}
@@ -327,12 +327,12 @@ const MobileChatsPage = () => {
                 transition={{ delay: index * 0.1 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate(`/mobile-chat/${conversation.userId || conversation.groupId || conversation.id}`)}
-                className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600 hover:scale-[1.02]"
+                className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-200/50 dark:border-gray-700/50 hover:border-blue-300 dark:hover:border-blue-600 hover:scale-[1.01] sm:hover:scale-[1.02]"
               >
-                <div className="p-6">
-                  <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <div className="p-4 sm:p-6">
+                  <div className="flex items-center space-x-3 sm:space-x-4 rtl:space-x-reverse">
                     <div className="relative group/avatar">
-                      <div className="w-16 h-16 rounded-3xl overflow-hidden shadow-xl ring-4 ring-white/50 dark:ring-gray-700/50 group-hover/avatar:ring-blue-200 dark:group-hover/avatar:ring-blue-800 transition-all duration-300">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl ring-2 sm:ring-4 ring-white/50 dark:ring-gray-700/50 group-hover/avatar:ring-blue-200 dark:group-hover/avatar:ring-blue-800 transition-all duration-300">
                         <img
                           src={conversation.avatar}
                           alt={conversation.name}
@@ -352,7 +352,7 @@ const MobileChatsPage = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
+                          <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
                           {conversation.name}
                         </h3>
                           <div className="flex items-center space-x-2 rtl:space-x-reverse mt-1">
@@ -379,8 +379,8 @@ const MobileChatsPage = () => {
                         </div>
                       </div>
                       
-                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl p-3 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors duration-200">
-                        <p className="text-sm text-gray-700 dark:text-gray-300 truncate font-medium">
+                      <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl sm:rounded-2xl p-2 sm:p-3 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors duration-200">
+                        <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 truncate font-medium">
                           {conversation.lastMessage}
                         </p>
                       </div>
