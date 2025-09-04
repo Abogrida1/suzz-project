@@ -103,6 +103,18 @@ const AdminPage = () => {
     checkAdminAuthorization();
   }, [user, navigate]);
 
+  // Auto-redirect when authorization is granted
+  useEffect(() => {
+    if (isAuthorized && !checkingAuth) {
+      console.log('AdminPage - authorization granted, loading admin data');
+      // Load admin data when authorized
+      loadStats();
+      loadUsers();
+      loadMessages();
+      loadGroups();
+    }
+  }, [isAuthorized, checkingAuth]);
+
   useEffect(() => {
     const storedCredentials = localStorage.getItem('adminCredentials');
     if (!storedCredentials) {

@@ -37,9 +37,11 @@ const AdminLogin = () => {
       });
       
       if (isCreatorEmail || isCreatorUsername || hasStoredCredentials) {
-        console.log('✅ Admin access granted');
+        console.log('✅ Admin access granted - redirecting to admin page');
         setIsAuthorized(true);
         setCheckingAuth(false);
+        // Auto-redirect to admin page if already authorized
+        navigate('/admin');
         return;
       }
       
@@ -67,6 +69,14 @@ const AdminLogin = () => {
 
     checkAdminAuthorization();
   }, [user, navigate]);
+
+  // Auto-redirect when authorization is granted
+  useEffect(() => {
+    if (isAuthorized && !checkingAuth) {
+      console.log('AdminLogin - authorization granted, redirecting to admin page');
+      navigate('/admin');
+    }
+  }, [isAuthorized, checkingAuth, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -96,7 +106,13 @@ const AdminLogin = () => {
       
       console.log('AdminLogin - credentials stored, navigating to /admin');
       toast.success('تم تسجيل الدخول بنجاح');
-      navigate('/admin');
+      // Set authorization state first
+      setIsAuthorized(true);
+      // Then navigate
+      setTimeout(() => {
+        console.log('AdminLogin - navigating to /admin after timeout');
+        navigate('/admin');
+      }, 100);
     } else {
       toast.error('بيانات الدخول غير صحيحة');
     }
