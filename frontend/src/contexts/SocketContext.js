@@ -8,6 +8,7 @@ const SocketContext = createContext();
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [connected, setConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [typingUsers, setTypingUsers] = useState({});
   const [messageStatuses, setMessageStatuses] = useState({});
@@ -43,6 +44,7 @@ export const SocketProvider = ({ children }) => {
       newSocket.on('connect', () => {
         console.log('Connected to server');
         setConnected(true);
+        setConnectionError(null);
         setSocket(newSocket);
       });
 
@@ -53,8 +55,19 @@ export const SocketProvider = ({ children }) => {
 
       newSocket.on('connect_error', (error) => {
         console.error('Connection error:', error);
+        console.error('Connection error details:', {
+          message: error.message,
+          type: error.type,
+          description: error.description,
+          data: error.data
+        });
         setConnected(false);
-        // Don't show error toast immediately, let reconnection handle it
+        setConnectionError(error);
+        
+        // Show error only after multiple failed attempts
+        if (error.type === 'TransportError' || error.message?.includes('timeout')) {
+          console.warn('Connection timeout or transport error - will retry');
+        }
       });
 
       newSocket.on('reconnect', () => {
@@ -157,7 +170,17 @@ export const SocketProvider = ({ children }) => {
       // Handle errors
       newSocket.on('error', (error) => {
         console.error('Socket error:', error);
-        toast.error(error.message || 'An error occurred');
+        console.error('Error details:', {
+          message: error.message,
+          type: error.type,
+          description: error.description,
+          context: error.context
+        });
+        
+        // Only show user-friendly errors, not connection issues
+        if (error.type !== 'TransportError' && error.type !== 'ConnectionError') {
+          toast.error(error.message || 'An error occurred');
+        }
       });
 
       // Handle new messages
@@ -336,6 +359,7 @@ export const SocketProvider = ({ children }) => {
   const value = {
     socket,
     connected,
+    connectionError,
     onlineUsers,
     typingUsers,
     messageStatuses,

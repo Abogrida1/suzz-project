@@ -4,6 +4,7 @@ import ChatSidebar from './ChatSidebar';
 import ChatWindow from './ChatWindow';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useSocket } from '../../contexts/SocketContext';
 import './chat.css';
 
 const ChatLayout = () => {
@@ -12,6 +13,7 @@ const ChatLayout = () => {
   const [isMobile, setIsMobile] = useState(false);
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { connected, connectionError } = useSocket();
 
   // Handle responsive behavior
   useEffect(() => {
@@ -56,6 +58,17 @@ const ChatLayout = () => {
 
   return (
     <div className={`h-screen bg-gray-50 dark:bg-gray-900 flex ${theme === 'dark' ? 'dark' : ''}`}>
+      {/* Connection Status */}
+      {!connected && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-500 text-white text-center py-2 text-sm">
+          {connectionError ? (
+            <span>Connection error: {connectionError.message || 'Unable to connect to server'}</span>
+          ) : (
+            <span>Connecting to server...</span>
+          )}
+        </div>
+      )}
+      
       {/* Sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
