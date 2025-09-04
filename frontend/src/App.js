@@ -11,9 +11,7 @@ import VoiceCallModal from './components/VoiceCallModal';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import HomePage from './pages/HomePage';
-import ChatsPage from './pages/ChatsPage';
-import MobileChatsPage from './pages/MobileChatsPage';
-import Chat from './pages/Chat';
+import ModernChat from './pages/ModernChat';
 import CreateGroupPage from './pages/CreateGroupPage';
 import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
@@ -50,15 +48,7 @@ function App() {
                   path="/chats" 
                   element={
                     <ProtectedRoute>
-                      <ChatsPage />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/mobile-chats" 
-                  element={
-                    <ProtectedRoute>
-                      <MobileChatsPage />
+                      <ModernChat />
                     </ProtectedRoute>
                   } 
                 />
@@ -66,7 +56,7 @@ function App() {
                   path="/chat" 
                   element={
                     <ProtectedRoute>
-                      <Chat />
+                      <ModernChat />
                     </ProtectedRoute>
                   } 
                 />
@@ -74,7 +64,7 @@ function App() {
                   path="/chat/:chatId" 
                   element={
                     <ProtectedRoute>
-                      <Chat />
+                      <ModernChat />
                     </ProtectedRoute>
                   } 
                 />
