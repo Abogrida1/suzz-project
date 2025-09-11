@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Font support */
+* {
+  font-family: 'Inter', 'Cairo', Arial, sans-serif !important;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  font-family: 'Inter', 'Cairo', Arial, sans-serif !important;
+  direction: rtl;
+  color: #1f2937 !important;
+}
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+  font-family: 'Inter', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Custom responsive styles */
+.card {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200;
+}
+
+/* Responsive table styles */
+.responsive-table {
+  @apply overflow-x-auto;
+}
+
+.responsive-table table {
+  @apply min-w-full;
+}
+
+@media (max-width: 768px) {
+  .responsive-table {
+    @apply -mx-4;
+  }
+  
+  .responsive-table table {
+    @apply text-sm;
+  }
+  
+  .responsive-table th,
+  .responsive-table td {
+    @apply px-3 py-2;
+  }
+}
+
+/* Mobile-first grid improvements */
+.stats-grid {
+  @apply grid grid-cols-1 gap-4;
+}
+
+@media (min-width: 640px) {
+  .stats-grid {
+    @apply grid-cols-2 gap-6;
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    @apply grid-cols-3;
+  }
+}
+
+@media (min-width: 1280px) {
+  .stats-grid {
+    @apply grid-cols-5;
+  }
+}
+
+/* Responsive text sizes */
+.responsive-title {
+  @apply text-xl sm:text-2xl lg:text-3xl font-bold;
+}
+
+.responsive-subtitle {
+  @apply text-sm sm:text-base text-gray-600;
+}
+
+/* Mobile sidebar improvements */
+@media (max-width: 1024px) {
+  .mobile-sidebar {
+    @apply w-full max-w-xs;
+  }
+}
+
+.btn-primary {
+  @apply bg-primary-500 hover:bg-primary-600 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+}
+
+.btn-danger {
+  @apply bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+}
+
+.input-field {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+  font-family: 'Inter', Arial, sans-serif !important;
+  color: #1f2937 !important;
+}
+
+.status-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.status-pending {
+  @apply status-badge bg-yellow-100 text-yellow-800;
+}
+
+.status-accepted {
+  @apply status-badge bg-blue-100 text-blue-800;
+}
+
+.status-preparing {
+  @apply status-badge bg-orange-100 text-orange-800;
+}
+
+.status-assigned {
+  @apply status-badge bg-purple-100 text-purple-800;
+}
+
+.status-out-for-delivery {
+  @apply status-badge bg-indigo-100 text-indigo-800;
+}
+
+.status-delivered {
+  @apply status-badge bg-green-100 text-green-800;
+}
+
+.status-cancelled {
+  @apply status-badge bg-red-100 text-red-800;
+}
+
+.courier-available {
+  @apply status-badge bg-green-100 text-green-800;
+}
+
+.courier-busy {
+  @apply status-badge bg-orange-100 text-orange-800;
+}
+
+.courier-offline {
+  @apply status-badge bg-gray-100 text-gray-800;
+}
