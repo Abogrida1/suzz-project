@@ -3,10 +3,24 @@ const { parse } = require('url')
 const next = require('next')
 const fs = require('fs')
 const path = require('path')
+const { execSync } = require('child_process')
 
 // Check if .next directory exists (production build)
 const nextDir = path.join(__dirname, '.next')
-const hasBuild = fs.existsSync(nextDir)
+let hasBuild = fs.existsSync(nextDir)
+
+// If no build exists and we're not in development, build it
+if (!hasBuild && process.env.NODE_ENV !== 'development') {
+  console.log('🔨 No build found, creating production build...')
+  try {
+    execSync('npm run build', { stdio: 'inherit', cwd: __dirname })
+    hasBuild = fs.existsSync(nextDir)
+    console.log('✅ Build completed successfully!')
+  } catch (error) {
+    console.error('❌ Build failed:', error.message)
+    console.log('🔄 Falling back to development mode...')
+  }
+}
 
 const dev = !hasBuild || process.env.NODE_ENV === 'development' // Auto-detect mode
 const hostname = '0.0.0.0' // Force all interfaces
