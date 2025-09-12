@@ -13,7 +13,7 @@ let hasBuild = fs.existsSync(nextDir)
 if (!hasBuild && process.env.NODE_ENV !== 'development') {
   console.log('🔨 No build found, creating production build...')
   try {
-    execSync('npm run build', { stdio: 'inherit', cwd: __dirname })
+    execSync('npm run build', { stdio: 'inherit', cwd: __dirname, timeout: 180000 }) // 3 min timeout
     hasBuild = fs.existsSync(nextDir)
     console.log('✅ Build completed successfully!')
   } catch (error) {
@@ -47,6 +47,8 @@ app.prepare().then(() => {
 
   server.listen(port, hostname, () => {
     console.log(`✅ Server ready on http://${hostname}:${port}`)
+    console.log(`🌐 Server listening on all interfaces (${hostname})`)
+    console.log(`📡 Port ${port} is now open for HTTP traffic`)
   })
 
   server.on('error', (err) => {
