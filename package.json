@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next start -H 0.0.0.0 -p $PORT",
+    "dev": "npm run build && next start -H 0.0.0.0 -p $PORT",
     "dev:local": "next dev",
     "build": "next build",
-    "start": "next start -H 0.0.0.0 -p $PORT",
+    "start": "npm run build && next start -H 0.0.0.0 -p $PORT",
     "lint": "next lint --fix"
   },
   "dependencies": {
