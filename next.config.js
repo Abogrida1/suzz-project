@@ -1,14 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // Remove standalone output that might cause issues
   poweredByHeader: false,
   compress: true,
-  // Remove experimental options that might cause issues
   eslint: {
     ignoreDuringBuilds: true,
   },
   typescript: {
     ignoreBuildErrors: false,
+  },
+  // Force server to bind to 0.0.0.0
+  async rewrites() {
+    return []
   },
 }
 
