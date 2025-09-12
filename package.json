@@ -3,11 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "node server.js",
-    "dev:local": "next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "node server.js",
-    "start:fallback": "next start --hostname 0.0.0.0 --port $PORT",
     "lint": "next lint --fix"
   },
   "dependencies": {
