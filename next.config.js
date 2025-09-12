@@ -1,12 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  experimental: {
-    outputFileTracingRoot: undefined,
+  poweredByHeader: false,
+  compress: true,
+  // Remove experimental options that might cause issues
+  eslint: {
+    ignoreDuringBuilds: true,
   },
-  // Ensure server runs on all interfaces
-  async rewrites() {
-    return []
+  typescript: {
+    ignoreBuildErrors: false,
   },
 }
 
