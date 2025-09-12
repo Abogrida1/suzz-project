@@ -1,12 +1,20 @@
 const { createServer } = require('http')
 const { parse } = require('url')
 const next = require('next')
+const fs = require('fs')
+const path = require('path')
 
-const dev = false // Force production mode
+// Check if .next directory exists (production build)
+const nextDir = path.join(__dirname, '.next')
+const hasBuild = fs.existsSync(nextDir)
+
+const dev = !hasBuild || process.env.NODE_ENV === 'development' // Auto-detect mode
 const hostname = '0.0.0.0' // Force all interfaces
 const port = parseInt(process.env.PORT, 10) || 10000
 
 console.log(`Starting Next.js server on ${hostname}:${port}`)
+console.log(`Mode: ${dev ? 'development' : 'production'}`)
+console.log(`Build exists: ${hasBuild}`)
 
 const app = next({ dev })
 const handle = app.getRequestHandler()
